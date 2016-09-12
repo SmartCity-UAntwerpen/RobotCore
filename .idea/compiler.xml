@@ -23,10 +23,12 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
         <module name="SmartCar Core" />
+        <module name="SmartCity Common" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="SmartCar Core" target="1.8" />
+      <module name="SmartCity Common" target="1.5" />
     </bytecodeTargetLevel>
   </component>
 </project>
