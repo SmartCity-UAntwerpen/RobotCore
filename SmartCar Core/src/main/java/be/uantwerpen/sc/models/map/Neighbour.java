@@ -1,39 +1,39 @@
 package be.uantwerpen.sc.models.map;
 
-import be.uantwerpen.sc.models.LinkEntity;
-import be.uantwerpen.sc.models.PointEntity;
+import be.uantwerpen.sc.models.Link;
+import be.uantwerpen.sc.models.Point;
 
 /**
  * Created by Niels on 14/04/2016.
  */
 public class Neighbour
 {
-    private PointEntity pointEntity;
-    private int length;
+    private Point pointEntity;
+    private Long length;
     private int weight;
 
     public Neighbour() {
     }
 
-    public Neighbour(LinkEntity linkEntity) {
-        this.pointEntity = linkEntity.getStopId();
+    public Neighbour(Link linkEntity) {
+        this.pointEntity = linkEntity.getStopPoint();
         this.length = linkEntity.getLength();
         this.weight = linkEntity.getWeight();
     }
 
-    public PointEntity getPointEntity() {
+    public Point getPointEntity() {
         return pointEntity;
     }
 
-    public void setPointEntity(PointEntity pointEntity) {
+    public void setPointEntity(Point pointEntity) {
         this.pointEntity = pointEntity;
     }
 
-    public int getLength() {
+    public Long getLength() {
         return length;
     }
 
-    public void setLength(int length) {
+    public void setLength(Long length) {
         this.length = length;
     }
 

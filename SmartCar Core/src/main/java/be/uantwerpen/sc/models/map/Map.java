@@ -1,6 +1,6 @@
 package be.uantwerpen.sc.models.map;
 
-import be.uantwerpen.sc.models.BotEntity;
+import be.uantwerpen.sc.models.Bot;
 import be.uantwerpen.sc.models.TrafficLightEntity;
 
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import java.util.List;
 public class Map
 {
     private List<Node> nodeList;
-    private List<BotEntity> botEntities;
+    private List<Bot> botEntities;
     private List<TrafficLightEntity> trafficlightEntity;
 
     public Map(){
@@ -32,11 +32,11 @@ public class Map
         return nodeList;
     }
 
-    public List<BotEntity> getBotEntities() {
+    public List<Bot> getBotEntities() {
         return botEntities;
     }
 
-    public void setBotEntities(List<BotEntity> botEntities) {
+    public void setBotEntities(List<Bot> botEntities) {
         this.botEntities = botEntities;
     }
 

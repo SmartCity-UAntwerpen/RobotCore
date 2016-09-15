@@ -87,9 +87,9 @@ public class SystemLoader implements ApplicationRunner
             queueConsumer.setServerCoreIP(serverIP, serverPort);
 
             new Thread(robotCoreLoop).start();
-            //new Thread(cStatusEventHandler).start();
+            new Thread(cStatusEventHandler).start();
             new Thread(queueConsumer).start();
-            //new Thread(cLocationPoller).start();
+            new Thread(cLocationPoller).start();
             terminalService.setRobotCoreLoop(robotCoreLoop);
 
             terminalService.systemReady();

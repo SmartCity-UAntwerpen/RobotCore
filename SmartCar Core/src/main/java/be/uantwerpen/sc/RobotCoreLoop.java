@@ -119,14 +119,14 @@ public class RobotCoreLoop implements Runnable
             if (queueService.getContentQueue().isEmpty() && dataService.locationUpdated) {
                 dataService.setCurrentLocationAccordingTag();
                 //Endpoint wont be used -> does not matter
-                dataService.navigationParser = new NavigationParser(pathplanning.Calculatepath(dataService.map, dataService.getCurrentLocation(), -1));
+                dataService.navigationParser = new NavigationParser(pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), -1));
                 //Parse Map
                 //dataService.navigationParser.parseMap();
                 dataService.navigationParser.parseRandomMap(dataService);
 
                 //Setup for driving
-                int start = dataService.navigationParser.list.get(0).getId();
-                int end = dataService.navigationParser.list.get(1).getId();
+                Long start = dataService.navigationParser.list.get(0).getId();
+                Long end = dataService.navigationParser.list.get(1).getId();
                 dataService.setNextNode(end);
                 dataService.setPrevNode(start);
                 if (first) {
@@ -171,16 +171,16 @@ public class RobotCoreLoop implements Runnable
                     e.printStackTrace();
                 }
             }
-            dataService.navigationParser = new NavigationParser(pathplanning.Calculatepath(dataService.map, dataService.getCurrentLocation(), 12));
+            dataService.navigationParser = new NavigationParser(pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), 12));
             //Parse Map
             dataService.navigationParser.parseMap();
             //dataService.navigationParser.parseRandomMap(dataService);
 
             //Setup for driving
-            int start = dataService.navigationParser.list.get(0).getId();
-            int end = dataService.navigationParser.list.get(1).getId();
-            dataService.setNextNode(end);
-            dataService.setPrevNode(start);
+            int start = (int)(long)dataService.navigationParser.list.get(0).getId();
+            int end = (int)(long)dataService.navigationParser.list.get(1).getId();
+            dataService.setNextNode((long)end);
+            dataService.setPrevNode((long)start);
             queueService.insertJob("DRIVE FOLLOWLINE");
             queueService.insertJob("DRIVE FORWARD 110");
 
@@ -214,82 +214,71 @@ public class RobotCoreLoop implements Runnable
         }
     }
 
+    @Deprecated
     public void updateStartLocation(){
         switch(dataService.getTag().trim()){
             case "04 70 39 32 06 27 80":
-                dataService.setCurrentLocation(1);
+                dataService.setCurrentLocation(3L);
                 break;
             case "04 67 88 8A C8 48 80":
-                dataService.setCurrentLocation(2);
+                dataService.setCurrentLocation(14L);
                 break;
             case "04 97 36 A2 F7 22 80":
-                dataService.setCurrentLocation(3);
-                break;
-            case "04 36 8A 9A F6 1F 80":
-                dataService.setCurrentLocation(4);
+                dataService.setCurrentLocation(1L);
                 break;
             case "04 7B 88 8A C8 48 80":
-                dataService.setCurrentLocation(5);
-                break;
-            case "04 6C 6B 32 06 27 80":
-                dataService.setCurrentLocation(6);
-                break;
-            case "04 84 88 8A C8 48 80":
-                dataService.setCurrentLocation(7);
+                dataService.setCurrentLocation(15L);
                 break;
             case "04 B3 88 8A C8 48 80":
-                dataService.setCurrentLocation(8);
+                dataService.setCurrentLocation(8L);
                 break;
             case "04 8D 88 8A C8 48 80":
-                dataService.setCurrentLocation(9);
+                dataService.setCurrentLocation(9L);
                 break;
             case "04 AA 88 8A C8 48 80":
-                dataService.setCurrentLocation(10);
+                dataService.setCurrentLocation(11L);
                 break;
             case "04 C4 FD 12 Q9 34 80":
-                dataService.setCurrentLocation(11);
+                dataService.setCurrentLocation(19L);
                 break;
             case "04 96 88 8A C8 48 80":
-                dataService.setCurrentLocation(12);
+                dataService.setCurrentLocation(17L);
                 break;
             case "04 A1 88 8A C8 48 80":
-                dataService.setCurrentLocation(13);
+                dataService.setCurrentLocation(18L);
                 break;
             case "04 86 04 22 A9 34 84":
-                dataService.setCurrentLocation(14);
+                dataService.setCurrentLocation(20L);
                 break;
             case "04 18 25 9A 7F 22 80":
-                dataService.setCurrentLocation(15);
+                dataService.setCurrentLocation(6L);
                 break;
             case "04 BC 88 8A C8 48 80":
-                dataService.setCurrentLocation(16);
+                dataService.setCurrentLocation(16L);
                 break;
             case "04 C5 88 8A C8 48 80":
-                dataService.setCurrentLocation(17);
+                dataService.setCurrentLocation(7L);
                 break;
             case "04 EC 88 8A C8 48 80":
-                dataService.setCurrentLocation(18);
+                dataService.setCurrentLocation(10L);
                 break;
             case "04 E3 88 8A C8 48 80":
-                dataService.setCurrentLocation(19);
+                dataService.setCurrentLocation(13L);
                 break;
             case "04 26 3E 92 1E 25 80":
-                dataService.setCurrentLocation(20);
+                dataService.setCurrentLocation(4L);
                 break;
             case "04 DA 88 8A C8 48 80":
-                dataService.setCurrentLocation(21);
-                break;
-            case "04 D0 88 8A C8 48 80":
-                dataService.setCurrentLocation(22);
+                dataService.setCurrentLocation(12L);
                 break;
             case "04 41 70 92 1E 25 80":
-                dataService.setCurrentLocation(23);
+                dataService.setCurrentLocation(2L);
                 break;
             case "04 3C 67 9A F6 1F 80":
-                dataService.setCurrentLocation(24);
+                dataService.setCurrentLocation(5L);
                 break;
             default:
-                dataService.setCurrentLocation(-1);
+                dataService.setCurrentLocation(-1L);
                 break;
         }
     }

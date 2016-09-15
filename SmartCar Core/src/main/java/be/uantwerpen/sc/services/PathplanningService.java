@@ -1,6 +1,6 @@
 package be.uantwerpen.sc.services;
 
-import be.uantwerpen.sc.models.LinkEntity;
+import be.uantwerpen.sc.models.Link;
 import be.uantwerpen.sc.models.map.*;
 import be.uantwerpen.sc.tools.Dijkstra;
 import be.uantwerpen.sc.tools.Edge;
@@ -25,26 +25,26 @@ public class PathplanningService implements IPathplanning
     @Override
     public List<Vertex> Calculatepath(Map map, int start, int stop) {
         //MapJson mapJsonServer = mapControlService.buildMapJson();
-        List<LinkEntity> linkEntityList = new ArrayList<>();
+        List<Link> linkEntityList = new ArrayList<>();
         List<Vertex> vertexes = new ArrayList<>();
         for (Node nj : map.getNodeList()){
             vertexes.add(new Vertex(nj));
-            for(LinkEntity linkEntity : nj.getNeighbours()){
+            for(Link linkEntity : nj.getNeighbours()){
                 linkEntityList.add(linkEntity);
             }
         }
 
         ArrayList<Edge> edges;
         List<ArrayList<Edge>> edgeslistinlist = new ArrayList<>();
-        LinkEntity realLink = new LinkEntity();
+        Link realLink = new Link();
         int i = 0;
         for (Node nj : map.getNodeList()){
             edges = new ArrayList<>();
-            for (LinkEntity neighbour : nj.getNeighbours()){
+            for (Link neighbour : nj.getNeighbours()){
                 for (Vertex v : vertexes){
-                    if(v.getId() == neighbour.getStopId().getPid()){
-                        for(LinkEntity linkEntity: linkEntityList){
-                            if(linkEntity.getStopId().getPid() == v.getId() && linkEntity.getStartId().getPid() == nj.getPointEntity().getPid()){
+                    if(v.getId() == neighbour.getStopPoint().getId()){
+                        for(Link linkEntity: linkEntityList){
+                            if(linkEntity.getStopPoint().getId() == v.getId() && linkEntity.getStartPoint().getId() == nj.getPointEntity().getId()){
                                 realLink = linkEntity;
                             }
                         }

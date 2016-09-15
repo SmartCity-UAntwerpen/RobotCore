@@ -1,6 +1,6 @@
 package be.uantwerpen.sc.models.map;
 
-import be.uantwerpen.sc.models.PointEntity;
+import be.uantwerpen.sc.models.Point;
 
 import java.util.List;
 
@@ -9,21 +9,21 @@ import java.util.List;
  */
 public class NodeJson
 {
-    private PointEntity pointEntity;
+    private Point pointEntity;
     private List<Neighbour> neighbours;
 
     public NodeJson() {
     }
 
-    public NodeJson(PointEntity pointEntity) {
+    public NodeJson(Point pointEntity) {
         this.pointEntity = pointEntity;
     }
 
-    public PointEntity getPointEntity() {
+    public Point getPointEntity() {
         return pointEntity;
     }
 
-    public void setPointEntity(PointEntity pointEntity) {
+    public void setPointEntity(Point pointEntity) {
         this.pointEntity = pointEntity;
     }
 

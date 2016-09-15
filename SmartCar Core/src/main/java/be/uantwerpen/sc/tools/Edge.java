@@ -1,6 +1,6 @@
 package be.uantwerpen.sc.tools;
 
-import be.uantwerpen.sc.models.LinkEntity;
+import be.uantwerpen.sc.models.Link;
 
 /**
  * Created by Niels on 17/04/2016.
@@ -9,21 +9,21 @@ public class Edge {
 
     public Edge(){}
 
-    private int target;
+    private Long target;
     private int weight;
-    private LinkEntity linkEntity;
-    public Edge(int argTarget, int argWeight, LinkEntity linkEntity)
+    private Link linkEntity;
+    public Edge(Long argTarget, int argWeight, Link linkEntity)
     { target = argTarget; weight = argWeight; this.linkEntity = linkEntity;}
 
-    public Edge(int argTarget, int argWeight)
+    public Edge(Long argTarget, int argWeight)
     { target = argTarget; weight = argWeight;}
 
 
-    public int getTarget() {
+    public Long getTarget() {
         return target;
     }
 
-    public void setTarget(int target) {
+    public void setTarget(Long target) {
         this.target = target;
     }
 
@@ -35,11 +35,11 @@ public class Edge {
         this.weight = weight;
     }
 
-    public LinkEntity getLinkEntity() {
+    public Link getLinkEntity() {
         return linkEntity;
     }
 
-    public void setLinkEntity(LinkEntity linkEntity) {
+    public void setLinkEntity(Link linkEntity) {
         this.linkEntity = linkEntity;
     }
 

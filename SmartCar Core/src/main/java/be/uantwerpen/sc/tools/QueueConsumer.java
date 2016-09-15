@@ -73,7 +73,7 @@ public class QueueConsumer implements Runnable
                                 //response true -> Lock granted
                                 Terminal.printTerminal("Lock Granted: " + dataService.getNextNode());
                                 lockGranted = true;
-                                dataService.setPermission(dataService.getNextNode());
+                                dataService.setPermission((int)(long)dataService.getNextNode());
                                 Terminal.printTerminal("Permission: " + dataService.hasPermission() + " ,NextNode: " + dataService.getNextNode());
                                 sender.sendCommand("DRIVE RESUME");
                                 Terminal.printTerminal("RESUMED");

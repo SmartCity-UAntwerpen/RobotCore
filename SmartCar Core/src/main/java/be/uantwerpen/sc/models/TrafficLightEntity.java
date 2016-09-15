@@ -8,7 +8,7 @@ public class TrafficLightEntity
     private int tlid;
     private String direction;
     private String state;
-    private PointEntity pointid;
+    private Point pointid;
 
     public int getTlid() {
         return tlid;
@@ -56,11 +56,11 @@ public class TrafficLightEntity
         return result;
     }
 
-    public PointEntity getPointid() {
+    public Point getPointid() {
         return pointid;
     }
 
-    public void setPointid(PointEntity pointid) {
+    public void setPointid(Point pointid) {
         this.pointid = pointid;
     }
 }

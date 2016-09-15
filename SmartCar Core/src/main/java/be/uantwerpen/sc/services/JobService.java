@@ -112,16 +112,16 @@ public class JobService
             }
         }
         Terminal.printTerminal("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end2);
-        dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, dataService.getCurrentLocation(), end2));
+        dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2));
         //Parse Map
         dataService.navigationParser.parseMap();
         //dataService.navigationParser.parseRandomMap(dataService);
 
         //Setup for driving
-        int start = dataService.navigationParser.list.get(0).getId();
-        int end = dataService.navigationParser.list.get(1).getId();
-        dataService.setNextNode(end);
-        dataService.setPrevNode(start);
+        int start = (int)(long)dataService.navigationParser.list.get(0).getId();
+        int end = (int)(long)dataService.navigationParser.list.get(1).getId();
+        dataService.setNextNode((long)end);
+        dataService.setPrevNode((long)start);
         queueService.insertJob("DRIVE FOLLOWLINE");
         queueService.insertJob("DRIVE FORWARD 110");
 

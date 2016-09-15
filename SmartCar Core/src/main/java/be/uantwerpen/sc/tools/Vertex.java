@@ -13,22 +13,22 @@ public class Vertex implements Comparable<Vertex> {
 
     public Vertex(){}
 
-    private int id;
+    private Long id;
     private List<Edge> adjacencies = new ArrayList<>();
     private double minDistance = Double.POSITIVE_INFINITY;
     private Vertex previous;
 
     public Vertex(NodeJson nodeJson) {
-        this.id = nodeJson.getPointEntity().getPid();
+        this.id = nodeJson.getPointEntity().getId();
     }
     public Vertex(Node node){this.id = node.getNodeId();}
-    public Vertex(int id){this.id=id;}
+    public Vertex(Long id){this.id=id;}
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

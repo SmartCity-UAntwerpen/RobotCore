@@ -1,6 +1,6 @@
 package be.uantwerpen.sc.services;
 
-import be.uantwerpen.sc.models.LinkEntity;
+import be.uantwerpen.sc.models.Link;
 import be.uantwerpen.sc.models.map.Map;
 import be.uantwerpen.sc.models.map.Node;
 import be.uantwerpen.sc.tools.*;
@@ -23,17 +23,17 @@ public class DataService
     private Long robotID;
 
     private int millis;
-    private int linkMillis;
+    private Long linkMillis;
 
-    public int getNextNode() {
+    public Long getNextNode() {
         return nextNode;
     }
 
-    public void setNextNode(int nextNode) {
+    public void setNextNode(Long nextNode) {
         this.nextNode = nextNode;
     }
 
-    private int nextNode = -1;
+    private Long nextNode = -1L;
 
     public boolean isLocationVerified() {
         return locationVerified;
@@ -45,15 +45,15 @@ public class DataService
 
     boolean locationVerified = false;
 
-    public int getPrevNode() {
+    public Long getPrevNode() {
         return prevNode;
     }
 
-    public void setPrevNode(int prevNode) {
+    public void setPrevNode(Long prevNode) {
         this.prevNode = prevNode;
     }
 
-    private int prevNode = -1;
+    private Long prevNode = -1L;
 
     public int hasPermission() {
         return hasPermission;
@@ -75,7 +75,7 @@ public class DataService
     public NavigationParser navigationParser = null;
 
     private String tag = "NO_TAG";
-    private int currentLocation = -1;
+    private Long currentLocation = -1L;
 
     public Long getRobotID() {
         return robotID;
@@ -85,22 +85,22 @@ public class DataService
         this.robotID = robotID;
     }
 
-    public int getCurrentLocation() {
+    public Long getCurrentLocation() {
         return currentLocation;
     }
 
-    public void setCurrentLocation(int currentLocation) {
+    public void setCurrentLocation(Long currentLocation) {
         this.currentLocation = currentLocation;
     }
 
     public int getMillis() {return millis;}
     public void setMillis(int millis) {this.millis = millis;}
 
-    public int getLinkMillis() {
+    public Long getLinkMillis() {
         return linkMillis;
     }
 
-    public void setLinkMillis(int linkMillis) {
+    public void setLinkMillis(Long linkMillis) {
         this.linkMillis = linkMillis;
     }
 
@@ -129,14 +129,14 @@ public class DataService
 
     public void firstLink(){
         if(map != null) {
-            int start = getCurrentLocation();
-            int lid = -1;
+            Long start = getCurrentLocation();
+            Long lid = -1L;
             for(Node node : map.getNodeList()){
                 if(node.getNodeId() == start){
-                    LinkEntity link = node.getNeighbours().get(0);
-                    lid = link.getLid();
-                    nextNode = link.getStopId().getPid();
-                    prevNode = link.getStartId().getPid();
+                    Link link = node.getNeighbours().get(0);
+                    lid = link.getId();
+                    nextNode = link.getStopPoint().getId();
+                    prevNode = link.getStartPoint().getId();
                     linkMillis = link.getLength();
                 }
             }
@@ -149,19 +149,19 @@ public class DataService
 
     public void nextLink(){
         if(map != null && navigationParser != null && navigationParser.list != null && !navigationParser.list.isEmpty() && navigationParser.list.size() != 1) {
-            int start = navigationParser.list.get(0).getId();
-            int end = navigationParser.list.get(1).getId();
+            Long start = navigationParser.list.get(0).getId();
+            Long end = navigationParser.list.get(1).getId();
             if(getTag().trim().equals("NONE")){
                 currentLocation = nextNode;
             }
             //setCurrentLocationAccordingTag();
             nextNode = end;
             prevNode = start;
-            int lid = -1;
+            Long lid = -1L;
             //find link from start to end
             for (Edge e : navigationParser.list.get(0).getAdjacencies()) {
                 if (e.getTarget() == end) {
-                    lid = e.getLinkEntity().getLid();
+                    lid = e.getLinkEntity().getId();
                     linkMillis = e.getLinkEntity().getLength();
                     Terminal.printTerminal("New Link Distance: " + linkMillis);
                 }
@@ -176,7 +176,7 @@ public class DataService
             rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + robotID + "/lid/" + lid, Integer.class);
         }else{
             //TODO update location
-            Terminal.printTerminal("Entering manual manouvering mode. Location will be inacurate");
+            Terminal.printTerminal("Entering manual manouvering mode. Location will be inaccurate");
             prevNode = nextNode;
         }
     }
@@ -184,81 +184,69 @@ public class DataService
     public void setCurrentLocationAccordingTag() {
         switch(getTag()){
             case "04 70 39 32 06 27 80":
-                setCurrentLocation(1);
+                setCurrentLocation(3L);
                 break;
             case "04 67 88 8A C8 48 80":
-                setCurrentLocation(2);
+                setCurrentLocation(14L);
                 break;
             case "04 97 36 A2 F7 22 80":
-                setCurrentLocation(3);
-                break;
-            case "04 36 8A 9A F6 1F 80":
-                setCurrentLocation(4);
+                setCurrentLocation(1L);
                 break;
             case "04 7B 88 8A C8 48 80":
-                setCurrentLocation(5);
-                break;
-            case "04 6C 6B 32 06 27 80":
-                setCurrentLocation(6);
-                break;
-            case "04 84 88 8A C8 48 80":
-                setCurrentLocation(7);
+                setCurrentLocation(15L);
                 break;
             case "04 B3 88 8A C8 48 80":
-                setCurrentLocation(8);
+                setCurrentLocation(8L);
                 break;
             case "04 8D 88 8A C8 48 80":
-                setCurrentLocation(9);
+                setCurrentLocation(9L);
                 break;
             case "04 AA 88 8A C8 48 80":
-                setCurrentLocation(10);
+                setCurrentLocation(11L);
                 break;
             case "04 C4 FD 12 Q9 34 80":
-                setCurrentLocation(11);
+                setCurrentLocation(19L);
                 break;
             case "04 96 88 8A C8 48 80":
-                setCurrentLocation(12);
+                setCurrentLocation(17L);
                 break;
             case "04 A1 88 8A C8 48 80":
-                setCurrentLocation(13);
+                setCurrentLocation(18L);
                 break;
             case "04 86 04 22 A9 34 84":
-                setCurrentLocation(14);
+                setCurrentLocation(20L);
                 break;
             case "04 18 25 9A 7F 22 80":
-                setCurrentLocation(15);
+                setCurrentLocation(6L);
                 break;
             case "04 BC 88 8A C8 48 80":
-                setCurrentLocation(16);
+                setCurrentLocation(16L);
                 break;
             case "04 C5 88 8A C8 48 80":
-                setCurrentLocation(17);
+                setCurrentLocation(7L);
                 break;
             case "04 EC 88 8A C8 48 80":
-                setCurrentLocation(18);
+                setCurrentLocation(10L);
                 break;
             case "04 E3 88 8A C8 48 80":
-                setCurrentLocation(19);
+                setCurrentLocation(13L);
                 break;
             case "04 26 3E 92 1E 25 80":
-                setCurrentLocation(20);
+                setCurrentLocation(4L);
                 break;
             case "04 DA 88 8A C8 48 80":
-                setCurrentLocation(21);
-                break;
-            case "04 D0 88 8A C8 48 80":
-                setCurrentLocation(22);
+                setCurrentLocation(12L);
                 break;
             case "04 41 70 92 1E 25 80":
-                setCurrentLocation(23);
+                setCurrentLocation(2L);
                 break;
             case "04 3C 67 9A F6 1F 80":
-                setCurrentLocation(24);
+                setCurrentLocation(5L);
                 break;
             case "NONE":
                 break;
             default:
-                setCurrentLocation(-1);
+                setCurrentLocation(-1L);
                 break;
         }
     }

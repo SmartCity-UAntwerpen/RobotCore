@@ -69,10 +69,10 @@ public class TerminalService
                         startPathPlanning(endInt);
                     } catch (NumberFormatException e) {
                         terminal.printTerminalError(e.getMessage());
-                        terminal.printTerminalInfo("Usage: navigate start end");
+                        terminal.printTerminalInfo("Usage: navigate end");
                     }
                 }catch(ArrayIndexOutOfBoundsException e){
-                    terminal.printTerminalInfo("Usage: navigate start end");
+                    terminal.printTerminalInfo("Usage: navigate end");
                 }
                 break;
             case "path":
@@ -162,7 +162,7 @@ public class TerminalService
             default:
                 terminal.printTerminal("Available commands:");
                 terminal.printTerminal("-------------------");
-                terminal.printTerminal("'navigate {start} {end}': navigates the robot from point {start} to {end}");
+                terminal.printTerminal("'navigate {end}': navigates the robot from point {start} to {end}");
                 terminal.printTerminal("'path {start} {end}': get the path from the server");
                 terminal.printTerminal("'random': get random path from the server from current location");
                 terminal.printTerminal("'simulate {true/false}': activate he simulator");
@@ -186,16 +186,16 @@ public class TerminalService
             }
         }
         Terminal.printTerminal("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end2);
-        dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, dataService.getCurrentLocation(), end2));
+        dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2));
         //Parse Map
         dataService.navigationParser.parseMap();
         //dataService.navigationParser.parseRandomMap(dataService);
 
         //Setup for driving
-        int start = dataService.navigationParser.list.get(0).getId();
-        int end = dataService.navigationParser.list.get(1).getId();
-        dataService.setNextNode(end);
-        dataService.setPrevNode(start);
+        int start = (int)(long)dataService.navigationParser.list.get(0).getId();
+        int end = (int)(long)dataService.navigationParser.list.get(1).getId();
+        dataService.setNextNode((long)end);
+        dataService.setPrevNode((long)start);
         queueService.insertJob("DRIVE FOLLOWLINE");
         queueService.insertJob("DRIVE FORWARD 110");
 
@@ -211,7 +211,7 @@ public class TerminalService
     }
 
     private void getRandomPath(){
-        int currentLocation = dataService.getCurrentLocation();
+        int currentLocation = (int)(long)dataService.getCurrentLocation();
         if(currentLocation < 0) {
             currentLocation = 4;
             dataService.setLookingCoordiante("N");

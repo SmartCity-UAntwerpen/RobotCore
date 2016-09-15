@@ -1,7 +1,7 @@
 package be.uantwerpen.sc.models.map;
 
-import be.uantwerpen.sc.models.LinkEntity;
-import be.uantwerpen.sc.models.PointEntity;
+import be.uantwerpen.sc.models.Link;
+import be.uantwerpen.sc.models.Point;
 
 import java.util.List;
 
@@ -10,39 +10,39 @@ import java.util.List;
  */
 public class Node
 {
-    private int nodeId;
-    private PointEntity pointEntity;
-    private List<LinkEntity> neighbours;
+    private Long nodeId;
+    private Point pointEntity;
+    private List<Link> neighbours;
 
     public Node() {
     }
 
-    public Node(PointEntity pointEntity) {
+    public Node(Point pointEntity) {
         this.pointEntity = pointEntity;
-        this.nodeId = pointEntity.getPid();
+        this.nodeId = pointEntity.getId();
     }
 
-    public int getNodeId() {
+    public Long getNodeId() {
         return nodeId;
     }
 
-    public void setNodeId(int nodeId) {
+    public void setNodeId(Long nodeId) {
         this.nodeId = nodeId;
     }
 
-    public PointEntity getPointEntity() {
+    public Point getPointEntity() {
         return pointEntity;
     }
 
-    public void setPointEntity(PointEntity pointEntity) {
+    public void setPointEntity(Point pointEntity) {
         this.pointEntity = pointEntity;
     }
 
-    public List<LinkEntity> getNeighbours() {
+    public List<Link> getNeighbours() {
         return neighbours;
     }
 
-    public void setNeighbours(List<LinkEntity> neighbours) {
+    public void setNeighbours(List<Link> neighbours) {
         this.neighbours = neighbours;
     }
 }

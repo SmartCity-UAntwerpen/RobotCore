@@ -171,7 +171,7 @@ public class NavigationParser {
                 //NavigationParser navigationParser = new NavigationParser(path);
                 //System.out.println(commands.toString());
                 //System.out.println(parseMap().toString());
-                switch (list.get(0).getAdjacencies().get(i).getLinkEntity().getLid()) {
+                /*switch (list.get(0).getAdjacencies().get(i).getLinkEntity().getId()) {
                     case 15:
                         dataService.setLookingCoordiante("E");
                         break;
@@ -189,7 +189,7 @@ public class NavigationParser {
                         break;
                     default:
                         dataService.setLookingCoordiante(list.get(0).getAdjacencies().get(i).getLinkEntity().getStartDirection());
-                }
+                }*/
             }
 
             //dataService.setCurrentLocation(list.get(1).getId());
