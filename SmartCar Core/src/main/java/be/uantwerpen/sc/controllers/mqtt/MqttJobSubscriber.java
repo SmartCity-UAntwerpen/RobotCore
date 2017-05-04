@@ -92,7 +92,7 @@ public class MqttJobSubscriber
             mqttSubscribeClient.connect(connectOptions);
 
             //Subscribe to all subtopics of bots
-            mqttSubscribeClient.subscribe("BOT/" + dataService.getRobotID() + "/Job");
+            mqttSubscribeClient.subscribe("job/" + dataService.getRobotID());
         }
         catch(MqttException e)
         {
