@@ -135,10 +135,11 @@ public class DataService
                     linkMillis = link.getLength();
                 }
             }
-
+                    lid=getCurrentLocation();   //BIJGEVOEGD      =====FOUT
             Terminal.printTerminal("Current Link: " + lid);
-            RestTemplate rest = new RestTemplate();
-            rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + robotID + "/lid/" + lid, Integer.class);
+            //RestTemplate rest = new RestTemplate();
+            //rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + robotID + "/lid/" + lid, Integer.class);
+
         }
     }
 

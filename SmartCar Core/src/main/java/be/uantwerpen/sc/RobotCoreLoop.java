@@ -25,6 +25,9 @@ public class RobotCoreLoop implements Runnable
     private PathplanningType pathplanningType;
 
     @Autowired
+    private WorkingmodeType workingmodeType;
+
+    @Autowired
     private MqttJobSubscriber jobSubscriber;
 
     @Autowired
@@ -77,7 +80,7 @@ public class RobotCoreLoop implements Runnable
         //getRobotId
         RestTemplate restTemplate = new RestTemplate();
         //Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/newRobot", Long.class);
-        Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/initiate", Long.class);
+        Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/initiate/aa", Long.class);
 
         dataService.setRobotID(robotID);
         jobService.setRobotCoreLoop(this);
@@ -113,11 +116,14 @@ public class RobotCoreLoop implements Runnable
         setupInterface();
 
         dataService.map = mapController.getMap();
+        Terminal.printTerminal("Map received");
 
         //We have the map now, update link
         dataService.firstLink();
+        Terminal.printTerminal("link updated");
 
         dataService.setLookingCoordiante("N");
+        Terminal.printTerminal("looking north");
         while (!Thread.interrupted() && pathplanningType.getType() == PathplanningEnum.RANDOM) {
             //Use pathplanning (Described in Interface)
             if (queueService.getContentQueue().isEmpty() && dataService.locationUpdated) {
