@@ -25,6 +25,25 @@ public class DataService
     private int millis;
     private Long linkMillis;
 
+    private Long nextNode = -1L;
+    boolean locationVerified = false;
+    private Long prevNode = -1L;
+    private int hasPermission = -1;
+    public boolean robotBusy = false;
+    public boolean locationUpdated = true;
+    public String trafficLightStatus;
+    private Long currentLocation = -1L;
+
+    public Map map = null;
+    public NavigationParser navigationParser = null;
+
+    private String tag = "NO_TAG";
+
+    private String LookingCoordiante;
+    private PathplanningEnum pathplanningEnum;
+
+
+
     public Long getNextNode() {
         return nextNode;
     }
@@ -32,8 +51,6 @@ public class DataService
     public void setNextNode(Long nextNode) {
         this.nextNode = nextNode;
     }
-
-    private Long nextNode = -1L;
 
     public boolean isLocationVerified() {
         return locationVerified;
@@ -43,8 +60,6 @@ public class DataService
         this.locationVerified = locationVerifier;
     }
 
-    boolean locationVerified = false;
-
     public Long getPrevNode() {
         return prevNode;
     }
@@ -53,8 +68,6 @@ public class DataService
         this.prevNode = prevNode;
     }
 
-    private Long prevNode = -1L;
-
     public int hasPermission() {
         return hasPermission;
     }
@@ -62,20 +75,6 @@ public class DataService
     public void setPermission(int hasPermission) {
         this.hasPermission = hasPermission;
     }
-
-    private int hasPermission = -1;
-
-    public boolean robotBusy = false;
-
-    public boolean locationUpdated = true;
-
-    public String trafficLightStatus;
-
-    public Map map = null;
-    public NavigationParser navigationParser = null;
-
-    private String tag = "NO_TAG";
-    private Long currentLocation = -1L;
 
     public Long getRobotID() {
         return robotID;
@@ -107,8 +106,6 @@ public class DataService
     public String getTag() {return tag;}
     public void setTag(String tag) {this.tag = tag;}
 
-    private String LookingCoordiante;
-
     public String getLookingCoordiante() {
         return LookingCoordiante;
     }
@@ -116,8 +113,6 @@ public class DataService
     public void setLookingCoordiante(String lookingCoordiante) {
         LookingCoordiante = lookingCoordiante;
     }
-
-    private PathplanningEnum pathplanningEnum;
 
     public PathplanningEnum getPathplanningEnum() {
         return pathplanningEnum;
@@ -243,6 +238,14 @@ public class DataService
             case "04 3C 67 9A F6 1F 80":
                 setCurrentLocation(5L);
                 break;
+
+
+            case "04 D0 88 8A C8 48 80":
+                setCurrentLocation(30L);
+                break;
+
+
+
             case "NONE":
                 break;
             default:

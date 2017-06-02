@@ -76,7 +76,9 @@ public class RobotCoreLoop implements Runnable
     public void run() {
         //getRobotId
         RestTemplate restTemplate = new RestTemplate();
-        Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/newRobot", Long.class);
+        //Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/newRobot", Long.class);
+        Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/initiate", Long.class);
+
         dataService.setRobotID(robotID);
         jobService.setRobotCoreLoop(this);
 
@@ -92,7 +94,9 @@ public class RobotCoreLoop implements Runnable
             while (dataService.getTag().trim().equals("NONE") || dataService.getTag().equals("NO_TAG")) {
                 try {
                     //Read tag
+                    Terminal.printTerminal("OK1");
                     queueService.insertJob("TAG READ UID");
+                    Terminal.printTerminal("OK2");
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();

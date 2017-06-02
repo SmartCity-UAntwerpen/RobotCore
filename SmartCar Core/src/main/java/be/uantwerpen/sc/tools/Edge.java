@@ -7,11 +7,12 @@ import be.uantwerpen.sc.models.Link;
  */
 public class Edge {
 
-    public Edge(){}
-
     private Long target;
     private int weight;
     private Link linkEntity;
+
+    public Edge(){}
+
     public Edge(Long argTarget, int argWeight, Link linkEntity)
     { target = argTarget; weight = argWeight; this.linkEntity = linkEntity;}
 

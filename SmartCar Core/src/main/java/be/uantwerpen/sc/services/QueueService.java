@@ -34,6 +34,7 @@ public class QueueService
         }
     }
 
+
     public BlockingQueue<String> getContentQueue(){
 
         return this.jobQueue;

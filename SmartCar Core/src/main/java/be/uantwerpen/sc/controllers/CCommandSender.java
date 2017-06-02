@@ -21,7 +21,8 @@ public class CCommandSender
     private DataInputStream dIn;
     private boolean serverActive;
 
-    @Value("${car.ccore.ip:localhost}")
+    //@Value("${car.ccore.ip:localhost}")
+    @Value("${car.ccore.ip:146.175.140.187}")
     private String coreIP;
 
     @Value("#{new Integer(${car.ccore.taskport}) ?: 1313}")
@@ -38,7 +39,8 @@ public class CCommandSender
         //IP / port-values are initialised at the end of the constructor
         try
         {
-            socket = new Socket(coreIP, coreCommandPort);
+            //socket = new Socket(coreIP, coreCommandPort);
+            socket = new Socket("146.175.140.54", 1994);
             socket.setSoTimeout(500);
             dOut = new DataOutputStream(socket.getOutputStream());
             dIn = new DataInputStream(socket.getInputStream());
