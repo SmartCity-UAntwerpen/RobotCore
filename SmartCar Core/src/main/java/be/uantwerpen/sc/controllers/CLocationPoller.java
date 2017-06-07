@@ -21,7 +21,7 @@ public class CLocationPoller implements Runnable
         {
             try
             {
-                Thread.currentThread().sleep(250);
+                Thread.currentThread().sleep(2500000);
             }
             catch (Exception e)
             {

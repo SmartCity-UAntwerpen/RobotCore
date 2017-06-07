@@ -29,6 +29,8 @@ public class TerminalService
 
     private RobotCoreLoop robotCoreLoop;
 
+    private boolean activated;
+
     public TerminalService()
     {
         terminal = new Terminal()
@@ -39,6 +41,15 @@ public class TerminalService
                 parseCommand(commandString);
             }
         };
+        activated=false;
+    }
+
+    public boolean getActivated(){
+        return activated;
+    }
+
+    public void setActivated(boolean act){
+        activated=act;
     }
 
     public void systemReady()
@@ -47,6 +58,7 @@ public class TerminalService
         terminal.printTerminal("Type 'help' to display the possible commands.");
 
         terminal.activateTerminal();
+        activated=true;
     }
 
     @Deprecated

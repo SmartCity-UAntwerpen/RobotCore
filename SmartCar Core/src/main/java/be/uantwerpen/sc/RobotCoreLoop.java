@@ -3,6 +3,7 @@ package be.uantwerpen.sc;
 import be.uantwerpen.sc.controllers.MapController;
 import be.uantwerpen.sc.controllers.PathController;
 import be.uantwerpen.sc.controllers.mqtt.MqttJobSubscriber;
+import be.uantwerpen.sc.controllers.mqtt.MqttLocationPublisher;
 import be.uantwerpen.sc.services.*;
 import be.uantwerpen.sc.tools.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,9 @@ public class RobotCoreLoop implements Runnable
     private MqttJobSubscriber jobSubscriber;
 
     @Autowired
+    private MqttLocationPublisher locationPublisher;
+
+    @Autowired
     private JobService jobService;
 
     @Value("${sc.core.ip:localhost}")
@@ -50,6 +54,9 @@ public class RobotCoreLoop implements Runnable
 
     private boolean first = true;
 
+    @Autowired
+    private TerminalService terminalService;
+
     /*public RobotCoreLoop(QueueService queueService, MapController mapController, PathController pathController, PathplanningType pathplanningType, DataService dataService){
         this.queueService = queueService;
         this.mapController = mapController;
@@ -67,6 +74,7 @@ public class RobotCoreLoop implements Runnable
     private void postconstruct(){
         //Setup type
         Terminal.printTerminalInfo("Selected PathplanningType: " + pathplanningType.getType().name());
+        Terminal.printTerminalInfo("Selected WorkingmodeType: " + workingmodeType.getType().name());
     }
 
     @Deprecated
@@ -80,26 +88,24 @@ public class RobotCoreLoop implements Runnable
         //getRobotId
         RestTemplate restTemplate = new RestTemplate();
         //Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/newRobot", Long.class);
-        Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/initiate/aa", Long.class);
+        Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/initiate/"
+                +workingmodeType.getType().toString(), Long.class);
 
         dataService.setRobotID(robotID);
         jobService.setRobotCoreLoop(this);
+        jobService.setEndJob(-1);
 
         if(!jobSubscriber.initialisation())
         {
             System.err.println("Could not initialise MQTT Job service!");
         }
 
-        Terminal.printTerminal("Got ID: " + robotID);
-
         //Wait for tag read
         synchronized (this) {
             while (dataService.getTag().trim().equals("NONE") || dataService.getTag().equals("NO_TAG")) {
                 try {
                     //Read tag
-                    Terminal.printTerminal("OK1");
                     queueService.insertJob("TAG READ UID");
-                    Terminal.printTerminal("OK2");
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -112,18 +118,60 @@ public class RobotCoreLoop implements Runnable
         updateStartLocation();
         Terminal.printTerminal("Start Location: " + dataService.getCurrentLocation());
 
-        //Setup interface for correct mode
+        //Setup interface for correct mode of pathplanning
         setupInterface();
+        Terminal.printTerminal("Interface is set up");
 
-        dataService.map = mapController.getMap();
-        Terminal.printTerminal("Map received");
+        //dataService.map = mapController.getMap();
+        //Terminal.printTerminal("Map received");
 
         //We have the map now, update link
-        dataService.firstLink();
-        Terminal.printTerminal("link updated");
+        //dataService.firstLink();
+        //Terminal.printTerminal("link updated");
 
         dataService.setLookingCoordiante("N");
         Terminal.printTerminal("looking north");
+
+
+        while(!Thread.interrupted()){
+
+            switch(workingmodeType.getType()){
+                case PARTIALSERVER:
+                    //wait for instructions in mqtt
+                    //ask robotcore for calculated path and add commands in jobservice
+                    break;
+                case FULLSERVER:
+                    //wait for instructions in mqtt
+                    //if( not at destination && at edge):
+                    DriveDir nextNode = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/map/"
+                            +dataService.getCurrentLocation()+"/path/"+jobService.getEndJob(), DriveDir.class);
+                    //ask robotcore for calculated path from current position on edge
+                    break;
+                case INDEPENDENT:
+                    //take random routes until job in mqtt
+                    switch(pathplanningType.getType()){
+                        case DIJKSTRA:
+                            Terminal.printTerminal("Dijkstraaa Dijkstraaa Dijkstraaa Dijkstraaa ");
+                            break;
+                        case RANDOM:
+                            break;
+                        case TERMINAL:
+                            if(terminalService.getActivated()==false){
+                                terminalService.systemReady();
+                            }
+                            break;
+                    }
+                    break;
+                default:
+                    Terminal.printTerminal("Wrong working mode type!");
+                    break;
+            }
+
+        }
+
+
+
+/*vroeger
         while (!Thread.interrupted() && pathplanningType.getType() == PathplanningEnum.RANDOM) {
             //Use pathplanning (Described in Interface)
             if (queueService.getContentQueue().isEmpty() && dataService.locationUpdated) {
@@ -198,7 +246,7 @@ public class RobotCoreLoop implements Runnable
             for (DriveDir command : dataService.navigationParser.commands) {
                 queueService.insertJob(command.toString());
             }
-        }
+        }*/
     }
 
     public IPathplanning getPathplanning()
@@ -221,6 +269,20 @@ public class RobotCoreLoop implements Runnable
                 //Dijkstra
                 pathplanning = new PathplanningService();
                 dataService.setPathplanningEnum(PathplanningEnum.DIJKSTRA);
+        }
+
+        switch(workingmodeType.getType()) {
+            case PARTIALSERVER:
+                dataService.setworkingmodeEnum(WorkingmodeEnum.PARTIALSERVER);
+                break;
+            case FULLSERVER:
+                dataService.setworkingmodeEnum(WorkingmodeEnum.FULLSERVER);
+                break;
+            case INDEPENDENT:
+                dataService.setworkingmodeEnum(WorkingmodeEnum.INDEPENDENT);
+                break;
+            default:
+                dataService.setworkingmodeEnum(WorkingmodeEnum.INDEPENDENT);
         }
     }
 

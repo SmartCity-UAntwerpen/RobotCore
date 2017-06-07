@@ -39,8 +39,7 @@ public class CCommandSender
         //IP / port-values are initialised at the end of the constructor
         try
         {
-            //socket = new Socket(coreIP, coreCommandPort);
-            socket = new Socket("146.175.140.54", 1994);
+            socket = new Socket(coreIP, coreCommandPort);
             socket.setSoTimeout(500);
             dOut = new DataOutputStream(socket.getOutputStream());
             dIn = new DataInputStream(socket.getInputStream());

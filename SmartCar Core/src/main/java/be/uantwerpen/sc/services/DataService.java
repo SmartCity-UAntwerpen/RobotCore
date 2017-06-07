@@ -41,6 +41,7 @@ public class DataService
 
     private String LookingCoordiante;
     private PathplanningEnum pathplanningEnum;
+    private WorkingmodeEnum workingmodeEnum;
 
 
 
@@ -122,6 +123,14 @@ public class DataService
         this.pathplanningEnum = pathplanningEnum;
     }
 
+    public WorkingmodeEnum getWorkingmodeEnum() {
+        return workingmodeEnum;
+    }
+
+    public void setworkingmodeEnum(WorkingmodeEnum workingmodeEnum) {
+        this.workingmodeEnum = workingmodeEnum;
+    }
+
     public void firstLink(){
         if(map != null) {
             Long start = getCurrentLocation();
@@ -168,8 +177,8 @@ public class DataService
                 //delete entry from navigationParser
                 navigationParser.list.remove(0);
             }
-            RestTemplate rest = new RestTemplate();
-            rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + robotID + "/lid/" + lid, Integer.class);
+            //RestTemplate rest = new RestTemplate();
+            //rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + robotID + "/lid/" + lid, Integer.class);
         }else{
             //TODO update location
             Terminal.printTerminal("Entering manual manouvering mode. Location will be inaccurate");
@@ -241,7 +250,7 @@ public class DataService
                 break;
 
 
-            case "04 D0 88 8A C8 48 80":
+            case "04 36 8A 9A F6 1F 80":
                 setCurrentLocation(30L);
                 break;
 

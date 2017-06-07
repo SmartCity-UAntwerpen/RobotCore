@@ -45,4 +45,6 @@ public class WorkingmodeType {
         this.type = type;
     }
 
+    public String toString(WorkingmodeEnum type) {return type.toString();}
+
 }

@@ -53,7 +53,7 @@ public class QueueConsumer implements Runnable
                     if (!lockGranted) {
                         //Robot already has permission?
                         if (!(dataService.hasPermission() == dataService.getNextNode())) {
-                            //Terminal.printTerminal("Millis: " + dataService.getMillis() + " ,linkMillis: " + (dataService.getLinkMillis() - 150));
+                            Terminal.printTerminal("Millis: " + dataService.getMillis() + " ,linkMillis: " + (dataService.getLinkMillis() - 150));
                             if (dataService.getMillis() > dataService.getLinkMillis() - 200) {
                                 //Pause robot
                                 sender.sendCommand("DRIVE PAUSE");
@@ -66,7 +66,7 @@ public class QueueConsumer implements Runnable
                                     response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/requestlock/" + dataService.getNextNode(), boolean.class);
 
                                     if (!response) {
-                                        //Terminal.printTerminal("Lock Denied: " + dataService.getNextNode());
+                                        Terminal.printTerminal("Lock Denied: " + dataService.getNextNode());
                                         Thread.sleep(200);
                                     }
                                 }

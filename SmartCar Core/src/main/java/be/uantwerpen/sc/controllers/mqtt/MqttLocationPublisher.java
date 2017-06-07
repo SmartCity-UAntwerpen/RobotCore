@@ -55,14 +55,14 @@ public class MqttLocationPublisher
                 connOpts.setCleanSession(true);
                 connOpts.setUserName(mqttUsername);
                 connOpts.setPassword(mqttPassword.toCharArray());
-                System.out.println("Connecting to broker: "+broker);
+                //System.out.println("Connecting to broker: "+broker);
                 client.connect(connOpts);
-                System.out.println("Connected");
-                System.out.println("Publishing message: " + content);
+                //System.out.println("Connected");
+                //System.out.println("Publishing message: " + content);
                 MqttMessage message = new MqttMessage(content.getBytes());
                 message.setQos(qos);
                 client.publish(topic, message);
-                System.out.println("Message published");
+                System.out.println("Message published: "+ content);
                 client.disconnect();
             }
             catch(MqttException me)
