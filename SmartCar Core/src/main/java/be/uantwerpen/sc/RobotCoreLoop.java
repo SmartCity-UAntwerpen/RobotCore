@@ -54,7 +54,6 @@ public class RobotCoreLoop implements Runnable
 
     private boolean first = true;
 
-    @Autowired
     private TerminalService terminalService;
 
     /*public RobotCoreLoop(QueueService queueService, MapController mapController, PathController pathController, PathplanningType pathplanningType, DataService dataService){
@@ -86,14 +85,19 @@ public class RobotCoreLoop implements Runnable
 
     public void run() {
         //getRobotId
+        terminalService=new TerminalService();
         RestTemplate restTemplate = new RestTemplate();
         //Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/newRobot", Long.class);
         Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/initiate/"
                 +workingmodeType.getType().toString(), Long.class);
 
+        for (Long i=0L;i<21L;i++)
+            restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/point/setlock/" + i + "/0", Boolean.class);
+
         dataService.setRobotID(robotID);
         jobService.setRobotCoreLoop(this);
         jobService.setEndJob(-1);
+        jobService.removeCommands();
 
         if(!jobSubscriber.initialisation())
         {
@@ -116,22 +120,31 @@ public class RobotCoreLoop implements Runnable
         Terminal.printTerminal("Tag: " + dataService.getTag());
 
         updateStartLocation();
-        Terminal.printTerminal("Start Location: " + dataService.getCurrentLocation());
+        dataService.setCurrentLocationAccordingTag();
+        Terminal.printTerminal("Start Location: " + dataService.getCurrentLocation()+"\n\n");
 
         //Setup interface for correct mode of pathplanning
         setupInterface();
         Terminal.printTerminal("Interface is set up");
 
-        //dataService.map = mapController.getMap();
-        //Terminal.printTerminal("Map received");
+        dataService.map = mapController.getMap();
+        Terminal.printTerminal("Map received");
 
         //We have the map now, update link
-        //dataService.firstLink();
-        //Terminal.printTerminal("link updated");
+        dataService.firstLink();
+        Terminal.printTerminal("link updated");
+        Terminal.printTerminal("next: "+dataService.getNextNode());
 
-        dataService.setLookingCoordiante("N");
-        Terminal.printTerminal("looking north");
+        dataService.setLookingCoordiante("Z");
+        Terminal.printTerminal("looking south");
 
+        //queueService.insertJob("DRIVE FORWARD 120");
+        //Terminal.printTerminal("LINE");
+        //queueService.insertJob("DRIVE FOLLOWLINE");
+        //Terminal.printTerminal("CROSS");
+        //queueService.insertJob("DRIVE FORWARD 50");
+        //Terminal.printTerminal("LINE");
+        //queueService.insertJob("DRIVE FOLLOWLINE");
 
         while(!Thread.interrupted()){
 
@@ -151,14 +164,16 @@ public class RobotCoreLoop implements Runnable
                     //take random routes until job in mqtt
                     switch(pathplanningType.getType()){
                         case DIJKSTRA:
-                            Terminal.printTerminal("Dijkstraaa Dijkstraaa Dijkstraaa Dijkstraaa ");
+                            Terminal.printTerminal("DDijkstra");
                             break;
                         case RANDOM:
                             break;
                         case TERMINAL:
-                            if(terminalService.getActivated()==false){
+                            //Terminal.printTerminal("Dijk");
+                            /*if(terminalService.getActivated()==false){
+                                Terminal.printTerminal("Dijkstraaa Dijkstraaa Dijkstraaa Dijkstraaa222222");
                                 terminalService.systemReady();
-                            }
+                            }*/
                             break;
                     }
                     break;

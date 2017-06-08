@@ -1,6 +1,7 @@
 package be.uantwerpen.sc.services;
 
 import be.uantwerpen.sc.models.Link;
+import be.uantwerpen.sc.models.Point;
 import be.uantwerpen.sc.models.map.*;
 import be.uantwerpen.sc.tools.Dijkstra;
 import be.uantwerpen.sc.tools.Edge;
@@ -28,6 +29,7 @@ public class PathplanningService implements IPathplanning
         List<Link> linkEntityList = new ArrayList<>();
         List<Vertex> vertexes = new ArrayList<>();
         for (Node nj : map.getNodeList()){
+            System.out.print(nj);
             vertexes.add(new Vertex(nj));
             for(Link linkEntity : nj.getNeighbours()){
                 linkEntityList.add(linkEntity);

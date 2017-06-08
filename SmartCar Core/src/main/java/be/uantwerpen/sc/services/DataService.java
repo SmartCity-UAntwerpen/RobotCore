@@ -131,6 +131,10 @@ public class DataService
         this.workingmodeEnum = workingmodeEnum;
     }
 
+    public NavigationParser getNavigationParser(){ return navigationParser;}
+
+    public void setNavigationParser(NavigationParser parser){ this.navigationParser=parser;}
+
     public void firstLink(){
         if(map != null) {
             Long start = getCurrentLocation();
@@ -189,73 +193,65 @@ public class DataService
     public void setCurrentLocationAccordingTag() {
         switch(getTag()){
             case "04 70 39 32 06 27 80":
-                setCurrentLocation(3L);
+                setCurrentLocation(20L); //3
                 break;
             case "04 67 88 8A C8 48 80":
-                setCurrentLocation(14L);
+                setCurrentLocation(8L);//14
                 break;
-            case "04 97 36 A2 F7 22 80":
-                setCurrentLocation(1L);
+            case "04 97 36 A2 7F 22 80":
+                setCurrentLocation(4L);//1
                 break;
             case "04 7B 88 8A C8 48 80":
-                setCurrentLocation(15L);
+                setCurrentLocation(9L);//15
                 break;
             case "04 B3 88 8A C8 48 80":
-                setCurrentLocation(8L);
+                setCurrentLocation(2L);//8
                 break;
             case "04 8D 88 8A C8 48 80":
-                setCurrentLocation(9L);
+                setCurrentLocation(5L);//9
                 break;
             case "04 AA 88 8A C8 48 80":
-                setCurrentLocation(11L);
+                setCurrentLocation(14L);//11
                 break;
             case "04 C4 FD 12 Q9 34 80":
                 setCurrentLocation(19L);
                 break;
             case "04 96 88 8A C8 48 80":
-                setCurrentLocation(17L);
+                setCurrentLocation(17L);//17
                 break;
             case "04 A1 88 8A C8 48 80":
-                setCurrentLocation(18L);
+                setCurrentLocation(15L);//18
                 break;
             case "04 86 04 22 A9 34 84":
                 setCurrentLocation(20L);
                 break;
             case "04 18 25 9A 7F 22 80":
-                setCurrentLocation(6L);
+                setCurrentLocation(11L);//6
                 break;
             case "04 BC 88 8A C8 48 80":
-                setCurrentLocation(16L);
+                setCurrentLocation(16L);//16
                 break;
             case "04 C5 88 8A C8 48 80":
-                setCurrentLocation(7L);
+                setCurrentLocation(3L);//7
                 break;
             case "04 EC 88 8A C8 48 80":
-                setCurrentLocation(10L);
+                setCurrentLocation(19L);//
                 break;
             case "04 E3 88 8A C8 48 80":
-                setCurrentLocation(13L);
+                setCurrentLocation(1L);//13
                 break;
             case "04 26 3E 92 1E 25 80":
-                setCurrentLocation(4L);
+                setCurrentLocation(6L);//4
                 break;
             case "04 DA 88 8A C8 48 80":
-                setCurrentLocation(12L);
+                setCurrentLocation(13L);//12
                 break;
             case "04 41 70 92 1E 25 80":
-                setCurrentLocation(2L);
+                setCurrentLocation(18L);//2
                 break;
             case "04 3C 67 9A F6 1F 80":
-                setCurrentLocation(5L);
+                setCurrentLocation(10L);//5
                 break;
-
-
-            case "04 36 8A 9A F6 1F 80":
-                setCurrentLocation(30L);
-                break;
-
-
-
             case "NONE":
                 break;
             default:

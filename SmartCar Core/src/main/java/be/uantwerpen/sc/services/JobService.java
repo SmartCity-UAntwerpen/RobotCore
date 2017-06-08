@@ -41,7 +41,9 @@ public class JobService
 
     private RobotCoreLoop robotCoreLoop;
 
-    int endJob;
+    private int endJob;
+
+    private Long jobid;
 
     public int getEndJob(){
         return endJob;
@@ -51,6 +53,14 @@ public class JobService
         endJob=endOfJob;
     }
 
+    public Long jobid(){
+        return jobid;
+    }
+
+    public void getJobid(Long jobid){
+        this.jobid=jobid;
+    }
+
     public void setRobotCoreLoop(RobotCoreLoop robotCoreLoop)
     {
         this.robotCoreLoop = robotCoreLoop;
@@ -58,28 +68,32 @@ public class JobService
 
     public void parseJob(String job) throws ParseException
     {
-        if(!job.startsWith("Job{jobId=") || job.split(", ", 2).length <= 1)
+        if(!job.startsWith("Job:{jobId:") || job.split("/ ", 2).length <= 1)
         {
             //Not a valid job string
             throw new ParseException("Can not parse job from: " + job + "\nInvalid type!", 0);
         }
-
+        Long oldjobid=jobid;
         try
         {
-            String jobDescription = job.split(", ", 2)[1];
+            String partialstring=job.split(":",3 )[0];
+            partialstring=partialstring.split("/",2)[0];
+            jobid = Long.parseLong(partialstring);
+            String jobDescription = job.split("/ ", 3)[2];
 
-            if(!jobDescription.startsWith("jobDescription='"))
+            if(!jobDescription.startsWith("idstart:"))
             {
                 //Not a valid job string
                 throw new ParseException("Can not parse job from: " + job + "\nInvalid field!", 0);
             }
 
-            Job parsedJob = new Job(0, jobDescription.split("'", 3)[1]);
+            Job parsedJob = new Job(jobid, jobDescription);
 
             performJob(parsedJob);
         }
         catch(Exception e)
         {
+            jobid=oldjobid;
             //Could not parse job from string
             throw new ParseException("Can not parse job from: " + job + "\nInvalid format!", 0);
         }
@@ -194,10 +208,20 @@ public class JobService
         String comm;
         while (contentcopy.size() > 0) {
             comm = contentcopy.get(0);
-            if (!contentcopy.get(0).matches("DRIVE (.*)")) {
+            Terminal.printTerminal(comm);
+            if (!comm.matches("DRIVE (.*)")) {
                 content.add(comm);
             }
         }
+        queueService.setContentQueue(content);
+    }
+
+    public void removeCommands(){
+        BlockingQueue<String> content = queueService.getContentQueue();
+        ArrayList<String> contentcopy = new ArrayList<String>();
+        content.drainTo(contentcopy);
+        Terminal.printTerminal(contentcopy.toString());
+        contentcopy.clear();
         queueService.setContentQueue(content);
     }
 

@@ -97,7 +97,7 @@ public class CStatusEventHandler implements Runnable
                             synchronized (this) {
                                 //Terminal.printTerminal("Distance: " + millis);
                                 dataService.setMillis(millis);
-                                locationPublisher.publishLocation(millis);
+                                locationPublisher.publishLocation(millis, 45L); ////whuuuuuuut
                             }
                         }
 

@@ -19,6 +19,10 @@ public class NavigationParser {
         this.list = list;
     }
 
+    public List<Vertex> getList(){
+        return list;
+    }
+
     public Queue<DriveDir> parseMap(){
         if(list.isEmpty()){
             Terminal.printTerminalError("Cannot parse empty map");

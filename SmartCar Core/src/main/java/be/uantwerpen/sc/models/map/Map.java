@@ -1,7 +1,10 @@
 package be.uantwerpen.sc.models.map;
 
 import be.uantwerpen.sc.models.Bot;
+import be.uantwerpen.sc.models.Link;
+import be.uantwerpen.sc.models.Point;
 import be.uantwerpen.sc.models.TrafficLightEntity;
+import be.uantwerpen.sc.tools.pathplanning.AbstractMap;
 
 import java.util.ArrayList;
 import java.util.List;
