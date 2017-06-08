@@ -5,16 +5,17 @@ package be.uantwerpen.sc.models;
  */
 public class TrafficLightEntity
 {
-    private int tlid;
+    private long tlid;
     private String direction;
     private String state;
-    private PointEntity pointid;
+    private int placeVertex;
+    private LinkEntity link;
 
-    public int getTlid() {
+    public long getTlid() {
         return tlid;
     }
 
-    public void setTlid(int tlid) {
+    public void setTlid(long tlid) {
         this.tlid = tlid;
     }
 
@@ -50,17 +51,26 @@ public class TrafficLightEntity
 
     @Override
     public int hashCode() {
-        int result = tlid;
+        long result = tlid;
         result = 31 * result + (direction != null ? direction.hashCode() : 0);
         result = 31 * result + (state != null ? state.hashCode() : 0);
-        return result;
+        return (int) result;
     }
 
-    public PointEntity getPointid() {
-        return pointid;
+    public LinkEntity getLink() {
+        return this.link;
     }
 
-    public void setPointid(PointEntity pointid) {
-        this.pointid = pointid;
+    public void setLink(LinkEntity link) {
+        this.link = link;
     }
+
+    public int getPlaceVertex() {
+        return placeVertex;
+    }
+
+    public void setPlaceVertex(int placeVertex) {
+        this.placeVertex = placeVertex;
+    }
+
 }

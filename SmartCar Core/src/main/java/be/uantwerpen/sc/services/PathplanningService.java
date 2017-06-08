@@ -3,6 +3,7 @@ package be.uantwerpen.sc.services;
 import be.uantwerpen.sc.models.LinkEntity;
 import be.uantwerpen.sc.models.map.*;
 import be.uantwerpen.sc.tools.Dijkstra;
+import be.uantwerpen.sc.tools.PathplanningType;
 import be.uantwerpen.sc.tools.Edge;
 import be.uantwerpen.sc.tools.IPathplanning;
 import be.uantwerpen.sc.tools.Vertex;

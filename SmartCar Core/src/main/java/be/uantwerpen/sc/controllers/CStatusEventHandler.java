@@ -1,6 +1,8 @@
 package be.uantwerpen.sc.controllers;
 
+import be.uantwerpen.sc.controllers.mqtt.MqttLightPublisher;
 import be.uantwerpen.sc.controllers.mqtt.MqttLocationPublisher;
+import be.uantwerpen.sc.models.TrafficLightEntity;
 import be.uantwerpen.sc.services.DataService;
 import be.uantwerpen.sc.tools.Terminal;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,9 @@ public class CStatusEventHandler implements Runnable
 
     @Autowired
     MqttLocationPublisher locationPublisher;
+
+    @Autowired
+    MqttLightPublisher mqttLightPublisher;
 
     Socket socket;
     DataInputStream dIn;
@@ -59,6 +64,14 @@ public class CStatusEventHandler implements Runnable
             try {
                 byte[] bytes = readData();
                 String s = new String(bytes);
+
+                if(s == "TEST"){
+                    System.out.println("DE TEST IS AANGEKOMEN");
+                    TrafficLightEntity tle = new TrafficLightEntity();
+                    tle.setTlid((long) 1);
+                    tle.setState("GREEN");
+                    mqttLightPublisher.publishLight(tle, 1);
+                }
 
                 //TODO Continue this method
                 if (s.startsWith("DRIVE EVENT: FINISHED")){

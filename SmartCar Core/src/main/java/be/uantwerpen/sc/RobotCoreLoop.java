@@ -76,16 +76,16 @@ public class RobotCoreLoop implements Runnable
     public void run() {
         //getRobotId
         RestTemplate restTemplate = new RestTemplate();
-        Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/newRobot", Long.class);
-        dataService.setRobotID(robotID);
-        jobService.setRobotCoreLoop(this);
+        //Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/newRobot", Long.class);
+        //dataService.setRobotID(robotID);
+        //jobService.setRobotCoreLoop(this);
 
         if(!jobSubscriber.initialisation())
         {
             System.err.println("Could not initialise MQTT Job service!");
         }
 
-        Terminal.printTerminal("Got ID: " + robotID);
+        //Terminal.printTerminal("Got ID: " + robotID);
 
         //Wait for tag read
         synchronized (this) {

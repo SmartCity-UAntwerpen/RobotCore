@@ -29,6 +29,9 @@ public class PathplanningType {
                 case "random":
                     type = PathplanningEnum.RANDOM;
                     break;
+                case "server":
+                    type = PathplanningEnum.SERVER;
+                    break;
                 default:
                     //run default
                     type = PathplanningEnum.TERMINAL;

@@ -51,9 +51,9 @@ public class JobService
                 throw new ParseException("Can not parse job from: " + job + "\nInvalid field!", 0);
             }
 
-            Job parsedJob = new Job(0, jobDescription.split("'", 3)[1]);
+            //Job parsedJob = new Job(0, jobDescription.split("'", 3)[1]);
 
-            performJob(parsedJob);
+            //performJob(parsedJob);
         }
         catch(Exception e)
         {
@@ -64,7 +64,7 @@ public class JobService
 
     private void performJob(Job job)
     {
-        String jobDescription = job.getJobDescription();
+        String jobDescription = "";//job.getJobDescription();
 
         System.out.println("JOB DESCRIPTION: " + jobDescription);
 
