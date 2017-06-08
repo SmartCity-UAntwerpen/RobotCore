@@ -65,14 +65,6 @@ public class CStatusEventHandler implements Runnable
                 byte[] bytes = readData();
                 String s = new String(bytes);
 
-                if(s == "TEST"){
-                    System.out.println("DE TEST IS AANGEKOMEN");
-                    TrafficLightEntity tle = new TrafficLightEntity();
-                    tle.setTlid((long) 1);
-                    tle.setState("GREEN");
-                    mqttLightPublisher.publishLight(tle, 1);
-                }
-
                 //TODO Continue this method
                 if (s.startsWith("DRIVE EVENT: FINISHED")){
                     synchronized (this){

@@ -1,6 +1,7 @@
 package be.uantwerpen.sc.services;
 
 import be.uantwerpen.sc.controllers.CCommandSender;
+import be.uantwerpen.sc.controllers.CLightSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,10 +12,10 @@ import org.springframework.stereotype.Service;
 public class TrafficLightService {
 
     @Autowired
-    CCommandSender cCommandSender;
+    CLightSender cLightSender;
 
     public void updateState(long id, String state){
         String command = "LIGHT "+id+" "+state;
-        cCommandSender.sendCommand(command);
+        cLightSender.sendLightCommand(command);
     }
 }
