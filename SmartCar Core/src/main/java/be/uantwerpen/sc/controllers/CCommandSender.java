@@ -58,6 +58,7 @@ public class CCommandSender
             //System.out.println(message.toString());
             int attempts = 0;
 
+
             str = str.concat("\n");
             byte[] bytes = str.getBytes();
 

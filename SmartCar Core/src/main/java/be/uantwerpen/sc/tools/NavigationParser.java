@@ -1,5 +1,6 @@
 package be.uantwerpen.sc.tools;
 
+import be.uantwerpen.sc.models.Link;
 import be.uantwerpen.sc.services.DataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,8 +16,9 @@ public class NavigationParser {
     public List<Vertex> list;
     public Queue<DriveDir> commands = new LinkedList<DriveDir>();
 
-    public NavigationParser(List<Vertex> list){
+    public NavigationParser(List<Vertex> list, DataService dataservice){
         this.list = list;
+        this.dataService=dataservice;
     }
 
     public List<Vertex> getList(){
@@ -31,19 +33,60 @@ public class NavigationParser {
             commands.add(new DriveDir(DriveDirEnum.FOLLOW));
             //Second part is parsing the rest of the map
             Vertex current = list.get(0);
+            System.out.println("current: "+current);
             Vertex previous = list.get(0);
             Vertex next = list.get(1);
-            for(int i = 2; i < list.size(); i++){
-                previous = current;
-                current = next;
-                next = list.get(i);
-                direction start = findStartDir(current);
+            System.out.println("next: "+next+"\n");
+            if(list.size()==2){
+                System.out.println(dataService.getPrevNode());
+                System.out.println(dataService.getNextNode());
+                DriveDir relDir=null;
                 direction stop = findStopDir(next);
-                DriveDir relDir = getNextRelDir(start, stop);
-                //Pass crossroad
-                commands.add(relDir);
-                //Drive followLine
-                commands.add(new DriveDir(DriveDirEnum.FOLLOW));
+                switch(dataService.getLookingCoordiante()){
+                    case "N":
+                        relDir = getNextRelDir(direction.NORTH, stop);
+                        break;
+                    case "E":
+                        relDir = getNextRelDir(direction.EAST, stop);
+                        break;
+                    case "Z":
+                        relDir = getNextRelDir(direction.SOUTH, stop);
+                        break;
+                    case "W":
+                        relDir = getNextRelDir(direction.WEST, stop);
+                        break;
+
+                }
+                //direction start = findStartDir(current);
+                //direction stop = findStopDir(next);
+                //DriveDir relDir = getNextRelDir(start, stop);
+                System.out.println("reldir: "+relDir);
+                if(relDir.toString().equals("DRIVE FORWARD 120")){
+                    System.out.println("EQUALS");
+                }
+                /*else{
+                    //Pass crossroad
+                    commands.add(relDir);
+                    //Drive followLine
+                    commands.add(new DriveDir(DriveDirEnum.FOLLOW));
+                }*/
+
+            }else{
+                for(int i = 2; i < list.size(); i++) {
+                    previous = current;
+                    current = next;
+                    next = list.get(i);
+                    direction start = findStartDir(current);
+                    System.out.println("start: " + start);
+                    direction stop = findStopDir(next);
+                    System.out.println("stop: " + stop);
+                    DriveDir relDir = getNextRelDir(start, stop);
+                    System.out.println("reldir: " + relDir);
+                    //Pass crossroad
+                    commands.add(relDir);
+                    //Drive followLine
+                    commands.add(new DriveDir(DriveDirEnum.FOLLOW));
+                }
             }
         }
         return commands;
@@ -53,6 +96,17 @@ public class NavigationParser {
         int i = current.getPrevious().getAdjacencies().indexOf(current);
         String dirString = current.getPrevious().getAdjacencies().get(i).getLinkEntity().getStopDirection();
         direction dir = getDirection(dirString);
+        /*switch(dir){
+            case NORTH:
+                return direction.SOUTH;
+            case EAST:
+                return direction.WEST;
+            case SOUTH:
+                return direction.NORTH;
+            case WEST:
+                return direction.EAST;
+
+        }*/
         return dir;
     }
 
@@ -88,13 +142,16 @@ public class NavigationParser {
                 {
                     //Go EAST
                     case EAST:
-                        return new DriveDir(DriveDirEnum.LEFT);   //Turn LEFT
+                        return new DriveDir(DriveDirEnum.RIGHT);//LEFT);   //Turn LEFT
                     //Go SOUTH
-                    case SOUTH:
+                    case NORTH://SOUTH:
                         return new DriveDir(DriveDirEnum.FORWARD);   //Go STRAIGHT
                     //Go WEST
                     case WEST:
-                        return new DriveDir(DriveDirEnum.RIGHT);   //Turn RIGHT
+                        return new DriveDir(DriveDirEnum.LEFT);//RIGHT);   //Turn RIGHT
+                    //turn
+                    case SOUTH:
+                        return new DriveDir(DriveDirEnum.TURN);
                     
                 }
                 
@@ -104,13 +161,16 @@ public class NavigationParser {
                 {
                     //Go NORTH
                     case NORTH:
-                        return new DriveDir(DriveDirEnum.RIGHT);   //Turn RIGHT
+                        return new DriveDir(DriveDirEnum.LEFT);//RIGHT);   //Turn RIGHT
                     //Go SOUTH
                     case SOUTH:
-                        return new DriveDir(DriveDirEnum.LEFT);   //Turn LEFT
+                        return new DriveDir(DriveDirEnum.RIGHT);//LEFT);   //Turn LEFT
                     //Go WEST
-                    case WEST:
+                    case EAST://WEST:
                         return new DriveDir(DriveDirEnum.FORWARD);   //Go STRAIGHT
+                    //turn
+                    case WEST:
+                        return new DriveDir(DriveDirEnum.TURN);
                 }
                 
             //From SOUTH
@@ -118,14 +178,17 @@ public class NavigationParser {
                 switch(stopDir)
                 {
                     //Go NORTH
-                    case NORTH:
+                    case SOUTH://NORTH:
                         return new DriveDir(DriveDirEnum.FORWARD);   //Go STRAIGHT
                     //Go EAST
                     case EAST:
-                        return new DriveDir(DriveDirEnum.RIGHT);   //Turn RIGHT
+                        return new DriveDir(DriveDirEnum.LEFT);//RIGHT);   //Turn RIGHT
                     //Go WEST
                     case WEST:
-                        return new DriveDir(DriveDirEnum.LEFT);   //Turn LEFT
+                        return new DriveDir(DriveDirEnum.RIGHT);//LEFT);   //Turn LEFT
+                    //turn
+                    case NORTH:
+                        return new DriveDir(DriveDirEnum.TURN);
                     
                 }
                 
@@ -135,15 +198,16 @@ public class NavigationParser {
                 {
                     //Go NORTH
                     case NORTH:
-                        return new DriveDir(DriveDirEnum.LEFT);   //Turn LEFT
-                    
+                        return new DriveDir(DriveDirEnum.RIGHT);//LEFT);   //Turn LEFT
                     //Go EAST
-                    case EAST:
+                    case WEST://EAST:
                         return new DriveDir(DriveDirEnum.FORWARD);   //Go STRAIGHT
-                    
                     //Go SOUTH
                     case SOUTH:
-                        return new DriveDir(DriveDirEnum.RIGHT);   //Turn RIGHT
+                        return new DriveDir(DriveDirEnum.LEFT);//RIGHT);   //Turn RIGHT
+                    //turn
+                    case EAST:
+                        return new DriveDir(DriveDirEnum.TURN);
                     
                 }
                 

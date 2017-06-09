@@ -115,6 +115,57 @@ public class DataService
         LookingCoordiante = lookingCoordiante;
     }
 
+    public void changeLookingCoordiante(String command){
+        if(command.equals("DRIVE TURN L")){
+            switch(getLookingCoordiante()){
+                case "N":
+                    setLookingCoordiante("W");
+                    break;
+                case "E":
+                    setLookingCoordiante("N");
+                    break;
+                case "Z":
+                    setLookingCoordiante("E");
+                    break;
+                case "W":
+                    setLookingCoordiante("Z");
+            }
+        }
+
+        if(command.equals("DRIVE TURN R")){
+            switch(getLookingCoordiante()){
+                case "N":
+                    setLookingCoordiante("E");
+                    break;
+                case "E":
+                    setLookingCoordiante("Z");
+                    break;
+                case "Z":
+                    setLookingCoordiante("W");
+                    break;
+                case "W":
+                    setLookingCoordiante("N");
+            }
+        }
+
+        if(command.equals("DRIVE ROTATE R 180")){
+            switch(getLookingCoordiante()){
+                case "N":
+                    setLookingCoordiante("Z");
+                    break;
+                case "E":
+                    setLookingCoordiante("W");
+                    break;
+                case "Z":
+                    setLookingCoordiante("N");
+                    break;
+                case "W":
+                    setLookingCoordiante("E");
+            }
+        }
+
+    }
+
     public PathplanningEnum getPathplanningEnum() {
         return pathplanningEnum;
     }
@@ -134,6 +185,14 @@ public class DataService
     public NavigationParser getNavigationParser(){ return navigationParser;}
 
     public void setNavigationParser(NavigationParser parser){ this.navigationParser=parser;}
+
+    public Map getMap(){
+        return map;
+    }
+
+    public void setMap(Map map){
+        this.map=map;
+    }
 
     public void firstLink(){
         if(map != null) {
@@ -176,6 +235,7 @@ public class DataService
                 }
             }
 
+            setCurrentLocation(lid);
             Terminal.printTerminal("Current Link: " + lid);
             if(this.pathplanningEnum == PathplanningEnum.DIJKSTRA) {
                 //delete entry from navigationParser

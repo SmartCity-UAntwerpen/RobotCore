@@ -198,7 +198,7 @@ public class TerminalService
             }
         }
         Terminal.printTerminal("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end2);
-        dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2));
+        dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2), dataService);
         //Parse Map
         dataService.navigationParser.parseMap();
         //dataService.navigationParser.parseRandomMap(dataService);
@@ -229,7 +229,7 @@ public class TerminalService
             dataService.setLookingCoordiante("N");
         }
         List<Vertex> path = pathController.getRandomPath(currentLocation).getPath();
-        NavigationParser navigationParser = new NavigationParser(path);
+        NavigationParser navigationParser = new NavigationParser(path, dataService);
         //System.out.println(navigationParser.parseRandomMap().toString());
 
     }

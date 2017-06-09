@@ -136,7 +136,7 @@ public class RobotCoreLoop implements Runnable
         Terminal.printTerminal("next: "+dataService.getNextNode());
 
         dataService.setLookingCoordiante("Z");
-        Terminal.printTerminal("looking south");
+        Terminal.printTerminal("looking SOUTH");
 
         //queueService.insertJob("DRIVE FORWARD 120");
         //Terminal.printTerminal("LINE");

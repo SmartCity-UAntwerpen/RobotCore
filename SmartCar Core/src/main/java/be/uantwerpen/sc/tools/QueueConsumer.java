@@ -93,6 +93,10 @@ public class QueueConsumer implements Runnable
                         String s = queueService.getJob();
                         Terminal.printTerminal("Sending: " + s);
                         sender.sendCommand(s);
+                        if(dataService.getCurrentLocation()!=-1)
+                            if(dataService.getMap().changeLookingDir(dataService.getCurrentLocation(), dataService.getTag())!=null)
+                                dataService.setLookingCoordiante(dataService.getMap().changeLookingDir(dataService.getCurrentLocation(), dataService.getTag()));
+                        System.out.println("coordinate: "+dataService.getLookingCoordiante());
 
                         if(!s.contains("DRIVE DISTANCE")) {
                             dataService.robotBusy = true;
