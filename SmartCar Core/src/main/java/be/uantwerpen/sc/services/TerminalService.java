@@ -6,9 +6,13 @@ import be.uantwerpen.sc.controllers.PathController;
 import be.uantwerpen.sc.models.map.Path;
 import be.uantwerpen.sc.tools.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by Thomas on 14/04/2016.
@@ -17,6 +21,12 @@ import java.util.List;
 public class TerminalService
 {
     private Terminal terminal;
+
+    @Value("${sc.core.ip:localhost}")
+    private String serverIP;
+
+    @Value("#{new Integer(${sc.core.port}) ?: 1994}")
+    private int serverPort;
 
     @Autowired
     private PathController pathController;
@@ -76,13 +86,45 @@ public class TerminalService
             case "navigate":
                 try {
                     String end = commandString.split(" ", 2)[1].toLowerCase();
-                    try {
+                    switch(dataService.getWorkingmodeEnum()) {
+                        case INDEPENDENT:
+                            try {
+                                int endInt = Integer.parseInt(end);
+                                startPathPlanning(endInt);
+                            } catch (NumberFormatException e) {
+                                Terminal.printTerminalError(e.getMessage());
+                                Terminal.printTerminalInfo("Usage: navigate end");
+                            }
+                            break;
+                        case PARTIALSERVER:
+                            try {
+                                int endInt = Integer.parseInt(end);
+                                startPathRobotcore(endInt);
+                            } catch (NumberFormatException e) {
+                                Terminal.printTerminalError(e.getMessage());
+                                Terminal.printTerminalInfo("Usage: navigate end");
+                            }
+                            break;
+                        case FULLSERVER:
+                            try {
+                                int endInt = Integer.parseInt(end);
+                                while(dataService.getCurrentLocation()!=endInt)
+                                    if(queueService.getContentQueue().size() == 0){
+                                        startPathFullRobotcore(endInt);
+                                    }
+                            } catch (NumberFormatException e) {
+                                Terminal.printTerminalError(e.getMessage());
+                                Terminal.printTerminalInfo("Usage: navigate end");
+                            }
+                            break;
+                    }
+                    /*try {
                         int endInt = Integer.parseInt(end);
                         startPathPlanning(endInt);
                     } catch (NumberFormatException e) {
                         terminal.printTerminalError(e.getMessage());
                         terminal.printTerminalInfo("Usage: navigate end");
-                    }
+                    }*/
                 }catch(ArrayIndexOutOfBoundsException e){
                     terminal.printTerminalInfo("Usage: navigate end");
                 }
@@ -232,5 +274,48 @@ public class TerminalService
         NavigationParser navigationParser = new NavigationParser(path, dataService);
         //System.out.println(navigationParser.parseRandomMap().toString());
 
+    }
+
+    public void startPathRobotcore(int end){
+
+        //ask robotcore for instructions
+        RestTemplate restTemplate = new RestTemplate();
+        DriveDir[] nextPath = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/map/"
+                +dataService.getCurrentLocation()+"/path/"+end, DriveDir[].class);
+
+        removeDriveCommands();
+
+        //Process map
+        for (DriveDir command : nextPath) {
+            queueService.insertJob(command.toString());
+        }
+    }
+
+    public void startPathFullRobotcore(int end){
+        //ask robotcore for instructions
+        RestTemplate restTemplate = new RestTemplate();
+        DriveDir[] nextPath = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/map/"
+                +dataService.getCurrentLocation()+"/path/"+end, DriveDir[].class);
+
+        //Process map but only 2 first commands
+        for (int i=0;i<2;i++) {
+            queueService.insertJob(nextPath[i].toString());
+        }
+    }
+
+    public void removeDriveCommands() {
+        //remove drive jobs from queue
+        BlockingQueue<String> content = queueService.getContentQueue();
+        ArrayList<String> contentcopy = new ArrayList<String>();
+        content.drainTo(contentcopy);
+        String comm;
+        while (contentcopy.size() > 0) {
+            comm = contentcopy.get(0);
+            Terminal.printTerminal(comm);
+            if (!comm.matches("DRIVE (.*)")) {
+                content.add(comm);
+            }
+        }
+        queueService.setContentQueue(content);
     }
 }

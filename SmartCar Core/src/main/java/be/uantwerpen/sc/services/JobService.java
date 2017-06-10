@@ -130,6 +130,16 @@ public class JobService
                             }
                             break;
                         case FULLSERVER:
+                            try {
+                                int endInt = Integer.parseInt(end);
+                                while(dataService.getCurrentLocation()!=endInt)
+                                    if(queueService.getContentQueue().size() == 0){
+                                        startPathFullRobotcore(endInt);
+                                    }
+                            } catch (NumberFormatException e) {
+                                Terminal.printTerminalError(e.getMessage());
+                                Terminal.printTerminalInfo("Usage: navigate end");
+                            }
                             break;
                     }
                 }catch(ArrayIndexOutOfBoundsException e){
@@ -197,6 +207,18 @@ public class JobService
         //Process map
         for (DriveDir command : nextPath) {
             queueService.insertJob(command.toString());
+        }
+    }
+
+    public void startPathFullRobotcore(int end){
+        //ask robotcore for instructions
+        RestTemplate restTemplate = new RestTemplate();
+        DriveDir[] nextPath = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/map/"
+                +dataService.getCurrentLocation()+"/path/"+end, DriveDir[].class);
+
+        //Process map but only 2 first commands
+        for (int i=0;i<2;i++) {
+            queueService.insertJob(nextPath[i].toString());
         }
     }
 

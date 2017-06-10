@@ -135,8 +135,8 @@ public class RobotCoreLoop implements Runnable
         Terminal.printTerminal("link updated");
         Terminal.printTerminal("next: "+dataService.getNextNode());
 
-        dataService.setLookingCoordiante("Z");
-        Terminal.printTerminal("looking SOUTH");
+        dataService.setLookingCoordiante("N");
+        Terminal.printTerminal("looking NORTH");
 
         //queueService.insertJob("DRIVE FORWARD 120");
         //Terminal.printTerminal("LINE");
@@ -147,7 +147,7 @@ public class RobotCoreLoop implements Runnable
         //queueService.insertJob("DRIVE FOLLOWLINE");
 
         while(!Thread.interrupted()){
-
+        /*
             switch(workingmodeType.getType()){
                 case PARTIALSERVER:
                     //wait for instructions in mqtt
@@ -169,11 +169,6 @@ public class RobotCoreLoop implements Runnable
                         case RANDOM:
                             break;
                         case TERMINAL:
-                            //Terminal.printTerminal("Dijk");
-                            /*if(terminalService.getActivated()==false){
-                                Terminal.printTerminal("Dijkstraaa Dijkstraaa Dijkstraaa Dijkstraaa222222");
-                                terminalService.systemReady();
-                            }*/
                             break;
                     }
                     break;
@@ -181,7 +176,7 @@ public class RobotCoreLoop implements Runnable
                     Terminal.printTerminal("Wrong working mode type!");
                     break;
             }
-
+        */
         }
 
 
