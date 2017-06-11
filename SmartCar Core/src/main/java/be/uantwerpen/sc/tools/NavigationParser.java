@@ -60,10 +60,10 @@ public class NavigationParser {
                 //direction start = findStartDir(current);
                 //direction stop = findStopDir(next);
                 //DriveDir relDir = getNextRelDir(start, stop);
-                System.out.println("reldir: "+relDir);
+                /*System.out.println("reldir: "+relDir);
                 if(relDir.toString().equals("DRIVE FORWARD 120")){
                     System.out.println("EQUALS");
-                }
+                }*/
                 /*else{
                     //Pass crossroad
                     commands.add(relDir);

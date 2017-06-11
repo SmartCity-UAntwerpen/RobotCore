@@ -20,9 +20,7 @@ public class PathplanningType {
         List<String> files = args.getNonOptionArgs();
         // if run with "--debug logfile.txt" debug=true, files=["logfile.txt"]
         if(files.isEmpty()){
-            System.out.println("terrrrrminal");
             type = PathplanningEnum.TERMINAL;
-            //type = PathplanningEnum.DIJKSTRA;
         }else{
             switch (files.get(0).toLowerCase()){
                 case "dijkstra":

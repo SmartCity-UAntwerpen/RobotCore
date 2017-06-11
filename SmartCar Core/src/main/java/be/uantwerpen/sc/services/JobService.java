@@ -114,6 +114,7 @@ public class JobService
                         case INDEPENDENT:
                             try {
                                 int endInt = Integer.parseInt(end);
+                                //compute path on robot
                                 startPathPlanning(endInt);
                             } catch (NumberFormatException e) {
                                 Terminal.printTerminalError(e.getMessage());
@@ -123,6 +124,7 @@ public class JobService
                         case PARTIALSERVER:
                             try {
                                 int endInt = Integer.parseInt(end);
+                                //get commands from server
                                 startPathRobotcore(endInt);
                             } catch (NumberFormatException e) {
                                 Terminal.printTerminalError(e.getMessage());
@@ -134,6 +136,7 @@ public class JobService
                                 int endInt = Integer.parseInt(end);
                                 while(dataService.getCurrentLocation()!=endInt)
                                     if(queueService.getContentQueue().size() == 0){
+                                        //get first command from server
                                         startPathFullRobotcore(endInt);
                                     }
                             } catch (NumberFormatException e) {
@@ -202,6 +205,7 @@ public class JobService
         DriveDir[] nextPath = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/map/"
                 +dataService.getCurrentLocation()+"/path/"+end, DriveDir[].class);
 
+        //new job so remove drive commands from possible earlier job
         removeDriveCommands();
 
         //Process map

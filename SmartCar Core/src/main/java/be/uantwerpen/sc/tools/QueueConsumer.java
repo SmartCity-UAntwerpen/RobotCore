@@ -93,6 +93,7 @@ public class QueueConsumer implements Runnable
                         String s = queueService.getJob();
                         Terminal.printTerminal("Sending: " + s);
                         sender.sendCommand(s);
+                        //change looking coordinate when turning
                         if(dataService.getCurrentLocation()!=-1)
                             if(dataService.getMap().changeLookingDir(dataService.getCurrentLocation(), dataService.getTag())!=null)
                                 dataService.setLookingCoordiante(dataService.getMap().changeLookingDir(dataService.getCurrentLocation(), dataService.getTag()));
