@@ -26,7 +26,8 @@ public class CStatusEventHandler implements Runnable
     Socket socket;
     DataInputStream dIn;
 
-    @Value("${car.ccore.ip:localhost}")
+    //@Value("${car.ccore.ip:localhost}")
+    @Value("${car.ccore.ip:146.175.140.187}")
     private String coreIP;
 
     @Value("#{new Integer(${car.ccore.eventport}) ?: 1314}")
@@ -96,7 +97,7 @@ public class CStatusEventHandler implements Runnable
                             synchronized (this) {
                                 //Terminal.printTerminal("Distance: " + millis);
                                 dataService.setMillis(millis);
-                                locationPublisher.publishLocation(millis);
+                                locationPublisher.publishLocation(millis, 45L); ////whuuuuuuut
                             }
                         }
 
@@ -134,6 +135,21 @@ public class CStatusEventHandler implements Runnable
     private byte[] readData(){
         byte[] bytes = new byte[1024];
         try {
+            if(dIn==null){
+                Terminal.printTerminal("dIn is null");
+                try
+                {
+                    socket = new Socket(coreIP, coreEventPort);
+                    dIn = new DataInputStream(socket.getInputStream());
+                    if(socket.getInputStream()==null) {
+                        Terminal.printTerminal("get is null");
+                    }
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
             byte b = dIn.readByte();
             char c = ((char) b);
             int i = 0;

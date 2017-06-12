@@ -53,7 +53,7 @@ public class QueueConsumer implements Runnable
                     if (!lockGranted) {
                         //Robot already has permission?
                         if (!(dataService.hasPermission() == dataService.getNextNode())) {
-                            //Terminal.printTerminal("Millis: " + dataService.getMillis() + " ,linkMillis: " + (dataService.getLinkMillis() - 150));
+                            Terminal.printTerminal("Millis: " + dataService.getMillis() + " ,linkMillis: " + (dataService.getLinkMillis() - 150));
                             if (dataService.getMillis() > dataService.getLinkMillis() - 200) {
                                 //Pause robot
                                 sender.sendCommand("DRIVE PAUSE");
@@ -66,7 +66,7 @@ public class QueueConsumer implements Runnable
                                     response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/requestlock/" + dataService.getNextNode(), boolean.class);
 
                                     if (!response) {
-                                        //Terminal.printTerminal("Lock Denied: " + dataService.getNextNode());
+                                        Terminal.printTerminal("Lock Denied: " + dataService.getNextNode());
                                         Thread.sleep(200);
                                     }
                                 }
@@ -93,6 +93,11 @@ public class QueueConsumer implements Runnable
                         String s = queueService.getJob();
                         Terminal.printTerminal("Sending: " + s);
                         sender.sendCommand(s);
+                        //change looking coordinate when turning
+                        if(dataService.getCurrentLocation()!=-1)
+                            if(dataService.getMap().changeLookingDir(dataService.getCurrentLocation(), dataService.getTag())!=null)
+                                dataService.setLookingCoordiante(dataService.getMap().changeLookingDir(dataService.getCurrentLocation(), dataService.getTag()));
+                        System.out.println("coordinate: "+dataService.getLookingCoordiante());
 
                         if(!s.contains("DRIVE DISTANCE")) {
                             dataService.robotBusy = true;

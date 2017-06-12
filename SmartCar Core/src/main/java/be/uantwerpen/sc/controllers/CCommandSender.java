@@ -21,7 +21,8 @@ public class CCommandSender
     private DataInputStream dIn;
     private boolean serverActive;
 
-    @Value("${car.ccore.ip:localhost}")
+    //@Value("${car.ccore.ip:localhost}")
+    @Value("${car.ccore.ip:146.175.140.187}")
     private String coreIP;
 
     @Value("#{new Integer(${car.ccore.taskport}) ?: 1313}")
@@ -56,6 +57,7 @@ public class CCommandSender
             //byte[] message = str.getBytes();
             //System.out.println(message.toString());
             int attempts = 0;
+
 
             str = str.concat("\n");
             byte[] bytes = str.getBytes();

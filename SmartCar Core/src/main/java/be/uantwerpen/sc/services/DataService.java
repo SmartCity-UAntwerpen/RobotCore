@@ -25,6 +25,26 @@ public class DataService
     private int millis;
     private Long linkMillis;
 
+    private Long nextNode = -1L;
+    boolean locationVerified = false;
+    private Long prevNode = -1L;
+    private int hasPermission = -1;
+    public boolean robotBusy = false;
+    public boolean locationUpdated = true;
+    public String trafficLightStatus;
+    private Long currentLocation = -1L;
+
+    public Map map = null;
+    public NavigationParser navigationParser = null;
+
+    private String tag = "NO_TAG";
+
+    private String LookingCoordiante;
+    private PathplanningEnum pathplanningEnum;
+    private WorkingmodeEnum workingmodeEnum;
+
+
+
     public Long getNextNode() {
         return nextNode;
     }
@@ -32,8 +52,6 @@ public class DataService
     public void setNextNode(Long nextNode) {
         this.nextNode = nextNode;
     }
-
-    private Long nextNode = -1L;
 
     public boolean isLocationVerified() {
         return locationVerified;
@@ -43,8 +61,6 @@ public class DataService
         this.locationVerified = locationVerifier;
     }
 
-    boolean locationVerified = false;
-
     public Long getPrevNode() {
         return prevNode;
     }
@@ -53,8 +69,6 @@ public class DataService
         this.prevNode = prevNode;
     }
 
-    private Long prevNode = -1L;
-
     public int hasPermission() {
         return hasPermission;
     }
@@ -62,20 +76,6 @@ public class DataService
     public void setPermission(int hasPermission) {
         this.hasPermission = hasPermission;
     }
-
-    private int hasPermission = -1;
-
-    public boolean robotBusy = false;
-
-    public boolean locationUpdated = true;
-
-    public String trafficLightStatus;
-
-    public Map map = null;
-    public NavigationParser navigationParser = null;
-
-    private String tag = "NO_TAG";
-    private Long currentLocation = -1L;
 
     public Long getRobotID() {
         return robotID;
@@ -107,8 +107,6 @@ public class DataService
     public String getTag() {return tag;}
     public void setTag(String tag) {this.tag = tag;}
 
-    private String LookingCoordiante;
-
     public String getLookingCoordiante() {
         return LookingCoordiante;
     }
@@ -117,7 +115,56 @@ public class DataService
         LookingCoordiante = lookingCoordiante;
     }
 
-    private PathplanningEnum pathplanningEnum;
+    public void changeLookingCoordiante(String command){
+        if(command.equals("DRIVE TURN L")){
+            switch(getLookingCoordiante()){
+                case "N":
+                    setLookingCoordiante("W");
+                    break;
+                case "E":
+                    setLookingCoordiante("N");
+                    break;
+                case "Z":
+                    setLookingCoordiante("E");
+                    break;
+                case "W":
+                    setLookingCoordiante("Z");
+            }
+        }
+
+        if(command.equals("DRIVE TURN R")){
+            switch(getLookingCoordiante()){
+                case "N":
+                    setLookingCoordiante("E");
+                    break;
+                case "E":
+                    setLookingCoordiante("Z");
+                    break;
+                case "Z":
+                    setLookingCoordiante("W");
+                    break;
+                case "W":
+                    setLookingCoordiante("N");
+            }
+        }
+
+        if(command.equals("DRIVE ROTATE R 180")){
+            switch(getLookingCoordiante()){
+                case "N":
+                    setLookingCoordiante("Z");
+                    break;
+                case "E":
+                    setLookingCoordiante("W");
+                    break;
+                case "Z":
+                    setLookingCoordiante("N");
+                    break;
+                case "W":
+                    setLookingCoordiante("E");
+            }
+        }
+
+    }
 
     public PathplanningEnum getPathplanningEnum() {
         return pathplanningEnum;
@@ -125,6 +172,26 @@ public class DataService
 
     public void setPathplanningEnum(PathplanningEnum pathplanningEnum) {
         this.pathplanningEnum = pathplanningEnum;
+    }
+
+    public WorkingmodeEnum getWorkingmodeEnum() {
+        return workingmodeEnum;
+    }
+
+    public void setworkingmodeEnum(WorkingmodeEnum workingmodeEnum) {
+        this.workingmodeEnum = workingmodeEnum;
+    }
+
+    public NavigationParser getNavigationParser(){ return navigationParser;}
+
+    public void setNavigationParser(NavigationParser parser){ this.navigationParser=parser;}
+
+    public Map getMap(){
+        return map;
+    }
+
+    public void setMap(Map map){
+        this.map=map;
     }
 
     public void firstLink(){
@@ -140,10 +207,11 @@ public class DataService
                     linkMillis = link.getLength();
                 }
             }
-
+                    lid=getCurrentLocation();   //BIJGEVOEGD      =====FOUT
             Terminal.printTerminal("Current Link: " + lid);
-            RestTemplate rest = new RestTemplate();
-            rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + robotID + "/lid/" + lid, Integer.class);
+            //RestTemplate rest = new RestTemplate();
+            //rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + robotID + "/lid/" + lid, Integer.class);
+
         }
     }
 
@@ -167,13 +235,14 @@ public class DataService
                 }
             }
 
+            setCurrentLocation(lid);
             Terminal.printTerminal("Current Link: " + lid);
             if(this.pathplanningEnum == PathplanningEnum.DIJKSTRA) {
                 //delete entry from navigationParser
                 navigationParser.list.remove(0);
             }
-            RestTemplate rest = new RestTemplate();
-            rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + robotID + "/lid/" + lid, Integer.class);
+            //RestTemplate rest = new RestTemplate();
+            //rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + robotID + "/lid/" + lid, Integer.class);
         }else{
             //TODO update location
             Terminal.printTerminal("Entering manual manouvering mode. Location will be inaccurate");
@@ -184,64 +253,64 @@ public class DataService
     public void setCurrentLocationAccordingTag() {
         switch(getTag()){
             case "04 70 39 32 06 27 80":
-                setCurrentLocation(3L);
+                setCurrentLocation(20L); //3
                 break;
             case "04 67 88 8A C8 48 80":
-                setCurrentLocation(14L);
+                setCurrentLocation(8L);//14
                 break;
-            case "04 97 36 A2 F7 22 80":
-                setCurrentLocation(1L);
+            case "04 97 36 A2 7F 22 80":
+                setCurrentLocation(4L);//1
                 break;
             case "04 7B 88 8A C8 48 80":
-                setCurrentLocation(15L);
+                setCurrentLocation(9L);//15
                 break;
             case "04 B3 88 8A C8 48 80":
-                setCurrentLocation(8L);
+                setCurrentLocation(2L);//8
                 break;
             case "04 8D 88 8A C8 48 80":
-                setCurrentLocation(9L);
+                setCurrentLocation(5L);//9
                 break;
             case "04 AA 88 8A C8 48 80":
-                setCurrentLocation(11L);
+                setCurrentLocation(14L);//11
                 break;
             case "04 C4 FD 12 Q9 34 80":
                 setCurrentLocation(19L);
                 break;
             case "04 96 88 8A C8 48 80":
-                setCurrentLocation(17L);
+                setCurrentLocation(17L);//17
                 break;
             case "04 A1 88 8A C8 48 80":
-                setCurrentLocation(18L);
+                setCurrentLocation(15L);//18
                 break;
             case "04 86 04 22 A9 34 84":
                 setCurrentLocation(20L);
                 break;
             case "04 18 25 9A 7F 22 80":
-                setCurrentLocation(6L);
+                setCurrentLocation(11L);//6
                 break;
             case "04 BC 88 8A C8 48 80":
-                setCurrentLocation(16L);
+                setCurrentLocation(16L);//16
                 break;
             case "04 C5 88 8A C8 48 80":
-                setCurrentLocation(7L);
+                setCurrentLocation(3L);//7
                 break;
             case "04 EC 88 8A C8 48 80":
-                setCurrentLocation(10L);
+                setCurrentLocation(19L);//
                 break;
             case "04 E3 88 8A C8 48 80":
-                setCurrentLocation(13L);
+                setCurrentLocation(1L);//13
                 break;
             case "04 26 3E 92 1E 25 80":
-                setCurrentLocation(4L);
+                setCurrentLocation(6L);//4
                 break;
             case "04 DA 88 8A C8 48 80":
-                setCurrentLocation(12L);
+                setCurrentLocation(13L);//12
                 break;
             case "04 41 70 92 1E 25 80":
-                setCurrentLocation(2L);
+                setCurrentLocation(18L);//2
                 break;
             case "04 3C 67 9A F6 1F 80":
-                setCurrentLocation(5L);
+                setCurrentLocation(10L);//5
                 break;
             case "NONE":
                 break;

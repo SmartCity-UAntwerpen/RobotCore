@@ -1,10 +1,16 @@
 package be.uantwerpen.sc.models.map;
 
 import be.uantwerpen.sc.models.Bot;
+import be.uantwerpen.sc.models.Link;
+import be.uantwerpen.sc.models.Point;
 import be.uantwerpen.sc.models.TrafficLightEntity;
+import be.uantwerpen.sc.tools.DriveDir;
+import be.uantwerpen.sc.tools.NavigationParser;
+import be.uantwerpen.sc.tools.pathplanning.AbstractMap;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.*;
 
 /**
  * Created by Niels on 3/04/2016.
@@ -47,4 +53,38 @@ public class Map
     public void setTrafficlightEntity(List<TrafficLightEntity> trafficlightEntity) {
         this.trafficlightEntity = trafficlightEntity;
     }
+
+    public boolean isEndPoint(String s){
+        for (int i = 0; i < getNodeList().size(); i++) {
+            if(s.equals(getNodeList().get(i).getPointEntity().getRfid())){
+                if(getNodeList().get(i).getNeighbours().size()<2)
+                    return true;
+            }
+        }
+        return false;
+
+    }
+
+    public String changeLookingDir(Long linkid, String rfidTag){
+        for (int i = 0; i < getNodeList().size(); i++) {
+            if (rfidTag.equals(getNodeList().get(i).getPointEntity().getRfid())) {
+                for (int j = 0; j < getNodeList().get(i).getNeighbours().size(); j++) {
+                    if (linkid == getNodeList().get(i).getNeighbours().get(j).getId()) {
+                        switch(getNodeList().get(i).getNeighbours().get(j).getStopDirection()){
+                            case "N":
+                                return "Z";
+                            case "E":
+                                return "W";
+                            case "Z":
+                                return "N";
+                            case "W":
+                                return "E";
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
 }

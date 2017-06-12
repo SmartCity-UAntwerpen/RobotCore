@@ -6,10 +6,17 @@ import be.uantwerpen.sc.models.Job;
 import be.uantwerpen.sc.tools.DriveDir;
 import be.uantwerpen.sc.tools.NavigationParser;
 import be.uantwerpen.sc.tools.Terminal;
+import be.uantwerpen.sc.tools.WorkingmodeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by Thomas on 01/06/2016.
@@ -17,6 +24,12 @@ import java.text.ParseException;
 @Service
 public class JobService
 {
+    @Value("${sc.core.ip:localhost}")
+    private String serverIP;
+
+    @Value("#{new Integer(${sc.core.port}) ?: 1994}")
+    private int serverPort;
+
     @Autowired
     private DataService dataService;
 
@@ -28,6 +41,26 @@ public class JobService
 
     private RobotCoreLoop robotCoreLoop;
 
+    private int endJob;
+
+    private Long jobid;
+
+    public int getEndJob(){
+        return endJob;
+    }
+
+    public void setEndJob(int endOfJob){
+        endJob=endOfJob;
+    }
+
+    public Long jobid(){
+        return jobid;
+    }
+
+    public void getJobid(Long jobid){
+        this.jobid=jobid;
+    }
+
     public void setRobotCoreLoop(RobotCoreLoop robotCoreLoop)
     {
         this.robotCoreLoop = robotCoreLoop;
@@ -35,28 +68,32 @@ public class JobService
 
     public void parseJob(String job) throws ParseException
     {
-        if(!job.startsWith("Job{jobId=") || job.split(", ", 2).length <= 1)
+        if(!job.startsWith("Job:{jobId:") || job.split("/ ", 2).length <= 1)
         {
             //Not a valid job string
             throw new ParseException("Can not parse job from: " + job + "\nInvalid type!", 0);
         }
-
+        Long oldjobid=jobid;
         try
         {
-            String jobDescription = job.split(", ", 2)[1];
+            String partialstring=job.split(":",3 )[0];
+            partialstring=partialstring.split("/",2)[0];
+            jobid = Long.parseLong(partialstring);
+            String jobDescription = job.split("/ ", 3)[2];
 
-            if(!jobDescription.startsWith("jobDescription='"))
+            if(!jobDescription.startsWith("idstart:"))
             {
                 //Not a valid job string
                 throw new ParseException("Can not parse job from: " + job + "\nInvalid field!", 0);
             }
 
-            Job parsedJob = new Job(0, jobDescription.split("'", 3)[1]);
+            Job parsedJob = new Job(jobid, jobDescription);
 
             performJob(parsedJob);
         }
         catch(Exception e)
         {
+            jobid=oldjobid;
             //Could not parse job from string
             throw new ParseException("Can not parse job from: " + job + "\nInvalid format!", 0);
         }
@@ -73,12 +110,40 @@ public class JobService
             case "navigate":
                 try {
                     String end = jobDescription.split(" ", 2)[1].toLowerCase();
-                    try {
-                        int endInt = Integer.parseInt(end);
-                        startPathPlanning(endInt);
-                    } catch (NumberFormatException e) {
-                        Terminal.printTerminalError(e.getMessage());
-                        Terminal.printTerminalInfo("Usage: navigate end");
+                    switch(dataService.getWorkingmodeEnum()) {
+                        case INDEPENDENT:
+                            try {
+                                int endInt = Integer.parseInt(end);
+                                //compute path on robot
+                                startPathPlanning(endInt);
+                            } catch (NumberFormatException e) {
+                                Terminal.printTerminalError(e.getMessage());
+                                Terminal.printTerminalInfo("Usage: navigate end");
+                            }
+                            break;
+                        case PARTIALSERVER:
+                            try {
+                                int endInt = Integer.parseInt(end);
+                                //get commands from server
+                                startPathRobotcore(endInt);
+                            } catch (NumberFormatException e) {
+                                Terminal.printTerminalError(e.getMessage());
+                                Terminal.printTerminalInfo("Usage: navigate end");
+                            }
+                            break;
+                        case FULLSERVER:
+                            try {
+                                int endInt = Integer.parseInt(end);
+                                while(dataService.getCurrentLocation()!=endInt)
+                                    if(queueService.getContentQueue().size() == 0){
+                                        //get first command from server
+                                        startPathFullRobotcore(endInt);
+                                    }
+                            } catch (NumberFormatException e) {
+                                Terminal.printTerminalError(e.getMessage());
+                                Terminal.printTerminalInfo("Usage: navigate end");
+                            }
+                            break;
                     }
                 }catch(ArrayIndexOutOfBoundsException e){
                     Terminal.printTerminalInfo("Usage: navigate end");
@@ -112,10 +177,12 @@ public class JobService
             }
         }
         Terminal.printTerminal("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end2);
-        dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2));
+        dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2), dataService);
         //Parse Map
         dataService.navigationParser.parseMap();
         //dataService.navigationParser.parseRandomMap(dataService);
+
+        removeDriveCommands();
 
         //Setup for driving
         int start = (int)(long)dataService.navigationParser.list.get(0).getId();
@@ -130,4 +197,59 @@ public class JobService
             queueService.insertJob(command.toString());
         }
     }
+
+    public void startPathRobotcore(int end){
+
+        //ask robotcore for instructions
+        RestTemplate restTemplate = new RestTemplate();
+        DriveDir[] nextPath = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/map/"
+                +dataService.getCurrentLocation()+"/path/"+end, DriveDir[].class);
+
+        //new job so remove drive commands from possible earlier job
+        removeDriveCommands();
+
+        //Process map
+        for (DriveDir command : nextPath) {
+            queueService.insertJob(command.toString());
+        }
+    }
+
+    public void startPathFullRobotcore(int end){
+        //ask robotcore for instructions
+        RestTemplate restTemplate = new RestTemplate();
+        DriveDir[] nextPath = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/map/"
+                +dataService.getCurrentLocation()+"/path/"+end, DriveDir[].class);
+
+        //Process map but only 2 first commands
+        for (int i=0;i<2;i++) {
+            queueService.insertJob(nextPath[i].toString());
+        }
+    }
+
+    public void removeDriveCommands() {
+        //remove drive jobs from queue
+        BlockingQueue<String> content = queueService.getContentQueue();
+        ArrayList<String> contentcopy = new ArrayList<String>();
+        content.drainTo(contentcopy);
+        String comm;
+        while (contentcopy.size() > 0) {
+            comm = contentcopy.get(0);
+            Terminal.printTerminal(comm);
+            if (!comm.matches("DRIVE (.*)")) {
+                content.add(comm);
+            }
+        }
+        queueService.setContentQueue(content);
+    }
+
+    public void removeCommands(){
+        BlockingQueue<String> content = queueService.getContentQueue();
+        ArrayList<String> contentcopy = new ArrayList<String>();
+        content.drainTo(contentcopy);
+        Terminal.printTerminal(contentcopy.toString());
+        contentcopy.clear();
+        queueService.setContentQueue(content);
+    }
+
+
 }
