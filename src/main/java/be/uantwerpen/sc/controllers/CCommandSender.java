@@ -13,6 +13,10 @@ import java.net.Socket;
 /**
  * Created by Arthur on 2/05/2016.
  */
+/*
+Class waarmee robot core gaat communiceren met robot driver
+*/
+
 @Service
 public class CCommandSender
 {
@@ -39,11 +43,15 @@ public class CCommandSender
         //IP / port-values are initialised at the end of the constructor
         try
         {
+
+            //socket openen met de robot driver
+/*
             socket = new Socket(coreIP, coreCommandPort);
             socket.setSoTimeout(500);
             dOut = new DataOutputStream(socket.getOutputStream());
             dIn = new DataInputStream(socket.getInputStream());
             serverActive = true;
+*/
         }
         catch(Exception e)
         {
@@ -52,7 +60,7 @@ public class CCommandSender
         }
     }
 
-    public synchronized boolean sendCommand(String str){
+    public synchronized boolean sendCommand(String str){ //commandos sturen naar robot driver
         try {
             //byte[] message = str.getBytes();
             //System.out.println(message.toString());

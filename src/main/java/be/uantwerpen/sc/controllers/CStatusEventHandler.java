@@ -44,8 +44,10 @@ public class CStatusEventHandler implements Runnable
         //IP / port-values are initialised at the end of the constructor
         try
         {
+/*
             socket = new Socket(coreIP, coreEventPort);
             dIn = new DataInputStream(socket.getInputStream());
+*/
         }
         catch(Exception e)
         {
@@ -131,6 +133,7 @@ public class CStatusEventHandler implements Runnable
             e.printStackTrace();
         }
     }
+
 
     private byte[] readData(){
         byte[] bytes = new byte[1024];

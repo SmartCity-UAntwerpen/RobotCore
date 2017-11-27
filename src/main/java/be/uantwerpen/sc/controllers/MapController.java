@@ -13,6 +13,9 @@ import org.springframework.web.client.RestTemplate;
 /**
  * Created by Niels on 24/04/2016.
  */
+/*
+class voor de map te ontvangen
+ */
 @RestController
 @RequestMapping(value = "/map/")
 public class MapController

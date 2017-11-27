@@ -17,6 +17,9 @@ import java.util.concurrent.BlockingQueue;
 /**
  * Created by Thomas on 14/04/2016.
  */
+/*
+commandos ingeven, bepaalde dingen printen
+ */
 @Service
 public class TerminalService
 {

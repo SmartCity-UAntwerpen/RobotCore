@@ -6,16 +6,18 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="RobotCore" />
         <module name="SCRobotCore" />
         <module name="SmartCar Core" />
         <module name="SmartCity Common" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="RobotCore" target="1.8" />
       <module name="SCRobotCore" target="1.8" />
       <module name="SCSmartCarCore" target="1.8" />
       <module name="SmartCar Core" target="1.8" />
-      <module name="SmartCity Common" target="1.5" />
+      <module name="SmartCity Common" target="1.6" />
     </bytecodeTargetLevel>
   </component>
 </project>

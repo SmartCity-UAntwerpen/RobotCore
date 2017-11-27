@@ -5,6 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Created by Arthur on 11/05/2016.
  */
+/*
+class waar om de zoveel tijd gevraagd wordt naar de afstand die de bot heeft afgelegd
+ */
 public class CLocationPoller implements Runnable
 {
     @Autowired

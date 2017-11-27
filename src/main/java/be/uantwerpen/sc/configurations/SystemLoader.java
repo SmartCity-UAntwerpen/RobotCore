@@ -21,34 +21,44 @@ import be.uantwerpen.sc.services.TerminalService;
 @Configuration
 public class SystemLoader implements ApplicationRunner
 {
+
     @Autowired
     private TerminalService terminalService;
+
 
     @Autowired
     private QueueService queueService;
 
+
     @Autowired
     private CCommandSender cCommandSender;
+
 
     @Autowired
     private MapController mapController;
 
+
     @Autowired
     private PathController pathController;
+
 
     @Autowired
     private PathplanningType pathplanningType;
 
+
     @Autowired
     private CStatusEventHandler cStatusEventHandler;
+
 
     @Autowired
     private DataService dataService;
 
+
     @Autowired
     private MqttLocationPublisher locationPublisher;
 
-    @Value("${sc.core.ip}")
+
+    @Value("${sc.core.ip:localhost}")
     String serverIP;
 
     @Value("#{new Integer(${sc.core.port})}")
@@ -79,18 +89,21 @@ public class SystemLoader implements ApplicationRunner
 
             //robotCoreLoop = new RobotCoreLoop(queueService, mapController, pathController, pathplanningType, dataService);
 
+
             QueueConsumer queueConsumer = new QueueConsumer(queueService,cCommandSender, dataService);
             CLocationPoller cLocationPoller = new CLocationPoller(cCommandSender);
 
             //Temporary fix for new instantiated RobotCoreLoop / QueueConsumer class (no Spring handling)
-            robotCoreLoop.setServerCoreIP(serverIP, serverPort);
-            queueConsumer.setServerCoreIP(serverIP, serverPort);
+            //robotCoreLoop.setServerCoreIP(serverIP, serverPort);
+            //queueConsumer.setServerCoreIP(serverIP, serverPort);
+
 
             new Thread(robotCoreLoop).start();
-            new Thread(cStatusEventHandler).start();
+            //new Thread(cStatusEventHandler).start();
             new Thread(queueConsumer).start();
-            new Thread(cLocationPoller).start();
+            //new Thread(cLocationPoller).start();
             terminalService.setRobotCoreLoop(robotCoreLoop);
+
 
             terminalService.systemReady();
         }

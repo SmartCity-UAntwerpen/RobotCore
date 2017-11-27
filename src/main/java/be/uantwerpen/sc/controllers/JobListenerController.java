@@ -12,6 +12,9 @@ import java.util.concurrent.BlockingQueue;
 /**
  * Created by Niels on 4/05/2016.
  */
+/*
+luisteren naar inkomende jobs
+ */
 @RestController
 public class JobListenerController
 {
@@ -33,7 +36,7 @@ public class JobListenerController
         else
         {
             System.out.println("Job = " + job);
-            cCommandSender.sendCommand(job);
+            cCommandSender.sendCommand(job);//als er een job binnenkomt doorsturen naar de robot driver
             return new ResponseEntity("ok",HttpStatus.OK);
         }
     }

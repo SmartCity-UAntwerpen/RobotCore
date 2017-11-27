@@ -15,6 +15,10 @@ import javax.annotation.PostConstruct;
 /**
  * Created by Thomas on 01/06/2016.
  */
+
+/*
+Class voor het subscriben van de bot
+ */
 @Service
 public class MqttJobSubscriber
 {
@@ -66,8 +70,9 @@ public class MqttJobSubscriber
 
         try
         {
-            mqttSubscribeClient = new MqttClient(brokerURL, clientId + "_subscriber");
+            mqttSubscribeClient = new MqttClient(brokerURL, clientId + "_subscriber"); //mqtt client aanmaken
             start();
+
         }
         catch(MqttException e)
         {
@@ -84,7 +89,7 @@ public class MqttJobSubscriber
     {
         try
         {
-            mqttSubscribeClient.setCallback(new MqttJobSubscriberCallback(this, jobService));
+            mqttSubscribeClient.setCallback(new MqttJobSubscriberCallback(this, jobService)); //callback voor ontvangen berichten
             MqttConnectOptions connectOptions = new MqttConnectOptions();
             connectOptions.setCleanSession(true);
             connectOptions.setUserName(mqttUsername);

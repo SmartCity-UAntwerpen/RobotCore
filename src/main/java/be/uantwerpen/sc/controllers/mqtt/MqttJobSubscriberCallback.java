@@ -10,6 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Created by Thomas on 01/06/2016.
  */
+
+/*
+Class waar de berichten van de mqtt worden opgevangen
+ */
 public class MqttJobSubscriberCallback implements MqttCallback
 {
     JobService jobService;
@@ -27,6 +31,7 @@ public class MqttJobSubscriberCallback implements MqttCallback
         //This is called when the connection is lost. We could reconnect here.
     }
 
+    //bericht wordt ontvangen
     @Override
     public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception
     {
@@ -36,7 +41,7 @@ public class MqttJobSubscriberCallback implements MqttCallback
 
         try
         {
-            jobService.parseJob(payloadString);
+            jobService.parseJob(payloadString); //antvangen bericht toevoegen aand de jobs
         }
         catch(Exception e)
         {

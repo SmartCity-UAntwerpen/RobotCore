@@ -49,6 +49,7 @@ public class QueueConsumer implements Runnable
                 //System.out.println("Consumer wants to consume");
                 Thread.sleep(100);
 
+                //kijken of een kruispunt vrij is en een lock aanvragen
                 if(dataService.getNextNode() != -1) {
                     if (!lockGranted) {
                         //Robot already has permission?
@@ -84,6 +85,7 @@ public class QueueConsumer implements Runnable
                     }
                 }
 
+                //zijn er nog jobs in de queue?
                 if(queueService.getContentQueue().size() == 0){
                     //System.out.println("queue is empty");
                 }else{
