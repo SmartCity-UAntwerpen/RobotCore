@@ -8,6 +8,7 @@ import be.uantwerpen.sc.services.*;
 import be.uantwerpen.sc.tools.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -70,7 +71,7 @@ public class RobotCoreLoop implements Runnable
     }
 
     @PostConstruct
-    private void postconstruct(){ //struct die wordt opgeroepen na de initiele struct. Omdat de autowired pas wordt opgeroepen na de initiele struct
+    private void postconstruct(){ //struct die wordt opgeroepen na de initiele struct. Omdat de autowired pas wordt opgeroepen NA de initiele struct
         //Setup type
         Terminal.printTerminalInfo("Selected PathplanningType: " + pathplanningType.getType().name());
         Terminal.printTerminalInfo("Selected WorkingmodeType: " + workingmodeType.getType().name());
@@ -87,32 +88,23 @@ public class RobotCoreLoop implements Runnable
         //getRobotId
         terminalService=new TerminalService(); //terminal service starten. terminal wordt gebruikt om bepaalde dingen te printen en commandos in te geven
         RestTemplate restTemplate = new RestTemplate(); //standaard resttemplate gebruiken
-        //Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/newRobot", Long.class);
-
 
         Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/initiate/" //aan de server laten weten dat er een nieuwe bot zich aanbied
                 +workingmodeType.getType().toString(), Long.class); //Aan de server laten weten in welke mode de bot werkt
 
-        //Als bot opstart wordt elke point unlocked (kan de bedoeling niet zijn)
-
-        for (Long i=0L;i<21L;i++)
-            restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/point/setlock/" + i + "/0", Boolean.class);
-
-
-        //dataService.setRobotID(robotID);
-        dataService.setRobotID(new Long(12));
+        dataService.setRobotID(robotID);
         jobService.setRobotCoreLoop(this);
         jobService.setEndJob(-1);
         jobService.removeCommands();
 
-        if(!jobSubscriber.initialisation()) //subscriben op topic waarop de jobs binnenkomen via robot backend
+        if(!jobSubscriber.initialisation()) //subscribe to topics to listen to jobs
         {
             System.err.println("Could not initialise MQTT Job service!");
         }
 
         //Wait for tag read
-        //Tag lezen waarop de bot zich bevindt
-        /*kjell
+        //Read tag where bot is located
+
         synchronized (this) {
             while (dataService.getTag().trim().equals("NONE") || dataService.getTag().equals("NO_TAG")) {
                 try {
@@ -123,30 +115,33 @@ public class RobotCoreLoop implements Runnable
                     e.printStackTrace();
                 }
             }
-        }*/
+        }
 
         Terminal.printTerminal("Tag: " + dataService.getTag());
 
-        updateStartLocation();
-        dataService.setCurrentLocationAccordingTag(); //start locatie updaten
-        Terminal.printTerminal("Start Location: " + dataService.getCurrentLocation()+"\n\n");
+       // updateStartLocation();
 
         //Setup interface for correct mode of pathplanning
         setupInterface();
         Terminal.printTerminal("Interface is set up");
 
-        //map gaan opvragen bij server via rest
+        //Request map at server with rest
         dataService.map = mapController.getMap();
         Terminal.printTerminal("Map received");
+
+        //Set location of bot
+        dataService.setCurrentLocation(dataService.map.getNodeByRFID(dataService.getTag()));
+        Terminal.printTerminal("Start Location: " + dataService.getCurrentLocation()+"\n\n");
 
         //We have the map now, update link
         dataService.firstLink();
         Terminal.printTerminal("link updated");
         Terminal.printTerminal("next: "+dataService.getNextNode());
 
-        //kijk richting zetten (moet eigenlijk variabel gebeuren
+        //Set looking dir of bot
         dataService.setLookingCoordiante("N");
         Terminal.printTerminal("looking NORTH");
+
 
         //queueService.insertJob("DRIVE FORWARD 120");
         //Terminal.printTerminal("LINE");
@@ -174,7 +169,7 @@ public class RobotCoreLoop implements Runnable
                     //take random routes until job in mqtt
                     switch(pathplanningType.getType()){
                         case DIJKSTRA:
-                            Terminal.printTerminal("DDijkstra");
+                            Terminal.printTerminal("Dijkstra");
                             break;
                         case RANDOM:
                             break;
