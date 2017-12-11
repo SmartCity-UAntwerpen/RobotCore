@@ -301,6 +301,7 @@ public class RobotCoreLoop implements Runnable
         }
     }
 
+    /*
     @Deprecated
     public void updateStartLocation(){ //kijken welke tag nummer overeen komt met de locatie ervan. (moet van ergens kunnen binnengeladen worden ipv hardcoded)
         switch(dataService.getTag().trim()){
@@ -368,5 +369,6 @@ public class RobotCoreLoop implements Runnable
                 dataService.setCurrentLocation(-1L);
                 break;
         }
-    }
+
+    }*/
 }

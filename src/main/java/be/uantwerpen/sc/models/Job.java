@@ -5,7 +5,7 @@ package be.uantwerpen.sc.models;
  */
 public class Job
 {
-    private Long jobId;
+    private Long jobId,botid,startid,endid;
     private String jobDescription;
 
     public Job(String jobDescription)
@@ -18,6 +18,14 @@ public class Job
     {
         this.jobId = jobId;
         this.jobDescription = jobDescription;
+    }
+
+    public Job(Long jobId, Long botid, Long startid, Long endid)
+    {
+        this.jobId = jobId;
+        this.botid = botid;
+        this.startid = startid;
+        this.endid = endid;
     }
 
     public Long getJobId()
@@ -47,5 +55,9 @@ public class Job
                 "jobId:" + jobId +
                 "/ " + jobDescription +
                 '}';
+    }
+
+    public Long getEndid(){
+        return endid;
     }
 }

@@ -45,13 +45,13 @@ public class CCommandSender
         {
 
             //socket openen met de robot driver
-/*
+
             socket = new Socket(coreIP, coreCommandPort);
             socket.setSoTimeout(500);
             dOut = new DataOutputStream(socket.getOutputStream());
             dIn = new DataInputStream(socket.getInputStream());
             serverActive = true;
-*/
+
         }
         catch(Exception e)
         {
@@ -68,6 +68,7 @@ public class CCommandSender
 
 
             str = str.concat("\n");
+
             byte[] bytes = str.getBytes();
 
             //while(attempts <5) {
@@ -75,6 +76,9 @@ public class CCommandSender
                 //dOut.writeInt(message.length); // write length of the message
                 dOut.flush();
                 dOut.write(bytes);
+                dOut.flush();
+
+                //dOut.writeBytes(str);
 //                /*
 //                //Receive Message
 //                try {

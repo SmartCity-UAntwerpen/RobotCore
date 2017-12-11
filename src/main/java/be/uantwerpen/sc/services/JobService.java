@@ -116,7 +116,7 @@ public class JobService
             Long startid = Long.parseLong(idstartNumber);
             Long endid = Long.parseLong(idendNumber);
 
-            System.out.println("jobid = " + jobid + " botid = " + botid + " startid = " + startid + " endid = " + endid);
+            System.out.println("Parsed: jobid = " + jobid + " botid = " + botid + " startid = " + startid + " endid = " + endid);
 
 /*
             if(!jobDescription.startsWith("idstart:"))

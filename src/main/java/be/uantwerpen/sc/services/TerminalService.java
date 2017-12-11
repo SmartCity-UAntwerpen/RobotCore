@@ -167,7 +167,9 @@ public class TerminalService
                 try {
                     String command2 = commandString.split(" ", 2)[1].toUpperCase();
                     //No override
-                    queueService.insertJob(command2);
+                    //queueService.insertJob(command2);
+                    System.out.println("sending command :" + command2);
+                    sender.sendCommand(command2);
                     //Override
                     //sender.sendCommand(command2);
                 }catch(ArrayIndexOutOfBoundsException e){
@@ -209,6 +211,11 @@ public class TerminalService
 
     private void exitSystem()
     {
+        //aan RobotBackend late wete dat bot shutdownt
+        RestTemplate resttemplate = new RestTemplate();
+        resttemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/delete/" //aan de server laten weten dat er een nieuwe bot zich aanbied
+                + dataService.getRobotID(), void.class); //Aan de server laten weten in welke mode de bot werkt
+
         System.exit(0);
     }
 

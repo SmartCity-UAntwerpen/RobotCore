@@ -4,6 +4,7 @@ import be.uantwerpen.sc.controllers.CCommandSender;
 import be.uantwerpen.sc.services.DataService;
 import be.uantwerpen.sc.services.QueueService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.concurrent.BlockingQueue;
@@ -11,17 +12,18 @@ import java.util.concurrent.BlockingQueue;
 /**
  * Created by Niels on 4/05/2016.
  */
+
 public class QueueConsumer implements Runnable
 {
+    @Value("${sc.core.ip:172.16.0.50}")
+    private String serverIP;
+
+    @Value("#{new Integer(${sc.core.port}) ?: 8083}")
+    private int serverPort;
+
     private CCommandSender sender;
     private QueueService queueService;
     private DataService dataService;
-
-    @Value("${sc.core.ip:localhost}")
-    private String serverIP;
-
-    @Value("#{new Integer(${sc.core.port}) ?: 1994}")
-    private int serverPort;
 
     private boolean lockGranted = false;
     private boolean first = true;
@@ -38,8 +40,10 @@ public class QueueConsumer implements Runnable
     @Deprecated
     public void setServerCoreIP(String ip, int port)
     {
+        /*
         this.serverIP = ip;
         this.serverPort = port;
+        */
     }
 
     @Override

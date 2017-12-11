@@ -249,7 +249,7 @@ public class DataService
             prevNode = nextNode;
         }
     }
-
+/*
     public void setCurrentLocationAccordingTag() {
         switch(getTag()){
             case "04 70 39 32 06 27 80":
@@ -319,4 +319,5 @@ public class DataService
                 break;
         }
     }
+    */
 }

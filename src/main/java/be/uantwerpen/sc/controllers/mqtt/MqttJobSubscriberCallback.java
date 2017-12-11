@@ -36,8 +36,10 @@ public class MqttJobSubscriberCallback implements MqttCallback
     public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception
     {
         //TODO Process message
+        Terminal.printTerminal("mqtt message ontvangen");
         Terminal.printTerminal("Topic: " + topic + ", Message: " + mqttMessage);
         String payloadString = new String(mqttMessage.getPayload());
+        Terminal.printTerminal("payload = " + payloadString);
 
         try
         {

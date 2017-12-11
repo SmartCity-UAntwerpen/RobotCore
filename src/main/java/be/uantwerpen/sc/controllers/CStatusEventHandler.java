@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.net.Socket;
 
@@ -44,10 +45,10 @@ public class CStatusEventHandler implements Runnable
         //IP / port-values are initialised at the end of the constructor
         try
         {
-/*
+
             socket = new Socket(coreIP, coreEventPort);
             dIn = new DataInputStream(socket.getInputStream());
-*/
+
         }
         catch(Exception e)
         {
@@ -58,11 +59,13 @@ public class CStatusEventHandler implements Runnable
     @Override
     public void run()
     {
-        while(!Thread.currentThread().isInterrupted()){
-            try {
-                byte[] bytes = readData();
-                String s = new String(bytes);
 
+        Terminal.printTerminal("CstatusEventHandler start");
+        while(!Thread.currentThread().isInterrupted()){
+            Terminal.printTerminal("CstatusEventHandler running");
+            try {
+                String s = readData();
+                Terminal.printTerminal("String = " + s);
                 //TODO Continue this method
                 if (s.startsWith("DRIVE EVENT: FINISHED")){
                     synchronized (this){
@@ -109,7 +112,8 @@ public class CStatusEventHandler implements Runnable
                     synchronized (this){
                         dataService.setTag(tag);
                         dataService.robotBusy = false;
-                        dataService.setCurrentLocationAccordingTag();
+
+                        //dataService.setCurrentLocationAccordingTag();
                         if(!tag.trim().equals("NONE"))
                         {
                             dataService.locationUpdated = true;
@@ -127,17 +131,22 @@ public class CStatusEventHandler implements Runnable
         }
 
         try{
+            Terminal.printTerminal("connection closed with bot");
             socket.close();
 
         }catch (Exception e){
             e.printStackTrace();
         }
+
+        Terminal.printTerminal("CstatusEventHandler end");
+
     }
 
 
-    private byte[] readData(){
-        byte[] bytes = new byte[1024];
+    private String readData(){
+        String recvData = "";
         try {
+            Terminal.printTerminal("ReadData");
             if(dIn==null){
                 Terminal.printTerminal("dIn is null");
                 try
@@ -153,21 +162,26 @@ public class CStatusEventHandler implements Runnable
                     e.printStackTrace();
                 }
             }
-            byte b = dIn.readByte();
-            char c = ((char) b);
-            int i = 0;
-            while (c != '\n') {
-                //Terminal.printTerminal("" + c);
-                bytes[i] = b;
-                i++;
-                b = dIn.readByte();
-                c = ((char) b);
+
+            Terminal.printTerminal("CstatusEventHandler: waiting for data");
+            Terminal.printTerminal("CstatusEventHandler: dIn open?" + socket.isConnected());
+            char b = (char)dIn.readByte();
+            Terminal.printTerminal("CstatusEventHandler: firstChar received = " + b);
+            //recvData = recvData + b;
+            while(b != '\n'){
+                recvData = recvData + b;
+                b = (char)dIn.readByte();
+
             }
-            bytes[i-1] = '\0';
-            return bytes;
+            //String s = new String(bytes);
+
+            Terminal.printTerminal("CstatusEventHandler: received data = " + recvData);
+
+            return recvData;
         }catch(Exception e){
             e.printStackTrace();
         }
-        return bytes;
+        Terminal.printTerminal(" end ReadData");
+        return recvData;
     }
 }

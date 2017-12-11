@@ -6,6 +6,7 @@ import be.uantwerpen.sc.models.Point;
 import be.uantwerpen.sc.models.TrafficLightEntity;
 import be.uantwerpen.sc.tools.DriveDir;
 import be.uantwerpen.sc.tools.NavigationParser;
+import be.uantwerpen.sc.tools.Terminal;
 import be.uantwerpen.sc.tools.pathplanning.AbstractMap;
 
 import java.util.ArrayList;
@@ -85,6 +86,20 @@ public class Map
             }
         }
         return null;
+    }
+
+    public Long getNodeByRFID(String rfid){
+
+        Long nodeNumber = -1L;
+
+        for(int i = 0; i < nodeList.size(); i++) {
+            if(nodeList.get(i).getPointEntity().getRfid().equals(rfid)){
+                nodeNumber = nodeList.get(i).getPointEntity().getId();
+            }
+        }
+
+        return nodeNumber;
+
     }
 
 }
