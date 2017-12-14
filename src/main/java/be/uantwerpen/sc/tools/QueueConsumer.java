@@ -15,10 +15,11 @@ import java.util.concurrent.BlockingQueue;
 
 public class QueueConsumer implements Runnable
 {
-    @Value("${sc.core.ip:172.16.0.50}")
+
+    @Value("${sc.core.ip:localhost}") //values won't be loaded beceause QueueConsumer is created with "new" in systemloader
     private String serverIP;
 
-    @Value("#{new Integer(${sc.core.port}) ?: 8083}")
+    @Value("#{new Integer(${sc.core.port}) ?: 1994}")
     private int serverPort;
 
     private CCommandSender sender;
@@ -30,11 +31,13 @@ public class QueueConsumer implements Runnable
 
     private BlockingQueue<String> jobQueue;
 
-    public QueueConsumer(QueueService queueService, CCommandSender sender, DataService dataService)
+    public QueueConsumer(QueueService queueService, CCommandSender sender, DataService dataService, String serverIP, int serverPort)
     {
         this.queueService = queueService;
         this.sender = sender;
         this.dataService = dataService;
+        this.serverIP = serverIP;
+        this.serverPort = serverPort;
     }
 
     @Deprecated

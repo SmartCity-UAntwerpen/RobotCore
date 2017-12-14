@@ -261,6 +261,7 @@ public class JobService
                 e.printStackTrace();
             }
         }
+
         Terminal.printTerminal("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end2);
         dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2), dataService);
         //Parse Map

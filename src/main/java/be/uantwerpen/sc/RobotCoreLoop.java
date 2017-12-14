@@ -138,9 +138,19 @@ public class RobotCoreLoop implements Runnable
         Terminal.printTerminal("link updated");
         Terminal.printTerminal("next: "+dataService.getNextNode());
 
+        /*
+        for(int i = 0; i < dataService.map.getNodeList().size();i++){
+            for(int j = 0; j < dataService.map.getNodeList().get(i).getNeighbours().size();j++){
+                Terminal.printTerminal("NodeId = " +  dataService.map.getNodeList().get(i).getNodeId() + " Rfid = " + dataService.map.getNodeList().get(i).getPointEntity().getRfid());
+                Terminal.printTerminal("Stop direction" + dataService.map.getNodeList().get(i).getNeighbours().get(j).getStopDirection());
+                Terminal.printTerminal("Start direction" + dataService.map.getNodeList().get(i).getNeighbours().get(j).getStartDirection());
+            }
+
+        }
+        */
         //Set looking dir of bot
-        dataService.setLookingCoordiante("N");
-        Terminal.printTerminal("looking NORTH");
+        dataService.setLookingCoordiante(dataService.map.getNodeList().get(dataService.getCurrentLocation().intValue()).getNeighbours().get(0).getStartDirection());
+        Terminal.printTerminal("looking in direction " + dataService.getLookingCoordiante());
 
 
         //queueService.insertJob("DRIVE FORWARD 120");

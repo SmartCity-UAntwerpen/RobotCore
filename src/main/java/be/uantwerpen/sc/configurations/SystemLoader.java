@@ -57,6 +57,8 @@ public class SystemLoader implements ApplicationRunner
     @Autowired
     private MqttLocationPublisher locationPublisher;
 
+    @Autowired KeepAliveController keepAlivePoller;
+
 
     @Value("${sc.core.ip:localhost}")
     String serverIP;
@@ -90,7 +92,7 @@ public class SystemLoader implements ApplicationRunner
             //robotCoreLoop = new RobotCoreLoop(queueService, mapController, pathController, pathplanningType, dataService);
 
 
-            QueueConsumer queueConsumer = new QueueConsumer(queueService,cCommandSender, dataService);
+            QueueConsumer queueConsumer = new QueueConsumer(queueService,cCommandSender, dataService,serverIP,serverPort);
             CLocationPoller cLocationPoller = new CLocationPoller(cCommandSender);
 
             //Temporary fix for new instantiated RobotCoreLoop / QueueConsumer class (no Spring handling)
@@ -101,6 +103,7 @@ public class SystemLoader implements ApplicationRunner
             new Thread(robotCoreLoop).start();
             new Thread(cStatusEventHandler).start();
             new Thread(queueConsumer).start();
+            new Thread(keepAlivePoller).start();
             //new Thread(cLocationPoller).start();
             terminalService.setRobotCoreLoop(robotCoreLoop);
 

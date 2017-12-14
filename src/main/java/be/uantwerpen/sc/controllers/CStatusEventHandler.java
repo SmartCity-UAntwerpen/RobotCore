@@ -60,12 +60,10 @@ public class CStatusEventHandler implements Runnable
     public void run()
     {
 
-        Terminal.printTerminal("CstatusEventHandler start");
+
         while(!Thread.currentThread().isInterrupted()){
-            Terminal.printTerminal("CstatusEventHandler running");
             try {
                 String s = readData();
-                Terminal.printTerminal("String = " + s);
                 //TODO Continue this method
                 if (s.startsWith("DRIVE EVENT: FINISHED")){
                     synchronized (this){
@@ -146,9 +144,7 @@ public class CStatusEventHandler implements Runnable
     private String readData(){
         String recvData = "";
         try {
-            Terminal.printTerminal("ReadData");
             if(dIn==null){
-                Terminal.printTerminal("dIn is null");
                 try
                 {
                     socket = new Socket(coreIP, coreEventPort);
@@ -163,25 +159,17 @@ public class CStatusEventHandler implements Runnable
                 }
             }
 
-            Terminal.printTerminal("CstatusEventHandler: waiting for data");
-            Terminal.printTerminal("CstatusEventHandler: dIn open?" + socket.isConnected());
-            char b = (char)dIn.readByte();
-            Terminal.printTerminal("CstatusEventHandler: firstChar received = " + b);
-            //recvData = recvData + b;
-            while(b != '\n'){
+            char b = (char)dIn.readByte(); //Read first char
+            while(b != '\n'){ //Read the other chars and add them to string
                 recvData = recvData + b;
                 b = (char)dIn.readByte();
 
             }
-            //String s = new String(bytes);
-
-            Terminal.printTerminal("CstatusEventHandler: received data = " + recvData);
 
             return recvData;
         }catch(Exception e){
             e.printStackTrace();
         }
-        Terminal.printTerminal(" end ReadData");
         return recvData;
     }
 }

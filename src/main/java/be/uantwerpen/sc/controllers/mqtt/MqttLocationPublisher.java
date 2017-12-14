@@ -93,4 +93,37 @@ public class MqttLocationPublisher
 
         System.out.println("Disconnected");
     }
+
+    public void sendAlive(){
+        try {
+
+
+            String topic = "BOT/alive";
+            String broker = "tcp://" + mqttIP + ":" + mqttPort;
+            String clientId = dataService.getRobotID().toString();
+
+            MemoryPersistence persistence = new MemoryPersistence();
+
+            MqttClient client = new MqttClient(broker, clientId + "_publisher", persistence);
+
+            MqttConnectOptions connOpts = new MqttConnectOptions();
+            connOpts.setCleanSession(true);
+            connOpts.setUserName(mqttUsername);
+            connOpts.setPassword(mqttPassword.toCharArray());
+
+            client.connect(connOpts);
+            //System.out.println("Connected");
+            //System.out.println("Publishing message: " + content);
+            String content = "botid:" + clientId;
+            MqttMessage message = new MqttMessage(content.getBytes());
+            message.setQos(2);
+
+            client.publish(topic, message);
+            System.out.println("Message published: "+ content);
+
+            client.disconnect();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
 }
