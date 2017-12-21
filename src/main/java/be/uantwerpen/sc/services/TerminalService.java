@@ -39,10 +39,7 @@ public class TerminalService
     private QueueService queueService;
     @Autowired
     private DataService dataService;
-    @Autowired
-    private JobService jobService;
 
-    @Autowired
     private RobotCoreLoop robotCoreLoop;
 
     private boolean activated;
@@ -296,7 +293,7 @@ public class TerminalService
         DriveDir[] nextPath = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/map/"
                 +dataService.getCurrentLocation()+"/path/"+end, DriveDir[].class);
 
-        jobService.removeDriveCommands();
+        removeDriveCommands();
 
         //Process map
         for (DriveDir command : nextPath) {
@@ -316,7 +313,6 @@ public class TerminalService
         }
     }
 
-    /*
     public void removeDriveCommands() {
         //remove drive jobs from queue
         BlockingQueue<String> content = queueService.getContentQueue();
@@ -332,5 +328,4 @@ public class TerminalService
         }
         queueService.setContentQueue(content);
     }
-    */
 }
