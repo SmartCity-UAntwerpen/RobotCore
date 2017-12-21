@@ -43,6 +43,7 @@ public class DataService
     private PathplanningEnum pathplanningEnum;
     private WorkingmodeEnum workingmodeEnum;
 
+    private Long destination = -1L;
 
 
     public Long getNextNode() {
@@ -320,4 +321,7 @@ public class DataService
         }
     }
     */
+
+    public void setDestination(Long dest){this.destination = dest;}
+    public Long getDestination(){return this.destination;}
 }

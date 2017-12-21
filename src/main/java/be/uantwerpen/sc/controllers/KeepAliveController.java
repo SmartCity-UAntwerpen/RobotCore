@@ -1,6 +1,6 @@
 package be.uantwerpen.sc.controllers;
 
-import be.uantwerpen.sc.controllers.mqtt.MqttLocationPublisher;
+import be.uantwerpen.sc.controllers.mqtt.MqttPublisher;
 import be.uantwerpen.sc.services.DataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,7 +11,7 @@ public class KeepAliveController implements Runnable{
     private DataService dataService;
 
     @Autowired
-    MqttLocationPublisher locationPublisher;
+    MqttPublisher keepAlivePublisher;
 
     //Send each 2 minutes a mqtt message, so RobotBackend knows bot is still live.
     public void run(){
@@ -26,7 +26,7 @@ public class KeepAliveController implements Runnable{
                 e.printStackTrace();
             }
 
-            locationPublisher.sendAlive();
+            keepAlivePublisher.sendAlive();
 
         }
     }

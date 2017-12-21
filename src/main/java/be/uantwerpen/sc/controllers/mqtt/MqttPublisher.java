@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
  * Created by Arthur on 9/05/2016.
  */
 @Service
-public class MqttLocationPublisher
+public class MqttPublisher
 {
     @Autowired
     private DataService dataService;
@@ -46,13 +46,13 @@ public class MqttLocationPublisher
             clientId = dataService.getRobotID().toString();
         }
 
-        MemoryPersistence persistence = new MemoryPersistence();
+        //MemoryPersistence persistence = new MemoryPersistence();
 
         if(dataService.getRobotID() != null)
         {
             try
             {
-                MqttClient client = new MqttClient(broker, clientId + "_publisher", persistence);
+                MqttClient client = new MqttClient(broker, clientId + "_publisher");
                 MqttConnectOptions connOpts = new MqttConnectOptions();
                 connOpts.setCleanSession(true);
                 connOpts.setUserName(mqttUsername);
@@ -102,9 +102,9 @@ public class MqttLocationPublisher
             String broker = "tcp://" + mqttIP + ":" + mqttPort;
             String clientId = dataService.getRobotID().toString();
 
-            MemoryPersistence persistence = new MemoryPersistence();
+            //MemoryPersistence persistence = new MemoryPersistence();
 
-            MqttClient client = new MqttClient(broker, clientId + "_publisher", persistence);
+            MqttClient client = new MqttClient(broker, clientId + "_publisher");
 
             MqttConnectOptions connOpts = new MqttConnectOptions();
             connOpts.setCleanSession(true);
@@ -119,7 +119,7 @@ public class MqttLocationPublisher
             message.setQos(2);
 
             client.publish(topic, message);
-            System.out.println("Message published: "+ content);
+            System.out.println("Keep alive message published: "+ content);
 
             client.disconnect();
         }catch(Exception e){

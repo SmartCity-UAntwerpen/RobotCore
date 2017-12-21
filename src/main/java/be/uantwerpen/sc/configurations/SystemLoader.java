@@ -2,7 +2,7 @@ package be.uantwerpen.sc.configurations;
 
 import be.uantwerpen.sc.RobotCoreLoop;
 import be.uantwerpen.sc.controllers.*;
-import be.uantwerpen.sc.controllers.mqtt.MqttLocationPublisher;
+import be.uantwerpen.sc.controllers.mqtt.MqttPublisher;
 import be.uantwerpen.sc.services.DataService;
 import be.uantwerpen.sc.services.QueueService;
 import be.uantwerpen.sc.tools.PathplanningType;
@@ -55,7 +55,7 @@ public class SystemLoader implements ApplicationRunner
 
 
     @Autowired
-    private MqttLocationPublisher locationPublisher;
+    private MqttPublisher locationPublisher;
 
     @Autowired KeepAliveController keepAlivePoller;
 
@@ -104,8 +104,8 @@ public class SystemLoader implements ApplicationRunner
             new Thread(cStatusEventHandler).start();
             new Thread(queueConsumer).start();
             new Thread(keepAlivePoller).start();
-            //new Thread(cLocationPoller).start();
-            terminalService.setRobotCoreLoop(robotCoreLoop);
+            new Thread(cLocationPoller).start();
+            //terminalService.setRobotCoreLoop(robotCoreLoop);
 
 
             terminalService.systemReady();

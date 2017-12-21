@@ -1,6 +1,6 @@
 package be.uantwerpen.sc.controllers;
 
-import be.uantwerpen.sc.controllers.mqtt.MqttLocationPublisher;
+import be.uantwerpen.sc.controllers.mqtt.MqttPublisher;
 import be.uantwerpen.sc.services.DataService;
 import be.uantwerpen.sc.tools.Terminal;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.net.Socket;
 
@@ -22,7 +21,7 @@ public class CStatusEventHandler implements Runnable
     DataService dataService;
 
     @Autowired
-    MqttLocationPublisher locationPublisher;
+    MqttPublisher locationPublisher;
 
     Socket socket;
     DataInputStream dIn;

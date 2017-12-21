@@ -42,27 +42,30 @@ public class Dijkstra
         }
     }
 
-    public List<Vertex> getShortestPathTo(Vertex target, List<Vertex> vertexes)
+    public List<Vertex> getShortestPathTo(int targetId, List<Vertex> vertexes)
     {
+        Vertex target = getVertexByID(vertexes, targetId);
         List<Vertex> path = new ArrayList<Vertex>();
-       /* int i;
-        for (Vertex vertex = target; vertex != null;  i = vertex.getPrevious())
+        for (Vertex vertex = target; vertex != null;  vertex = vertex.getPrevious())
             path.add(vertex);
-        int i;
+
+        /*
         Vertex vertex = target;
         path.add(vertex);
         i = vertex.getPrevious();
-        vertex= vertexes.get(i);*/
+        vertex= vertexes.get(i);
 
 
-        int i = (int)(long)target.getId();
+        int i = (int)(target.getId() % Integer.MAX_VALUE);
         do {
             for (Vertex v : vertexes){
-                if(v.getId() == i)
-                    path.add(vertexes.get(i-1));
+                if(v.getId() == i) {
+                    path.add(getVertexByID(vertexes,i - 1));
+                    break;
+                }
             }
             try {
-                i = (int)(long)vertexes.get(i-1).getPrevious().getId();
+                i = (int)(getVertexByID(vertexes,i-1).getPrevious().getId() % Integer.MAX_VALUE);
             }catch (Exception e){
                i = 0;
             }
@@ -78,5 +81,14 @@ public class Dijkstra
 
         Collections.reverse(path);
         return path;
+    }
+
+
+    private Vertex getVertexByID(List<Vertex> list, int target){
+        for(Vertex v : list){
+            if(v.getId()==target)
+                return v;
+        }
+        return null;
     }
 }

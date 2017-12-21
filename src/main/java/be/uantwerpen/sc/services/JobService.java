@@ -70,46 +70,22 @@ public class JobService
     {
 
         System.out.println("Parsing job");
-        /*
-        if(!job.startsWith("Job:{jobId:") || job.split("/ ", 2).length <= 1)
-        {
-            //Not a valid job string
-            throw new ParseException("Can not parse job from: " + job + "\nInvalid type!", 0);
-        }
-        Long oldjobid=jobid;
-*/
-        try
-        {
-            /*
-            String partialstring=job.split(":",3 )[2];
-            partialstring=partialstring.split("/",4)[0];
-            jobid = Long.parseLong(partialstring);
 
-            partialstring=job.split(":",3 )[2];
-            partialstring=partialstring.split("/",4)[2];
-            String jobDescription = partialstring.split(":", 3)[1];
-*/
+        //try
+        //{
 
             String tempStr = job.split(":")[2];
             String jobidNumber = tempStr.split("/")[0];
 
-            System.out.println("jobidNumber =" + jobidNumber + ".");
-
             String tempbotid = job.split("/")[1];
             String botidNumber = tempbotid.split(":",2)[1];
-
-            System.out.println("botidNumber =" + botidNumber + ".");
 
             String tempidstart = job.split("/")[2];
             String idstartNumber = tempidstart.split(":")[1];
 
-            System.out.println("startidNumber =" + idstartNumber + ".");
-
             String tempidend = job.split("/")[3];
             String idendNumber = tempidend.split(":")[1];
             idendNumber = idendNumber.replace("}","");
-
-            System.out.println("endidNumber =" + idendNumber + ".");
 
             Long jobid = Long.parseLong(jobidNumber);
             Long botid = Long.parseLong(botidNumber);
@@ -118,35 +94,24 @@ public class JobService
 
             System.out.println("Parsed: jobid = " + jobid + " botid = " + botid + " startid = " + startid + " endid = " + endid);
 
-/*
-            if(!jobDescription.startsWith("idstart:"))
-            {
-                System.out.println("does not start with idstart");
-            }
-
-            if(!jobDescription.startsWith("idstart:"))
-            {
-                //Not a valid job string
-                throw new ParseException("Can not parse job from: " + job + "\nInvalid field!", 0);
-            }
-*/
             Job parsedJob = new Job(jobid,botid,startid,endid);
 
+            dataService.setDestination(endid);
+
             performJob(parsedJob);
-        }
-        catch(Exception e)
-        {
-            //Could not parse job from string
-            System.out.println("exception :(");
-            throw new ParseException("Can not parse job from: " + job + "\nInvalid format!", 0);
-        }
+        //}
+//        catch(Exception e)
+//        {
+//            throw new ParseException("Can not parse job from: " + job + "\nInvalid format!", 0);
+//        }
     }
 
     private void performJob(Job job)
     {
 
-        int endInt = job.getEndid().intValue();
 
+        int endInt = job.getEndid().intValue();
+        Terminal.printTerminal("performJob end int = " + endInt);
         switch(dataService.getWorkingmodeEnum()) {
             case INDEPENDENT:
                 try {
@@ -170,12 +135,19 @@ public class JobService
                 break;
             case FULLSERVER:
                 try {
+                    Terminal.printTerminal("FullServer mode");
                     //int endInt = Integer.parseInt(end);
-                    while(dataService.getCurrentLocation()!=endInt)
+                    Terminal.printTerminal("Current Location = " + dataService.getCurrentLocation() + " end int = " + endInt);
+                    while(dataService.getCurrentLocation()!=endInt){
+                        Terminal.printTerminal("get Content queue = " + queueService.getContentQueue().size());
                         if(queueService.getContentQueue().size() == 0){
                             //get first command from server
+                            Terminal.printTerminal("StartPathFullRobotCore");
                             startPathFullRobotcore(endInt);
                         }
+                    }
+
+
                 } catch (NumberFormatException e) {
                     Terminal.printTerminalError(e.getMessage());
                     Terminal.printTerminalInfo("Usage: navigate end");
@@ -268,7 +240,7 @@ public class JobService
         dataService.navigationParser.parseMap();
         //dataService.navigationParser.parseRandomMap(dataService);
 
-        removeDriveCommands();
+        //removeDriveCommands();
 
         //Setup for driving
         int start = (int)(long)dataService.navigationParser.list.get(0).getId();
@@ -280,6 +252,7 @@ public class JobService
 
         //Process map
         for (DriveDir command : dataService.navigationParser.commands) {
+            Terminal.printTerminal("insert job" + command.toString());
             queueService.insertJob(command.toString());
         }
     }
@@ -306,14 +279,17 @@ public class JobService
         DriveDir[] nextPath = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/map/"
                 +dataService.getCurrentLocation()+"/path/"+end, DriveDir[].class);
 
+        Terminal.printTerminal("Drive dir Ontvangen = " + nextPath);
         //Process map but only 2 first commands
         for (int i=0;i<2;i++) {
+            Terminal.printTerminal("Number: " + i +" insert job = " + nextPath[i].toString());
             queueService.insertJob(nextPath[i].toString());
         }
     }
 
     public void removeDriveCommands() {
         //remove drive jobs from queue
+        Terminal.printTerminal("remove commands");
         BlockingQueue<String> content = queueService.getContentQueue();
         ArrayList<String> contentcopy = new ArrayList<String>();
         content.drainTo(contentcopy);

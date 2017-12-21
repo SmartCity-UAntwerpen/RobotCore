@@ -3,12 +3,11 @@ package be.uantwerpen.sc;
 import be.uantwerpen.sc.controllers.MapController;
 import be.uantwerpen.sc.controllers.PathController;
 import be.uantwerpen.sc.controllers.mqtt.MqttJobSubscriber;
-import be.uantwerpen.sc.controllers.mqtt.MqttLocationPublisher;
+import be.uantwerpen.sc.controllers.mqtt.MqttPublisher;
 import be.uantwerpen.sc.services.*;
 import be.uantwerpen.sc.tools.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -33,7 +32,7 @@ public class RobotCoreLoop implements Runnable
     private MqttJobSubscriber jobSubscriber;
 
     @Autowired
-    private MqttLocationPublisher locationPublisher;
+    private MqttPublisher locationPublisher;
 
     @Autowired
     private JobService jobService;
@@ -109,6 +108,7 @@ public class RobotCoreLoop implements Runnable
             while (dataService.getTag().trim().equals("NONE") || dataService.getTag().equals("NO_TAG")) {
                 try {
                     //Read tag
+                    Terminal.printTerminal("reading tag");
                     queueService.insertJob("TAG READ UID");
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
@@ -116,6 +116,8 @@ public class RobotCoreLoop implements Runnable
                 }
             }
         }
+
+
 
         Terminal.printTerminal("Tag: " + dataService.getTag());
 
@@ -129,7 +131,15 @@ public class RobotCoreLoop implements Runnable
         dataService.map = mapController.getMap();
         Terminal.printTerminal("Map received");
 
+
         //Set location of bot
+        /*
+        Terminal.printTerminal("map:");
+        for(int i = 0;i < dataService.map.getNodeList().size();i++){
+            Terminal.printTerminal("id: " + dataService.map.getNodeList().get(i).getNodeId().toString() + " rfid: " + dataService.map.getNodeList().get(i).getPointEntity().getRfid());
+        }
+        */
+
         dataService.setCurrentLocation(dataService.map.getNodeByRFID(dataService.getTag()));
         Terminal.printTerminal("Start Location: " + dataService.getCurrentLocation()+"\n\n");
 
@@ -149,7 +159,15 @@ public class RobotCoreLoop implements Runnable
         }
         */
         //Set looking dir of bot
-        dataService.setLookingCoordiante(dataService.map.getNodeList().get(dataService.getCurrentLocation().intValue()).getNeighbours().get(0).getStartDirection());
+        /*
+        for(int i = 0; i <dataService.map.getNodeList().get(dataService.getCurrentLocation().intValue()).getNeighbours().size();i++){
+            Terminal.printTerminal("Node: " + dataService.getCurrentLocation());
+            Terminal.printTerminal("Neigbour : " + dataService.map.getNodeList().get();
+            Terminal.printTerminal("StartDir: " + dataService.map.getNodeList().get(dataService.getCurrentLocation().intValue()).getNeighbours().get(i).getStartDirection()
+            " StopDir: " + dataService.map.getNodeList().get(dataService.getCurrentLocation().intValue()).getNeighbours().get(i).getStopDirection());
+        }
+        */
+        dataService.setLookingCoordiante(dataService.map.getNodeList().get(dataService.getCurrentLocation().intValue() - 1).getNeighbours().get(0).getStopDirection());
         Terminal.printTerminal("looking in direction " + dataService.getLookingCoordiante());
 
 

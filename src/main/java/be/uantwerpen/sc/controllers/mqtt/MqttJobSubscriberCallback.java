@@ -41,15 +41,17 @@ public class MqttJobSubscriberCallback implements MqttCallback
         String payloadString = new String(mqttMessage.getPayload());
         Terminal.printTerminal("payload = " + payloadString);
 
-        try
-        {
+       // try
+        //{
             jobService.parseJob(payloadString); //antvangen bericht toevoegen aand de jobs
-        }
+        //}
+        /*
         catch(Exception e)
         {
             System.err.println("Could not parse job from message: " + payloadString);
             System.err.println(e.getMessage());
         }
+        */
     }
 
     @Override

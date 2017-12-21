@@ -77,6 +77,7 @@ public class NavigationParser {
                     current = next;
                     next = list.get(i);
                     direction start = findStartDir(current);
+                    System.out.println("previous: " + previous + " current: " + current + " next: " + next);
                     System.out.println("start: " + start);
                     direction stop = findStopDir(next);
                     System.out.println("stop: " + stop);
@@ -89,11 +90,15 @@ public class NavigationParser {
                 }
             }
         }
+        commands.add(new DriveDir((DriveDirEnum.TURN)));
+        Terminal.printTerminal("Commands added");
         return commands;
     }
 
     private direction findStartDir(Vertex current){
+        Terminal.printTerminal("Find start dir________________");
         int i = current.getPrevious().getAdjacencies().indexOf(current);
+
         String dirString = current.getPrevious().getAdjacencies().get(i).getLinkEntity().getStopDirection();
         direction dir = getDirection(dirString);
         /*switch(dir){
@@ -111,7 +116,19 @@ public class NavigationParser {
     }
 
     private direction findStopDir(Vertex next){
+        Terminal.printTerminal("Find stop dir________________");
         int i = next.getPrevious().getAdjacencies().indexOf(next);
+
+        for(int j = 0; j < next.getPrevious().getAdjacencies().size(); j++){
+            Terminal.printTerminal("Previous= " + next.getId());
+            Terminal.printTerminal("Previous= " + next.getPrevious().getId());
+            Terminal.printTerminal(" i= " + i + " content of i: " + next.getPrevious().getAdjacencies().get(i).getLinkEntity().getStartDirection());
+            Terminal.printTerminal(next.getPrevious().getAdjacencies().get(j).getLinkEntity().getStartDirection());
+            Terminal.printTerminal(next.getPrevious().getAdjacencies().get(j).getLinkEntity().getStopDirection());
+
+        }
+
+
         String dirString = next.getPrevious().getAdjacencies().get(i).getLinkEntity().getStartDirection();
         direction dir = getDirection(dirString);
         return dir;
