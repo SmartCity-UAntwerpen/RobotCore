@@ -3,7 +3,9 @@ package be.uantwerpen.sc.tools;
 import be.uantwerpen.sc.controllers.CCommandSender;
 import be.uantwerpen.sc.services.DataService;
 import be.uantwerpen.sc.services.QueueService;
+import org.mockito.internal.matchers.Null;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.expression.spel.ast.NullLiteral;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -28,6 +30,7 @@ public class QueueConsumer implements Runnable
 
     private boolean lockGranted = false;
     private boolean first = true;
+    private int prevQueueSize = 0;
 
     private BlockingQueue<String> jobQueue;
 
@@ -93,11 +96,27 @@ public class QueueConsumer implements Runnable
                 }
 
                 //zijn er nog jobs in de queue?
+                if((dataService.getCurrentLocation() == dataService.getDestination()) && (dataService.getDestination() != -1L) && (dataService.getCurrentLocation() != -1L)){
+
+                    Terminal.printTerminal("Finished");
+                    Park();
+
+                    dataService.robotDriving = false;
+                    prevQueueSize = 0;
+                    RestTemplate restTemplate = new RestTemplate(); //standaard resttemplate gebruiken
+
+                    restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/job/finished/" + dataService.getRobotID()//aan de server laten weten dat er een nieuwe bot zich aanbied
+                            , Void.class); //Aan de server laten weten in welke mode de bot werkt
+                    dataService.setDestination(-1L);
+
+                }
                 if(queueService.getContentQueue().size() == 0){
-                    //System.out.println("queue is empty");
+
                 }else{
                     //If robot not busy
+
                     if(!dataService.robotBusy) {
+                        Terminal.printTerminal("Robot not busy");
                         Terminal.printTerminal(queueService.getContentQueue().toString());
                         String s = queueService.getJob();
                         Terminal.printTerminal("Sending: " + s);
@@ -109,6 +128,7 @@ public class QueueConsumer implements Runnable
                         System.out.println("coordinate: "+dataService.getLookingCoordiante());
 
                         if(!s.contains("DRIVE DISTANCE")) {
+
                             dataService.robotBusy = true;
                             dataService.setLocationVerified(false);
                         }
@@ -118,7 +138,8 @@ public class QueueConsumer implements Runnable
                                 first = false;
                                 Terminal.printTerminal("Setting up");
                             }else{
-                                dataService.nextLink();
+                                //dataService.nextLink();
+                                //dataService.readTag();
                             }
 
                             //TODO when sending manual commands calling getNextNode will crash the program
@@ -142,5 +163,40 @@ public class QueueConsumer implements Runnable
                 e.printStackTrace();
             }
         }
+    }
+
+    public void Park(){
+        try{
+            Terminal.printTerminal("Parking");
+
+            sender.sendCommand("SPEAKER UNMUTE");
+            sender.sendCommand("SPEAKER SAY PARKING");
+
+            sender.sendCommand("DRIVE ROTATE R 180");
+
+            Thread.sleep(6000);
+
+            dataService.setTag("NONE");
+            sender.sendCommand("DRIVE BACKWARDS 1000");
+            sender.sendCommand("SPEAKER SAY TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT");
+            while(dataService.getTag().equals("NONE") || dataService.getTag().equals("NO_TAG")){
+
+            }
+            Terminal.printTerminal("Tag found : " + dataService.getTag() + "end");
+            sender.sendCommand("DRIVE ABORT");
+            sender.sendCommand("SPEAKER MUTE");
+                /*
+            sender.sendCommand("DRIVE BACKWARDS 400");
+
+
+            }
+
+
+            */
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+
     }
 }
