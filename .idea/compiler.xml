@@ -17,7 +17,7 @@
       <module name="SCRobotCore" target="1.8" />
       <module name="SCSmartCarCore" target="1.8" />
       <module name="SmartCar Core" target="1.8" />
-      <module name="SmartCity Common" target="1.6" />
+      <module name="SmartCity Common" target="1.5" />
     </bytecodeTargetLevel>
   </component>
 </project>

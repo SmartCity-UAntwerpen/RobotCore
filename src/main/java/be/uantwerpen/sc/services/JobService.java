@@ -3,10 +3,7 @@ package be.uantwerpen.sc.services;
 import be.uantwerpen.sc.RobotCoreLoop;
 import be.uantwerpen.sc.controllers.CCommandSender;
 import be.uantwerpen.sc.models.Job;
-import be.uantwerpen.sc.tools.DriveDir;
-import be.uantwerpen.sc.tools.NavigationParser;
-import be.uantwerpen.sc.tools.Terminal;
-import be.uantwerpen.sc.tools.WorkingmodeEnum;
+import be.uantwerpen.sc.tools.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -70,89 +67,78 @@ public class JobService
     {
 
         System.out.println("Parsing job");
-        /*
-        if(!job.startsWith("Job:{jobId:") || job.split("/ ", 2).length <= 1)
-        {
-            //Not a valid job string
-            throw new ParseException("Can not parse job from: " + job + "\nInvalid type!", 0);
-        }
-        Long oldjobid=jobid;
-*/
-        try
-        {
-            /*
-            String partialstring=job.split(":",3 )[2];
-            partialstring=partialstring.split("/",4)[0];
-            jobid = Long.parseLong(partialstring);
 
-            partialstring=job.split(":",3 )[2];
-            partialstring=partialstring.split("/",4)[2];
-            String jobDescription = partialstring.split(":", 3)[1];
-*/
+        //try
+        //{
 
-            String tempStr = job.split(":")[2];
-            String jobidNumber = tempStr.split("/")[0];
+        String tempStr = job.split(":")[2];
+        String jobidNumber = tempStr.split("/")[0];
 
-            System.out.println("jobidNumber =" + jobidNumber + ".");
+        String tempbotid = job.split("/")[1];
+        String botidNumber = tempbotid.split(":",2)[1];
 
-            String tempbotid = job.split("/")[1];
-            String botidNumber = tempbotid.split(":",2)[1];
+        String tempidstart = job.split("/")[2];
+        String idstartNumber = tempidstart.split(":")[1];
 
-            System.out.println("botidNumber =" + botidNumber + ".");
+        String tempidend = job.split("/")[3];
+        String idendNumber = tempidend.split(":")[1];
+        idendNumber = idendNumber.replace("}","");
 
-            String tempidstart = job.split("/")[2];
-            String idstartNumber = tempidstart.split(":")[1];
+        Long jobid = Long.parseLong(jobidNumber);
+        Long botid = Long.parseLong(botidNumber);
+        Long startid = Long.parseLong(idstartNumber);
+        Long endid = Long.parseLong(idendNumber);
 
-            System.out.println("startidNumber =" + idstartNumber + ".");
+        System.out.println("Parsed: jobid = " + jobid + " botid = " + botid + " startid = " + startid + " endid = " + endid);
 
-            String tempidend = job.split("/")[3];
-            String idendNumber = tempidend.split(":")[1];
-            idendNumber = idendNumber.replace("}","");
+        Job parsedJob = new Job(jobid,botid,startid,endid);
 
-            System.out.println("endidNumber =" + idendNumber + ".");
-
-            Long jobid = Long.parseLong(jobidNumber);
-            Long botid = Long.parseLong(botidNumber);
-            Long startid = Long.parseLong(idstartNumber);
-            Long endid = Long.parseLong(idendNumber);
-
-            System.out.println("Parsed: jobid = " + jobid + " botid = " + botid + " startid = " + startid + " endid = " + endid);
-
-/*
-            if(!jobDescription.startsWith("idstart:"))
-            {
-                System.out.println("does not start with idstart");
-            }
-
-            if(!jobDescription.startsWith("idstart:"))
-            {
-                //Not a valid job string
-                throw new ParseException("Can not parse job from: " + job + "\nInvalid field!", 0);
-            }
-*/
-            Job parsedJob = new Job(jobid,botid,startid,endid);
-
-            performJob(parsedJob);
-        }
-        catch(Exception e)
-        {
-            //Could not parse job from string
-            System.out.println("exception :(");
-            throw new ParseException("Can not parse job from: " + job + "\nInvalid format!", 0);
-        }
+        dataService.setDestination(endid);
+        Terminal.printTerminal("job parsed");
+        performJob(parsedJob);
+        //}
+//        catch(Exception e)
+//        {
+//            throw new ParseException("Can not parse job from: " + job + "\nInvalid format!", 0);
+//        }
     }
 
     private void performJob(Job job)
     {
 
         int endInt = job.getEndid().intValue();
-
+        int startInt = job.getStartid().intValue();
+        Terminal.printTerminal("performJob end int = " + endInt);
         switch(dataService.getWorkingmodeEnum()) {
             case INDEPENDENT:
                 try {
                     //int endInt = Integer.parseInt(end);
                     //compute path on robot
-                    startPathPlanning(endInt);
+                    dataService.robotDriving = true;
+                    dataService.jobfinished = false;
+                    dataService.tempjob = false;
+                    dataService.executingJob = false;
+                    while(!dataService.jobfinished){
+
+                        if((dataService.getCurrentLocation() != job.getStartid()) && (!dataService.executingJob)){
+                            Terminal.printTerminal("start location not currentLocation");
+                            dataService.setDestination(startid);
+                            dataService.tempjob = true;
+                            dataService.executingJob = true;
+                            startPathPlanning(startInt);
+
+                        }
+
+                        if(!dataService.tempjob && !dataService.executingJob && (dataService.getCurrentLocation() == job.getStartid())){
+                            dataService.tempjob = false;
+                            dataService.executingJob = true;
+                            dataService.setDestination(job.getEndid());
+                            startPathPlanning(endInt);
+                        }
+                    }
+
+
+
                 } catch (NumberFormatException e) {
                     Terminal.printTerminalError(e.getMessage());
                     Terminal.printTerminalInfo("Usage: navigate end");
@@ -162,7 +148,8 @@ public class JobService
                 try {
                     //int endInt = Integer.parseInt(end);
                     //get commands from server
-                    startPathRobotcore(endInt);
+                    dataService.robotDriving = true;
+                    startPathRobotcore(startInt,endInt);
                 } catch (NumberFormatException e) {
                     Terminal.printTerminalError(e.getMessage());
                     Terminal.printTerminalInfo("Usage: navigate end");
@@ -170,12 +157,21 @@ public class JobService
                 break;
             case FULLSERVER:
                 try {
+                    Terminal.printTerminal("FullServer mode");
                     //int endInt = Integer.parseInt(end);
-                    while(dataService.getCurrentLocation()!=endInt)
+                    Terminal.printTerminal("Current Location = " + dataService.getCurrentLocation() + " end int = " + endInt);
+                    dataService.robotDriving = true;
+                    while(dataService.getCurrentLocation()!=endInt){
+
+                        //Terminal.printTerminal("get Content queue = " + queueService.getContentQueue().size());
                         if(queueService.getContentQueue().size() == 0){
                             //get first command from server
-                            startPathFullRobotcore(endInt);
+                            Terminal.printTerminal("StartPathFullRobotCore");
+                            startPathFullRobotcore(startInt, endInt);
                         }
+                    }
+
+
                 } catch (NumberFormatException e) {
                     Terminal.printTerminalError(e.getMessage());
                     Terminal.printTerminalInfo("Usage: navigate end");
@@ -250,6 +246,7 @@ public class JobService
     }
 
     private void startPathPlanning(int end2){
+        /*
         dataService.locationUpdated = false;
         while(!dataService.locationUpdated){
             //Wait
@@ -261,59 +258,80 @@ public class JobService
                 e.printStackTrace();
             }
         }
-
+        */
         Terminal.printTerminal("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end2);
         dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2), dataService);
         //Parse Map
         dataService.navigationParser.parseMap();
         //dataService.navigationParser.parseRandomMap(dataService);
 
-        removeDriveCommands();
+        //removeDriveCommands();
 
         //Setup for driving
         int start = (int)(long)dataService.navigationParser.list.get(0).getId();
         int end = (int)(long)dataService.navigationParser.list.get(1).getId();
         dataService.setNextNode((long)end);
         dataService.setPrevNode((long)start);
+        dataService.robotDriving = true;
         queueService.insertJob("DRIVE FOLLOWLINE");
         queueService.insertJob("DRIVE FORWARD 110");
 
         //Process map
         for (DriveDir command : dataService.navigationParser.commands) {
+            Terminal.printTerminal("insert job" + command.toString());
             queueService.insertJob(command.toString());
         }
     }
 
-    public void startPathRobotcore(int end){
+    public void startPathRobotcore(int start, int end){
 
+        /*
         //ask robotcore for instructions
         RestTemplate restTemplate = new RestTemplate();
-        DriveDir[] nextPath = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/map/"
-                +dataService.getCurrentLocation()+"/path/"+end, DriveDir[].class);
+        DriveDirEncapsulator nextPath = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/map/getdirections/"
+                +"/" + start + "/" + end, DriveDirEncapsulator.class);
 
         //new job so remove drive commands from possible earlier job
         removeDriveCommands();
 
         //Process map
-        for (DriveDir command : nextPath) {
-            queueService.insertJob(command.toString());
+        for (int i = 0; i < nextPath.getDriveDirs().size();i++) {
+            Terminal.printTerminal("Partial server command: " + nextPath.getDriveDirs().get(i).toString());
+            queueService.insertJob(nextPath.getDriveDirs().get(i).toString());
+        }
+        */
+
+        RestTemplate restTemplate = new RestTemplate();
+        DriveDirEncapsulator nextPath = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/map/getdirectionsng/"
+                +"/" + start + "/" + end, DriveDirEncapsulator.class);
+
+        //new job so remove drive commands from possible earlier job
+        removeDriveCommands();
+
+        //Process map
+        for (int i = 0; i < nextPath.getDriveDirs().size();i++) {
+            Terminal.printTerminal("Partial server command: " + nextPath.getDriveDirs().get(i).toString());
+            queueService.insertJob(nextPath.getDriveDirs().get(i).toString());
         }
     }
 
-    public void startPathFullRobotcore(int end){
+    public void startPathFullRobotcore(int start, int end){
         //ask robotcore for instructions
         RestTemplate restTemplate = new RestTemplate();
-        DriveDir[] nextPath = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/map/"
-                +dataService.getCurrentLocation()+"/path/"+end, DriveDir[].class);
+        DriveDirEncapsulator nextPath = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/map/getnexthop/"
+                + start + "/" + dataService.getCurrentLocation() + "/" + end, DriveDirEncapsulator.class);
 
+        Terminal.printTerminal("Drive dir Ontvangen = " + nextPath);
         //Process map but only 2 first commands
-        for (int i=0;i<2;i++) {
-            queueService.insertJob(nextPath[i].toString());
+        for (int i = 0; i < nextPath.getDriveDirs().size();i++) {
+            Terminal.printTerminal("Full server command: " + nextPath.getDriveDirs().get(i).toString());
+            queueService.insertJob(nextPath.getDriveDirs().get(i).toString());
         }
     }
 
     public void removeDriveCommands() {
         //remove drive jobs from queue
+        Terminal.printTerminal("remove commands");
         BlockingQueue<String> content = queueService.getContentQueue();
         ArrayList<String> contentcopy = new ArrayList<String>();
         content.drainTo(contentcopy);

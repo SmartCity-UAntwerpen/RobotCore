@@ -1,6 +1,6 @@
 package be.uantwerpen.sc.controllers;
 
-import be.uantwerpen.sc.controllers.mqtt.MqttLocationPublisher;
+import be.uantwerpen.sc.controllers.mqtt.MqttPublisher;
 import be.uantwerpen.sc.services.DataService;
 import be.uantwerpen.sc.tools.Terminal;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.IOException;
 import java.net.Socket;
 
 /**
@@ -22,7 +22,7 @@ public class CStatusEventHandler implements Runnable
     DataService dataService;
 
     @Autowired
-    MqttLocationPublisher locationPublisher;
+    MqttPublisher locationPublisher;
 
     Socket socket;
     DataInputStream dIn;
@@ -52,6 +52,14 @@ public class CStatusEventHandler implements Runnable
         }
         catch(Exception e)
         {
+            e.printStackTrace();
+        }
+    }
+
+    public void closeConnection(){
+        try {
+            socket.close();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -86,23 +94,25 @@ public class CStatusEventHandler implements Runnable
                     }
                 }
                 if (s.startsWith("TRAVEL DISTANCE EVENT")){
-
-                        String millisString = s.split(":", 2)[1].trim();
-                        int millis = Integer.parseInt(millisString);
-
-                        if(!dataService.isLocationVerified()){
-                            if(millis < 50){
-                                dataService.setLocationVerified(true);
-                            }else{
-                                dataService.setMillis(0);
-                            }
+                    //Terminal.printTerminal("Travel distance event: " + s);
+                    String millisString = s.split(":", 2)[1].trim();
+                    int millis = Integer.parseInt(millisString);
+                    locationPublisher.publishLocation(millis, 45L);
+                    /*
+                    if(!dataService.isLocationVerified()){
+                        if(millis < 50){
+                            dataService.setLocationVerified(true);
                         }else{
-                            synchronized (this) {
-                                //Terminal.printTerminal("Distance: " + millis);
-                                dataService.setMillis(millis);
-                                locationPublisher.publishLocation(millis, 45L); ////whuuuuuuut
-                            }
+                            dataService.setMillis(0);
                         }
+                    }else{
+                        synchronized (this) {
+                            //Terminal.printTerminal("Distance: " + millis);
+                            dataService.setMillis(millis);
+                            locationPublisher.publishLocation(millis, 45L); ////whuuuuuuut
+                        }
+                    }
+                    */
 
 
                 }if (s.startsWith("TAG DETECTION EVENT")){
@@ -112,8 +122,11 @@ public class CStatusEventHandler implements Runnable
                         dataService.robotBusy = false;
 
                         //dataService.setCurrentLocationAccordingTag();
-                        if(!tag.trim().equals("NONE"))
+                        if(!tag.trim().equals("NONE") && !tag.trim().equals("NO_TAG"))
                         {
+                            if(dataService.getMap() != null){
+                                dataService.setCurrentLocation(dataService.map.getNodeByRFID(tag));
+                            }
                             dataService.locationUpdated = true;
                         }
                     }

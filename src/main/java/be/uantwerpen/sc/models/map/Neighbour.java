@@ -1,5 +1,6 @@
 package be.uantwerpen.sc.models.map;
 
+
 import be.uantwerpen.sc.models.Link;
 import be.uantwerpen.sc.models.Point;
 

@@ -60,4 +60,8 @@ public class Job
     public Long getEndid(){
         return endid;
     }
+
+    public Long getStartid() {
+        return startid;
+    }
 }

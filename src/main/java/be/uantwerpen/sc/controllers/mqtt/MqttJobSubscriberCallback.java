@@ -5,7 +5,6 @@ import be.uantwerpen.sc.tools.Terminal;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Created by Thomas on 01/06/2016.

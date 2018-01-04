@@ -15,6 +15,7 @@ public class PathplanningType {
     private PathplanningEnum type;
 
     @Autowired
+
     public PathplanningType(ApplicationArguments args) {
         boolean debug = args.containsOption("debug");
         List<String> files = args.getNonOptionArgs();
@@ -34,6 +35,7 @@ public class PathplanningType {
                     type = PathplanningEnum.TERMINAL;
             }
         }
+
     }
 
     public PathplanningEnum getType() {

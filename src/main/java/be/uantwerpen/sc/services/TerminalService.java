@@ -216,6 +216,7 @@ public class TerminalService
         resttemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/delete/" //aan de server laten weten dat er een nieuwe bot zich aanbied
                 + dataService.getRobotID(), void.class); //Aan de server laten weten in welke mode de bot werkt
 
+
         System.exit(0);
     }
 

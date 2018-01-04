@@ -1,6 +1,5 @@
 package be.uantwerpen.sc.tools;
 
-import be.uantwerpen.sc.models.Link;
 import be.uantwerpen.sc.services.DataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -77,6 +76,7 @@ public class NavigationParser {
                     current = next;
                     next = list.get(i);
                     direction start = findStartDir(current);
+                    System.out.println("previous: " + previous + " current: " + current + " next: " + next);
                     System.out.println("start: " + start);
                     direction stop = findStopDir(next);
                     System.out.println("stop: " + stop);
@@ -89,31 +89,47 @@ public class NavigationParser {
                 }
             }
         }
+        //commands.add(new DriveDir((DriveDirEnum.TURN)));
+        Terminal.printTerminal("Commands added");
         return commands;
     }
 
     private direction findStartDir(Vertex current){
+        Terminal.printTerminal("Find start dir________________");
         int i = current.getPrevious().getAdjacencies().indexOf(current);
+
+        System.out.println("Start link id" + current.getPrevious().getAdjacencies().get(i).getLinkEntity().getId());
+
         String dirString = current.getPrevious().getAdjacencies().get(i).getLinkEntity().getStopDirection();
         direction dir = getDirection(dirString);
-        /*switch(dir){
-            case NORTH:
-                return direction.SOUTH;
-            case EAST:
-                return direction.WEST;
-            case SOUTH:
-                return direction.NORTH;
-            case WEST:
-                return direction.EAST;
 
-        }*/
-        return dir;
+        direction revDir;
+
+        switch(dir){
+            case NORTH: revDir = direction.SOUTH;
+            break;
+            case EAST: revDir = direction.WEST;
+            break;
+            case SOUTH: revDir = direction.NORTH;
+            break;
+            case WEST: revDir = direction.EAST;
+            break;
+            default: revDir = direction.NORTH;
+
+        }
+
+        return revDir;
     }
 
     private direction findStopDir(Vertex next){
+        Terminal.printTerminal("________________Find stop dir________________");
         int i = next.getPrevious().getAdjacencies().indexOf(next);
+
+        System.out.println("Stop link id" + next.getPrevious().getAdjacencies().get(i).getLinkEntity().getId());
+        System.out.println("Stop start dir" + next.getPrevious().getAdjacencies().get(i).getLinkEntity().getStartDirection());
         String dirString = next.getPrevious().getAdjacencies().get(i).getLinkEntity().getStartDirection();
         direction dir = getDirection(dirString);
+
         return dir;
     }
 
@@ -123,7 +139,7 @@ public class NavigationParser {
                 return direction.NORTH;
             case "E":
                 return direction.EAST;
-            case "S":
+            case "Z":
                 return direction.SOUTH;
             case "W":
                 return direction.WEST;
@@ -152,10 +168,10 @@ public class NavigationParser {
                     //turn
                     case SOUTH:
                         return new DriveDir(DriveDirEnum.TURN);
-                    
+
                 }
-                
-            //From EAST
+
+                //From EAST
             case EAST:
                 switch(stopDir)
                 {
@@ -172,8 +188,8 @@ public class NavigationParser {
                     case WEST:
                         return new DriveDir(DriveDirEnum.TURN);
                 }
-                
-            //From SOUTH
+
+                //From SOUTH
             case SOUTH:
                 switch(stopDir)
                 {
@@ -189,10 +205,10 @@ public class NavigationParser {
                     //turn
                     case NORTH:
                         return new DriveDir(DriveDirEnum.TURN);
-                    
+
                 }
-                
-            //From WEST
+
+                //From WEST
             case WEST:
                 switch(stopDir)
                 {
@@ -208,9 +224,9 @@ public class NavigationParser {
                     //turn
                     case EAST:
                         return new DriveDir(DriveDirEnum.TURN);
-                    
+
                 }
-                
+
         }
 
         //Invalid direction

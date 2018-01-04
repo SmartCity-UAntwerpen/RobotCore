@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/RobotCore.iml" filepath="$PROJECT_DIR$/RobotCore.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SCRobotCore.iml" filepath="$PROJECT_DIR$/SCRobotCore.iml" />
       <module fileurl="file://$PROJECT_DIR$/../SmartCityProject/SmartCity Common/SmartCity Common.iml" filepath="$PROJECT_DIR$/../SmartCityProject/SmartCity Common/SmartCity Common.iml" />
     </modules>
   </component>

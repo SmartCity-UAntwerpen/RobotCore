@@ -3,12 +3,11 @@ package be.uantwerpen.sc;
 import be.uantwerpen.sc.controllers.MapController;
 import be.uantwerpen.sc.controllers.PathController;
 import be.uantwerpen.sc.controllers.mqtt.MqttJobSubscriber;
-import be.uantwerpen.sc.controllers.mqtt.MqttLocationPublisher;
+import be.uantwerpen.sc.controllers.mqtt.MqttPublisher;
 import be.uantwerpen.sc.services.*;
 import be.uantwerpen.sc.tools.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -33,7 +32,7 @@ public class RobotCoreLoop implements Runnable
     private MqttJobSubscriber jobSubscriber;
 
     @Autowired
-    private MqttLocationPublisher locationPublisher;
+    private MqttPublisher locationPublisher;
 
     @Autowired
     private JobService jobService;
@@ -127,7 +126,9 @@ public class RobotCoreLoop implements Runnable
 
         //Request map at server with rest
         dataService.map = mapController.getMap();
-        Terminal.printTerminal("Map received");
+        Terminal.printTerminal("Map received " + dataService.map.getNodeList());
+
+
 
         //Set location of bot
         dataService.setCurrentLocation(dataService.map.getNodeByRFID(dataService.getTag()));
@@ -149,7 +150,7 @@ public class RobotCoreLoop implements Runnable
         }
         */
         //Set looking dir of bot
-        dataService.setLookingCoordiante(dataService.map.getNodeList().get(dataService.getCurrentLocation().intValue()).getNeighbours().get(0).getStartDirection());
+//        dataService.setLookingCoordiante(dataService.map.getNodeList().get(dataService.getCurrentLocation().intValue()).getNeighbours().get(0).getStartDirection());
         Terminal.printTerminal("looking in direction " + dataService.getLookingCoordiante());
 
 

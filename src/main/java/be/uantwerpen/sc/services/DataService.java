@@ -1,12 +1,13 @@
 package be.uantwerpen.sc.services;
 
+import be.uantwerpen.sc.controllers.CCommandSender;
 import be.uantwerpen.sc.models.Link;
 import be.uantwerpen.sc.models.map.Map;
 import be.uantwerpen.sc.models.map.Node;
 import be.uantwerpen.sc.tools.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Created by Arthur on 24/04/2016.
@@ -19,6 +20,9 @@ public class DataService
 
     @Value("#{new Integer(${sc.core.port}) ?: 1994}")
     private int serverPort;
+
+    @Autowired
+    CCommandSender commandSender;
 
     private Long robotID;
 
@@ -43,7 +47,12 @@ public class DataService
     private PathplanningEnum pathplanningEnum;
     private WorkingmodeEnum workingmodeEnum;
 
+    private Long destination = -1L;
+    public boolean robotDriving = false;
 
+    public boolean jobfinished = false;
+    public boolean tempjob = false;
+    public boolean executingJob = false;
 
     public Long getNextNode() {
         return nextNode;
@@ -207,11 +216,28 @@ public class DataService
                     linkMillis = link.getLength();
                 }
             }
-                    lid=getCurrentLocation();   //BIJGEVOEGD      =====FOUT
+            lid=getCurrentLocation();   //BIJGEVOEGD      =====FOUT
             Terminal.printTerminal("Current Link: " + lid);
             //RestTemplate rest = new RestTemplate();
             //rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + robotID + "/lid/" + lid, Integer.class);
 
+        }
+    }
+
+    public void readTag(){
+
+        try {
+                    //Read tag
+            if(map != null){
+                commandSender.sendCommand("TAG READ UID");
+            }
+
+            //Thread.sleep(100);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if(tag != null && !tag.equals("NONE") && !tag.equals("NO_TAG")){
+            currentLocation = map.getNodeByRFID(tag);
         }
     }
 
@@ -249,75 +275,7 @@ public class DataService
             prevNode = nextNode;
         }
     }
-/*
-    public void setCurrentLocationAccordingTag() {
-        switch(getTag()){
-            case "04 70 39 32 06 27 80":
-                setCurrentLocation(20L); //3
-                break;
-            case "04 67 88 8A C8 48 80":
-                setCurrentLocation(8L);//14
-                break;
-            case "04 97 36 A2 7F 22 80":
-                setCurrentLocation(4L);//1
-                break;
-            case "04 7B 88 8A C8 48 80":
-                setCurrentLocation(9L);//15
-                break;
-            case "04 B3 88 8A C8 48 80":
-                setCurrentLocation(2L);//8
-                break;
-            case "04 8D 88 8A C8 48 80":
-                setCurrentLocation(5L);//9
-                break;
-            case "04 AA 88 8A C8 48 80":
-                setCurrentLocation(14L);//11
-                break;
-            case "04 C4 FD 12 Q9 34 80":
-                setCurrentLocation(19L);
-                break;
-            case "04 96 88 8A C8 48 80":
-                setCurrentLocation(17L);//17
-                break;
-            case "04 A1 88 8A C8 48 80":
-                setCurrentLocation(15L);//18
-                break;
-            case "04 86 04 22 A9 34 84":
-                setCurrentLocation(20L);
-                break;
-            case "04 18 25 9A 7F 22 80":
-                setCurrentLocation(11L);//6
-                break;
-            case "04 BC 88 8A C8 48 80":
-                setCurrentLocation(16L);//16
-                break;
-            case "04 C5 88 8A C8 48 80":
-                setCurrentLocation(3L);//7
-                break;
-            case "04 EC 88 8A C8 48 80":
-                setCurrentLocation(19L);//
-                break;
-            case "04 E3 88 8A C8 48 80":
-                setCurrentLocation(1L);//13
-                break;
-            case "04 26 3E 92 1E 25 80":
-                setCurrentLocation(6L);//4
-                break;
-            case "04 DA 88 8A C8 48 80":
-                setCurrentLocation(13L);//12
-                break;
-            case "04 41 70 92 1E 25 80":
-                setCurrentLocation(18L);//2
-                break;
-            case "04 3C 67 9A F6 1F 80":
-                setCurrentLocation(10L);//5
-                break;
-            case "NONE":
-                break;
-            default:
-                setCurrentLocation(-1L);
-                break;
-        }
-    }
-    */
+
+    public void setDestination(Long dest){this.destination = dest;}
+    public Long getDestination(){return this.destination;}
 }

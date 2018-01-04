@@ -97,17 +97,29 @@ public class QueueConsumer implements Runnable
 
                 //zijn er nog jobs in de queue?
                 if((dataService.getCurrentLocation() == dataService.getDestination()) && (dataService.getDestination() != -1L) && (dataService.getCurrentLocation() != -1L)){
-
-                    Terminal.printTerminal("Finished");
                     Park();
+                    if(!dataService.tempjob){
+                        Terminal.printTerminal("Finished");
 
-                    dataService.robotDriving = false;
-                    prevQueueSize = 0;
-                    RestTemplate restTemplate = new RestTemplate(); //standaard resttemplate gebruiken
 
-                    restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/job/finished/" + dataService.getRobotID()//aan de server laten weten dat er een nieuwe bot zich aanbied
-                            , Void.class); //Aan de server laten weten in welke mode de bot werkt
-                    dataService.setDestination(-1L);
+                        dataService.robotDriving = false;
+                        prevQueueSize = 0;
+                        RestTemplate restTemplate = new RestTemplate(); //standaard resttemplate gebruiken
+
+                        restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/job/finished/" + dataService.getRobotID()//aan de server laten weten dat er een nieuwe bot zich aanbied
+                                , Void.class); //Aan de server laten weten in welke mode de bot werkt
+                        dataService.setDestination(-1L);
+
+                        dataService.jobfinished = true;
+                    }else{
+                        Park();
+                        dataService.robotDriving = false;
+                        dataService.tempjob = false;
+                    }
+
+                    dataService.executingJob = false;
+
+
 
                 }
                 if(queueService.getContentQueue().size() == 0){
@@ -177,8 +189,8 @@ public class QueueConsumer implements Runnable
             Thread.sleep(6000);
 
             dataService.setTag("NONE");
-            sender.sendCommand("DRIVE BACKWARDS 1000");
-            sender.sendCommand("SPEAKER SAY TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT");
+            sender.sendCommand("DRIVE BACKWARDS 500");
+            sender.sendCommand("SPEAKER SAY TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT");
             while(dataService.getTag().equals("NONE") || dataService.getTag().equals("NO_TAG")){
 
             }

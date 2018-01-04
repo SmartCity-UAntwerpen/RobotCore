@@ -53,6 +53,8 @@ public class CCommandSender
             serverActive = true;
 
         }
+
+
         catch(Exception e)
         {
             e.printStackTrace();
@@ -60,52 +62,32 @@ public class CCommandSender
         }
     }
 
+
+    public void closeConnection(){
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public synchronized boolean sendCommand(String str){ //commandos sturen naar robot driver
         try {
             //byte[] message = str.getBytes();
             //System.out.println(message.toString());
-            int attempts = 0;
 
+            int attempts = 0;
 
             str = str.concat("\n");
 
             byte[] bytes = str.getBytes();
 
             //while(attempts <5) {
-                //Send message
-                //dOut.writeInt(message.length); // write length of the message
-                dOut.flush();
-                dOut.write(bytes);
-                dOut.flush();
-
-                //dOut.writeBytes(str);
-//                /*
-//                //Receive Message
-//                try {
-//                    //Check if acknowledged
-//                    byte[] ackBytes = new byte[4];
-//                    dIn.readFully(ackBytes);
-//                    String response = new String(ackBytes);
-//                    Terminal.printTerminal("Response:" + response);
-//                    if(response.startsWith("ACK")  || response.startsWith("Smar")){
-//                        //Message acknowledged
-//                        return true;
-//                    }if(response.startsWith("NACK")){
-//                        return false;
-//                    }
-//
-//                    //clear buffer
-//                    if(dIn.available() > 0) {
-//                        byte[] removed = new byte[dIn.available()];
-//                        dIn.readFully(removed);
-//                    }
-//                }catch(SocketTimeoutException e){
-//                    Terminal.printTerminalInfo("SocketTimeout");
-//                    e.printStackTrace();
-//                }
-//                attempts++;
-//                */
-//            //}
+            //Send message
+            //dOut.writeInt(message.length); // write length of the message
+            dOut.flush();
+            dOut.write(bytes);
+            dOut.flush();
 
             return true;
 

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
  * Created by Arthur on 9/05/2016.
  */
 @Service
-public class MqttLocationPublisher
+public class MqttPublisher
 {
     @Autowired
     private DataService dataService;
@@ -33,8 +33,8 @@ public class MqttLocationPublisher
 
     public void publishLocation(Integer location, Long jobid)
     {
-        String content      = "Location:{id:"+jobid.toString()
-                +"/ vertexid:"+dataService.getCurrentLocation()
+        String content      = "Location:{id:"+dataService.getRobotID()
+                +"/ vertex:"+dataService.getCurrentLocation()
                 +"/ progress:"+ dataService.getMillis()+"}";
         int qos             = 2;
         String topic        = "BOT/" + dataService.getRobotID()+"/loc";

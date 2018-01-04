@@ -1,7 +1,6 @@
 package be.uantwerpen.sc.services;
 
 import be.uantwerpen.sc.models.Link;
-import be.uantwerpen.sc.models.Point;
 import be.uantwerpen.sc.models.map.*;
 import be.uantwerpen.sc.tools.Dijkstra;
 import be.uantwerpen.sc.tools.Edge;
@@ -67,7 +66,7 @@ public class PathplanningService implements IPathplanning
 
         dijkstra.computePaths(v,vertexes); // run Dijkstra
         System.out.println("Distance to " + vertexes.get(stop-1) + ": " + vertexes.get(stop-1).getMinDistance());
-        List<Vertex> path = dijkstra.getShortestPathTo(vertexes.get(stop-1),vertexes);
+        List<Vertex> path = dijkstra.getShortestPathTo((stop),vertexes);
         System.out.println("Path: " + path);
         //return ("Distance to " + vertexes.get(stop-1) + ": " + vertexes.get(stop-1).minDistance) + ( "Path: " + path);
         return path;
