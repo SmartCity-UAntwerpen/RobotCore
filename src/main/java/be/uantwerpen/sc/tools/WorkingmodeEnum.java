@@ -6,5 +6,6 @@ package be.uantwerpen.sc.tools;
 public enum WorkingmodeEnum {
     INDEPENDENT,
     PARTIALSERVER,
+    PARTIALSERVERNG,
     FULLSERVER
 }

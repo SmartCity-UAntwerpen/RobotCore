@@ -67,6 +67,6 @@
     <orderEntry type="library" name="Maven: org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.0.2" level="project" />
     <orderEntry type="library" name="Maven: org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final" level="project" />
     <orderEntry type="library" name="Maven: org.hibernate:hibernate-core:4.3.11.Final" level="project" />
-    <orderEntry type="module" module-name="SmartCity Common" />
+    <orderEntry type="library" name="Maven: be.uantwerpen.sc:SmartCityCommon:0.0.1-SNAPSHOT" level="project" />
   </component>
 </module>

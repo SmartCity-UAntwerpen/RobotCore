@@ -5,17 +5,18 @@ package be.uantwerpen.sc.tools;
  */
 import org.springframework.boot.*;
 import org.springframework.beans.factory.annotation.*;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.stereotype.*;
 
 import java.util.List;
 
-@Component
+@Component("test")
 public class PathplanningType {
 
     private PathplanningEnum type;
 
     @Autowired
-
     public PathplanningType(ApplicationArguments args) {
         boolean debug = args.containsOption("debug");
         List<String> files = args.getNonOptionArgs();

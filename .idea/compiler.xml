@@ -9,7 +9,6 @@
         <module name="RobotCore" />
         <module name="SCRobotCore" />
         <module name="SmartCar Core" />
-        <module name="SmartCity Common" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -20,4 +19,5 @@
       <module name="SmartCity Common" target="1.5" />
     </bytecodeTargetLevel>
   </component>
+
 </project>

@@ -54,10 +54,24 @@ public class QueueConsumer implements Runnable
 
     @Override
     public void run() {
+        int i = 1;
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 //System.out.println("Consumer wants to consume");
                 Thread.sleep(100);
+
+                if(dataService.navigationParser != null && dataService.navigationParser.list!= null){
+                    if((i < dataService.navigationParser.list.size()) && (dataService.getCurrentLocation() == dataService.getNextNode())){
+                        dataService.setNextNode(dataService.navigationParser.list.get(i).getId());
+                        dataService.setPrevNode(dataService.navigationParser.list.get(i-1).getId());
+
+                        Terminal.printTerminal("Change next en prev node: " + dataService.getNextNode() + " " + dataService.getPrevNode());
+
+                        i++;
+                    }
+
+                }
+
 
                 //kijken of een kruispunt vrij is en een lock aanvragen
                 if(dataService.getNextNode() != -1) {
@@ -65,15 +79,17 @@ public class QueueConsumer implements Runnable
                         //Robot already has permission?
                         if (!(dataService.hasPermission() == dataService.getNextNode())) {
                             Terminal.printTerminal("Millis: " + dataService.getMillis() + " ,linkMillis: " + (dataService.getLinkMillis() - 150));
-                            if (dataService.getMillis() > dataService.getLinkMillis() - 200) {
+                            //if (dataService.getMillis() > dataService.getLinkMillis() - 200) {
                                 //Pause robot
                                 sender.sendCommand("DRIVE PAUSE");
                                 Terminal.printTerminal("PAUSED");
                                 //Ask for permission
                                 RestTemplate rest = new RestTemplate();
                                 boolean response = false;
-                                Terminal.printTerminal("Lock Requested");
+                                Terminal.printTerminal("Lock Requested : " + dataService.getNextNode());
+
                                 while (!response) {
+
                                     response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/requestlock/" + dataService.getNextNode(), boolean.class);
 
                                     if (!response) {
@@ -88,7 +104,7 @@ public class QueueConsumer implements Runnable
                                 Terminal.printTerminal("Permission: " + dataService.hasPermission() + " ,NextNode: " + dataService.getNextNode());
                                 sender.sendCommand("DRIVE RESUME");
                                 Terminal.printTerminal("RESUMED");
-                            }
+                            //}
                         } else {
                             lockGranted = true;
                         }
@@ -97,24 +113,26 @@ public class QueueConsumer implements Runnable
 
                 //zijn er nog jobs in de queue?
                 if((dataService.getCurrentLocation() == dataService.getDestination()) && (dataService.getDestination() != -1L) && (dataService.getCurrentLocation() != -1L)){
-                    Park();
+                    Terminal.printTerminal("Current location : " + dataService.getCurrentLocation() + " destination : " + dataService.getDestination() + " tempjob : " + dataService.tempjob);
+
                     if(!dataService.tempjob){
-                        Terminal.printTerminal("Finished");
-
-
+                        Park();
+                        Terminal.printTerminal("Total job Finished");
                         dataService.robotDriving = false;
-                        prevQueueSize = 0;
-                        RestTemplate restTemplate = new RestTemplate(); //standaard resttemplate gebruiken
 
+                        RestTemplate restTemplate = new RestTemplate(); //standaard resttemplate gebruiken
                         restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/job/finished/" + dataService.getRobotID()//aan de server laten weten dat er een nieuwe bot zich aanbied
                                 , Void.class); //Aan de server laten weten in welke mode de bot werkt
+
                         dataService.setDestination(-1L);
 
                         dataService.jobfinished = true;
                     }else{
+                        Terminal.printTerminal("Temp job finished");
                         Park();
                         dataService.robotDriving = false;
                         dataService.tempjob = false;
+                        dataService.setDestination(-1L);
                     }
 
                     dataService.executingJob = false;
@@ -165,8 +183,10 @@ public class QueueConsumer implements Runnable
                             }
 
                             //Unlock point
+                            Terminal.printTerminal("resetting point :" + dataService.getPrevNode());
                             RestTemplate rest = new RestTemplate();
-                            rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/setlock/" + dataService.getPrevNode() + "/0", Boolean.class);
+                            boolean setlock = rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/setlock/" + dataService.getPrevNode() + "/0", Boolean.class);
+                            Terminal.printTerminal("resetting point");
                         }
                     }
                 }
@@ -189,7 +209,7 @@ public class QueueConsumer implements Runnable
             Thread.sleep(6000);
 
             dataService.setTag("NONE");
-            sender.sendCommand("DRIVE BACKWARDS 500");
+            sender.sendCommand("DRIVE BACKWARDS 150");
             sender.sendCommand("SPEAKER SAY TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT");
             while(dataService.getTag().equals("NONE") || dataService.getTag().equals("NO_TAG")){
 

@@ -1,5 +1,7 @@
 package be.uantwerpen.sc.models;
 
+import be.uantwerpen.sc.models.points.Point;
+
 /**
  * Created by Niels on 24/03/2016.
  */

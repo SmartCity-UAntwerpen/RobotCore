@@ -1,6 +1,6 @@
 package be.uantwerpen.sc.models.map;
 
-import be.uantwerpen.sc.models.Point;
+import be.uantwerpen.sc.models.points.Point;
 
 import java.util.List;
 

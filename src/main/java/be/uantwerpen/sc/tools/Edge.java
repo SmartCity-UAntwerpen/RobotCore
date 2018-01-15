@@ -1,6 +1,6 @@
 package be.uantwerpen.sc.tools;
 
-import be.uantwerpen.sc.models.Link;
+import be.uantwerpen.sc.models.links.Link;
 
 /**
  * Created by Niels on 17/04/2016.

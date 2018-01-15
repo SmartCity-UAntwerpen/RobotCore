@@ -1,6 +1,7 @@
 package be.uantwerpen.sc.controllers.mqtt;
 
 import be.uantwerpen.sc.services.DataService;
+import be.uantwerpen.sc.tools.Terminal;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -64,7 +65,8 @@ public class MqttPublisher
                 MqttMessage message = new MqttMessage(content.getBytes());
                 message.setQos(qos);
                 client.publish(topic, message);
-                System.out.println("Message published: "+ content);
+                System.out.println("Message published: "+ content + " destination: " + dataService.getDestination() + " nextprevnode : " + dataService.getNextNode() + " " + dataService.getPrevNode());
+
                 client.disconnect();
             }
             catch(MqttException me)

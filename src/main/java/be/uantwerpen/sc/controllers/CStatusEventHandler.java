@@ -125,7 +125,7 @@ public class CStatusEventHandler implements Runnable
                         if(!tag.trim().equals("NONE") && !tag.trim().equals("NO_TAG"))
                         {
                             if(dataService.getMap() != null){
-                                dataService.setCurrentLocation(dataService.map.getNodeByRFID(tag));
+                                dataService.setCurrentLocation(dataService.map.getNodeByRFID(tag,dataService.getCurrentLocation()));
                             }
                             dataService.locationUpdated = true;
                         }

@@ -82,6 +82,20 @@ public class Map
         return null;
     }
 
+    public Long getNodeByRFID(String rfid,Long curretLocation){
+
+        Long nodeNumber = curretLocation;
+
+        for(int i = 0; i < nodeList.size(); i++) {
+            if(nodeList.get(i).getPointEntity().getRfid().equals(rfid)){
+                nodeNumber = nodeList.get(i).getPointEntity().getId();
+            }
+        }
+
+        return nodeNumber;
+
+    }
+
     public Long getNodeByRFID(String rfid){
 
         Long nodeNumber = -1L;

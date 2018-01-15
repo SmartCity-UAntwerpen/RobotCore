@@ -1,7 +1,7 @@
 package be.uantwerpen.sc.services;
 
 import be.uantwerpen.sc.controllers.CCommandSender;
-import be.uantwerpen.sc.models.Link;
+import be.uantwerpen.sc.models.links.Link;
 import be.uantwerpen.sc.models.map.Map;
 import be.uantwerpen.sc.models.map.Node;
 import be.uantwerpen.sc.tools.*;
@@ -47,7 +47,7 @@ public class DataService
     private PathplanningEnum pathplanningEnum;
     private WorkingmodeEnum workingmodeEnum;
 
-    private Long destination = -1L;
+    public Long destination = -1L;
     public boolean robotDriving = false;
 
     public boolean jobfinished = false;
@@ -236,9 +236,11 @@ public class DataService
         } catch (Exception e) {
             e.printStackTrace();
         }
+        /*
         if(tag != null && !tag.equals("NONE") && !tag.equals("NO_TAG")){
             currentLocation = map.getNodeByRFID(tag);
         }
+        */
     }
 
     public void nextLink(){

@@ -1,6 +1,6 @@
 package be.uantwerpen.sc.services;
 
-import be.uantwerpen.sc.models.Link;
+import be.uantwerpen.sc.models.links.Link;
 import be.uantwerpen.sc.models.map.*;
 import be.uantwerpen.sc.tools.Dijkstra;
 import be.uantwerpen.sc.tools.Edge;
