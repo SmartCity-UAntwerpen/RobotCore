@@ -231,9 +231,12 @@ public class DataService
 
     public void readTag(){
 
-        while (getTag().trim().equals("NONE") || getTag().equals("NO_TAG")) {
+        locationUpdated = false;
+        int timesTried = 0;
+        while (getTag().trim().equals("NONE") || getTag().equals("NO_TAG") || locationUpdated == false || timesTried < 5) {
             try {
                 //Read tag
+                timesTried++;
                 commandSender.sendCommand("TAG READ UID");
                 Thread.sleep(2000);
             } catch (InterruptedException e) {

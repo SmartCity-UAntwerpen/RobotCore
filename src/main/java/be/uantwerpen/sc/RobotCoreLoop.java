@@ -104,6 +104,9 @@ public class RobotCoreLoop implements Runnable
         //Wait for tag read
         //Read tag where bot is located
 
+        setupInterface();
+        Terminal.printTerminal("Interface is set up");
+
         synchronized (this) {
             while (dataService.getTag().trim().equals("NONE") || dataService.getTag().equals("NO_TAG")) {
                 try {
@@ -121,8 +124,6 @@ public class RobotCoreLoop implements Runnable
        // updateStartLocation();
 
         //Setup interface for correct mode of pathplanning
-        setupInterface();
-        Terminal.printTerminal("Interface is set up");
 
         //Request map at server with rest
         dataService.map = mapController.getMap();
@@ -290,6 +291,8 @@ public class RobotCoreLoop implements Runnable
             case INDEPENDENT:
                 dataService.setworkingmodeEnum(WorkingmodeEnum.INDEPENDENT);
                 break;
+            case PARTIALSERVERNG:
+                dataService.setworkingmodeEnum(WorkingmodeEnum.PARTIALSERVERNG);
             default:
                 dataService.setworkingmodeEnum(WorkingmodeEnum.INDEPENDENT);
         }

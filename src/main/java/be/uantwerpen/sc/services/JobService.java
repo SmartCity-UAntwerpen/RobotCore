@@ -133,6 +133,9 @@ public class JobService
                             startPathPlanning(startInt);
 
                             while(dataService.tempjob){}
+
+                            //Terminal.printTerminal("first part of job done, new destination = " + job.getEndid());
+
                             dataService.tempjob = false;
                             dataService.executingJob = true;
                             dataService.setDestination(job.getEndid());

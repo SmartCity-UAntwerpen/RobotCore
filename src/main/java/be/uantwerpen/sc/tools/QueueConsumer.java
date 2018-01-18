@@ -68,14 +68,16 @@ public class QueueConsumer implements Runnable
                                 , Void.class); //Aan de server laten weten in welke mode de bot werkt
 
                         dataService.setDestination(-1L);
-
+                        dataService.firstOfQueue = true;
                         dataService.jobfinished = true;
                     }else{
                         Terminal.printTerminal("Temp job finished");
                         Park();
+                        dataService.setDestination(-1L);
                         dataService.robotDriving = false;
                         dataService.tempjob = false;
-                        dataService.setDestination(-1L);
+                        dataService.firstOfQueue = true;
+
                     }
 
                     dataService.executingJob = false;
@@ -85,52 +87,86 @@ public class QueueConsumer implements Runnable
             if(queueService.getContentQueue().size() == 0){
 
             }else{
-                if(!dataService.robotBusy){
+                if(!dataService.robotBusy && (dataService.getWorkingmodeEnum() != null)){
 
-                    if(dataService.firstOfQueue){
-                        RequestLock();
-                    }
+                    switch(dataService.getWorkingmodeEnum()){
+                        case INDEPENDENT:
 
-                    Terminal.printTerminal("Robot not busy");
-                    Terminal.printTerminal(queueService.getContentQueue().toString());
-                    String s = queueService.getJob();
-                    Terminal.printTerminal("Sending: " + s);
-                    sender.sendCommand(s);
-
-                    dataService.robotBusy = true;
-                    Terminal.printTerminal("DRIVING.........");
-                    if(s.contains("DRIVE FOLLOWLINE")){
-                        while(dataService.robotBusy){
-                        }
-
-                        if(dataService.firstOfQueue){
-                            Terminal.printTerminal("First followlin of queue");
-                            dataService.firstOfQueue = false;
-                        }else{
-                            i++;
-                            Terminal.printTerminal("Current = " + dataService.getCurrentLocation() + " next = " + dataService.getNextNode() + " prev = " + dataService.getPrevNode());
-
-                            if(i < dataService.navigationParser.list.size()){
-                                dataService.setPrevNode(dataService.getCurrentLocation());
-                                dataService.setCurrentLocation(dataService.getNextNode());
-                                dataService.setNextNode(dataService.navigationParser.list.get(i).getId());
+                            if(dataService.firstOfQueue){
                                 RequestLock();
-                                ReleaseLock();
-
-                            }else{
-                                dataService.setPrevNode(dataService.getCurrentLocation());
-                                dataService.setCurrentLocation(dataService.getNextNode());
-                                dataService.firstLink();
-                                ReleaseLock(dataService.getNextNode());
                             }
 
-                            Terminal.printTerminal("Current = " + dataService.getCurrentLocation() + " next = " + dataService.getNextNode() + " prev = " + dataService.getPrevNode());
-                        }
-                    }else{
-                        while(dataService.robotBusy){
-                        }
+                            Terminal.printTerminal("Robot not busy");
+                            Terminal.printTerminal(queueService.getContentQueue().toString());
+                            String s = queueService.getJob();
+                            Terminal.printTerminal("Sending: " + s);
+                            sender.sendCommand(s);
 
+                            dataService.robotBusy = true;
+                            Terminal.printTerminal("DRIVING.........");
+                            if(s.contains("DRIVE FOLLOWLINE")){
+                                while(dataService.robotBusy){
+                                }
+
+                                if(dataService.firstOfQueue){
+                                    Terminal.printTerminal("First followlin of queue");
+                                    dataService.firstOfQueue = false;
+                                }else{
+                                    i++;
+                                    Terminal.printTerminal("Current = " + dataService.getCurrentLocation() + " next = " + dataService.getNextNode() + " prev = " + dataService.getPrevNode());
+
+                                    if(i < dataService.navigationParser.list.size()){
+                                        dataService.setPrevNode(dataService.getCurrentLocation());
+                                        dataService.setCurrentLocation(dataService.getNextNode());
+                                        dataService.setNextNode(dataService.navigationParser.list.get(i).getId());
+                                        RequestLock();
+                                        ReleaseLock();
+
+                                    }else{
+                                        dataService.setPrevNode(dataService.getCurrentLocation());
+                                        ReleaseLock(dataService.getCurrentLocation());
+                                        dataService.setCurrentLocation(dataService.getNextNode());
+                                        dataService.firstLink();
+
+                                    }
+
+                                    Terminal.printTerminal("Current = " + dataService.getCurrentLocation() + " next = " + dataService.getNextNode() + " prev = " + dataService.getPrevNode());
+                                    Terminal.printTerminal("Current = " + dataService.getCurrentLocation() + " destination = " + dataService.getDestination());
+                                    Terminal.printTerminal("");
+                                }
+                            }else{
+
+                                while(dataService.robotBusy){
+                                }
+
+                            }
+                            break;
+                     default:
+                         if(dataService.firstOfQueue){
+                             RequestLock();
+                         }
+
+                         Terminal.printTerminal("Robot not busy");
+                         Terminal.printTerminal(queueService.getContentQueue().toString());
+                         String c = queueService.getJob();
+                         Terminal.printTerminal("Sending: " + c);
+                         sender.sendCommand(c);
+
+                         dataService.robotBusy = true;
+                         Terminal.printTerminal("DRIVING.........");
+                         if(c.contains("DRIVE FOLLOWLINE")){
+                             while(dataService.robotBusy){
+                             }
+                             dataService.readTag();
+                         }else{
+
+                             while(dataService.robotBusy){
+                             }
+
+                         }
+                         break;
                     }
+
                 }
             }
 
