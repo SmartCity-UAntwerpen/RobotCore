@@ -50,6 +50,7 @@ public class MqttJobSubscriber
 
     public boolean initialisation()
     {
+        Terminal.printTerminal("subscribing to job topic");
         String clientId = "-1";
 
         //IP / port-values are initialised at the end of the constructor

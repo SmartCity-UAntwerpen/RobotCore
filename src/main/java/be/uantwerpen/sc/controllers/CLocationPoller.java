@@ -26,12 +26,11 @@ public class CLocationPoller implements Runnable
     public void run()
     {
 
-        int drivedist = 0;
         while(!Thread.currentThread().isInterrupted())
         {
             try
             {
-                Thread.currentThread().sleep(75);
+                Thread.currentThread().sleep(2000);
             }
             catch (Exception e)
             {
@@ -39,17 +38,10 @@ public class CLocationPoller implements Runnable
             }
 
             if(dataService.map != null && dataService.robotDriving){
-                dataService.readTag();
-            }
+                //dataService.readTag();
 
-
-            if(drivedist > 35){
                 cCommandSender.sendCommand("DRIVE DISTANCE");
-                drivedist = 0;
-            }else{
-                drivedist++;
             }
-
         }
     }
 }

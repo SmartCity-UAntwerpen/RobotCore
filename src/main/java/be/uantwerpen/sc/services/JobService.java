@@ -93,9 +93,13 @@ public class JobService
 
         Job parsedJob = new Job(jobid,botid,startid,endid);
 
-        dataService.setDestination(endid);
+        //dataService.setDestination(endid);
         Terminal.printTerminal("job parsed");
-        performJob(parsedJob);
+
+        dataService.job = parsedJob;
+        //performJob(parsedJob);
+
+
         //}
 //        catch(Exception e)
 //        {
@@ -103,7 +107,7 @@ public class JobService
 //        }
     }
 
-    private void performJob(Job job)
+    public void performJob(Job job)
     {
 
         int endInt = job.getEndid().intValue();
@@ -118,11 +122,12 @@ public class JobService
                     dataService.jobfinished = false;
                     dataService.tempjob = false;
                     dataService.executingJob = false;
+                    dataService.firstOfQueue = true;
 
 
                         if((dataService.getCurrentLocation() != job.getStartid()) && (!dataService.executingJob)){
+                            Terminal.printTerminal("start location not currentLocation. Going to " + job.getStartid());
                             dataService.setDestination(job.getStartid());
-                            Terminal.printTerminal("start location not currentLocation. Going to " + dataService.getDestination());
                             dataService.tempjob = true;
                             dataService.executingJob = true;
                             startPathPlanning(startInt);
@@ -262,19 +267,7 @@ public class JobService
     }
 
     private void startPathPlanning(int end2){
-        /*
-        dataService.locationUpdated = false;
-        while(!dataService.locationUpdated){
-            //Wait
-            try {
-                //Read tag
-                queueService.insertJob("TAG READ UID");
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        */
+
         Terminal.printTerminal("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end2);
         dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2), dataService);
         //Parse Map

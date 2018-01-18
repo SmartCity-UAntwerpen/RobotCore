@@ -91,23 +91,13 @@ public class SystemLoader implements ApplicationRunner
                 //Thread interrupted
             }
 
-            //robotCoreLoop = new RobotCoreLoop(queueService, mapController, pathController, pathplanningType, dataService);
-
-
             QueueConsumer queueConsumer = new QueueConsumer(queueService,cCommandSender, dataService,serverIP,serverPort);
-            //CLocationPoller cLocationPoller = new CLocationPoller(cCommandSender);
-
-            //Temporary fix for new instantiated RobotCoreLoop / QueueConsumer class (no Spring handling)
-            //robotCoreLoop.setServerCoreIP(serverIP, serverPort);
-            //queueConsumer.setServerCoreIP(serverIP, serverPort);
-
 
             new Thread(robotCoreLoop).start();
             new Thread(cStatusEventHandler).start();
             new Thread(queueConsumer).start();
             new Thread(keepAlivePoller).start();
             new Thread(cLocationPoller).start();
-            //terminalService.setRobotCoreLoop(robotCoreLoop);
 
             terminalService.systemReady();
         }

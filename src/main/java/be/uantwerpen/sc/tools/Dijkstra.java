@@ -49,36 +49,6 @@ public class Dijkstra
         for (Vertex vertex = target; vertex != null;  vertex = vertex.getPrevious())
             path.add(vertex);
 
-        /*
-        Vertex vertex = target;
-        path.add(vertex);
-        i = vertex.getPrevious();
-        vertex= vertexes.get(i);
-
-
-        int i = (int)(target.getId() % Integer.MAX_VALUE);
-        do {
-            for (Vertex v : vertexes){
-                if(v.getId() == i) {
-                    path.add(getVertexByID(vertexes,i - 1));
-                    break;
-                }
-            }
-            try {
-                i = (int)(getVertexByID(vertexes,i-1).getPrevious().getId() % Integer.MAX_VALUE);
-            }catch (Exception e){
-               i = 0;
-            }
-        } while (i != 0);
-
-       /* for (int i = target.getId(); vertexes.get(i).getPrevious() != null; i = vertexes.get(i).getPrevious()){
-            for (Vertex v : vertexes){
-                if(v.getId() == i)
-                    path.add(vertexes.get(i-1));
-            }
-        }*/
-
-
         Collections.reverse(path);
         return path;
     }

@@ -56,19 +56,6 @@ public class NavigationParser {
                         break;
 
                 }
-                //direction start = findStartDir(current);
-                //direction stop = findStopDir(next);
-                //DriveDir relDir = getNextRelDir(start, stop);
-                /*System.out.println("reldir: "+relDir);
-                if(relDir.toString().equals("DRIVE FORWARD 120")){
-                    System.out.println("EQUALS");
-                }*/
-                /*else{
-                    //Pass crossroad
-                    commands.add(relDir);
-                    //Drive followLine
-                    commands.add(new DriveDir(DriveDirEnum.FOLLOW));
-                }*/
 
             }else{
                 for(int i = 2; i < list.size(); i++) {

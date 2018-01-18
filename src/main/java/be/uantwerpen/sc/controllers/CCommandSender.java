@@ -73,18 +73,10 @@ public class CCommandSender
 
     public synchronized boolean sendCommand(String str){ //commandos sturen naar robot driver
         try {
-            //byte[] message = str.getBytes();
-            //System.out.println(message.toString());
-
-            int attempts = 0;
-
             str = str.concat("\n");
 
             byte[] bytes = str.getBytes();
 
-            //while(attempts <5) {
-            //Send message
-            //dOut.writeInt(message.length); // write length of the message
             dOut.flush();
             dOut.write(bytes);
             dOut.flush();

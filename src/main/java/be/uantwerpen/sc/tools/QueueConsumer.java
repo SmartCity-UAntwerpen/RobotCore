@@ -29,7 +29,7 @@ public class QueueConsumer implements Runnable
     private DataService dataService;
 
     private boolean lockGranted = false;
-    private boolean first = true;
+    //private boolean first = true;
     private int prevQueueSize = 0;
 
     private BlockingQueue<String> jobQueue;
@@ -46,10 +46,7 @@ public class QueueConsumer implements Runnable
     @Deprecated
     public void setServerCoreIP(String ip, int port)
     {
-        /*
-        this.serverIP = ip;
-        this.serverPort = port;
-        */
+
     }
 
     @Override
@@ -57,61 +54,7 @@ public class QueueConsumer implements Runnable
         int i = 1;
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                //System.out.println("Consumer wants to consume");
-                Thread.sleep(100);
 
-                if(dataService.navigationParser != null && dataService.navigationParser.list!= null){
-                    if((i < dataService.navigationParser.list.size()) && (dataService.getCurrentLocation() == dataService.getNextNode())){
-                        dataService.setNextNode(dataService.navigationParser.list.get(i).getId());
-                        dataService.setPrevNode(dataService.navigationParser.list.get(i-1).getId());
-
-                        Terminal.printTerminal("Change next en prev node: " + dataService.getNextNode() + " " + dataService.getPrevNode());
-
-                        i++;
-                    }
-
-                }
-
-
-                //kijken of een kruispunt vrij is en een lock aanvragen
-                if(dataService.getNextNode() != -1) {
-                    if (!lockGranted) {
-                        //Robot already has permission?
-                        if (!(dataService.hasPermission() == dataService.getNextNode())) {
-                            Terminal.printTerminal("Millis: " + dataService.getMillis() + " ,linkMillis: " + (dataService.getLinkMillis() - 150));
-                            //if (dataService.getMillis() > dataService.getLinkMillis() - 200) {
-                                //Pause robot
-                                sender.sendCommand("DRIVE PAUSE");
-                                Terminal.printTerminal("PAUSED");
-                                //Ask for permission
-                                RestTemplate rest = new RestTemplate();
-                                boolean response = false;
-                                Terminal.printTerminal("Lock Requested : " + dataService.getNextNode());
-
-                                while (!response) {
-
-                                    response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/requestlock/" + dataService.getNextNode(), boolean.class);
-
-                                    if (!response) {
-                                        Terminal.printTerminal("Lock Denied: " + dataService.getNextNode());
-                                        Thread.sleep(200);
-                                    }
-                                }
-                                //response true -> Lock granted
-                                Terminal.printTerminal("Lock Granted: " + dataService.getNextNode());
-                                lockGranted = true;
-                                dataService.setPermission((int)(long)dataService.getNextNode());
-                                Terminal.printTerminal("Permission: " + dataService.hasPermission() + " ,NextNode: " + dataService.getNextNode());
-                                sender.sendCommand("DRIVE RESUME");
-                                Terminal.printTerminal("RESUMED");
-                            //}
-                        } else {
-                            lockGranted = true;
-                        }
-                    }
-                }
-
-                //zijn er nog jobs in de queue?
                 if((dataService.getCurrentLocation() == dataService.getDestination()) && (dataService.getDestination() != -1L) && (dataService.getCurrentLocation() != -1L)){
                     Terminal.printTerminal("Current location : " + dataService.getCurrentLocation() + " destination : " + dataService.getDestination() + " tempjob : " + dataService.tempjob);
 
@@ -136,61 +79,61 @@ public class QueueConsumer implements Runnable
                     }
 
                     dataService.executingJob = false;
-
-
-
+                    i = 1;
                 }
-                if(queueService.getContentQueue().size() == 0){
 
-                }else{
-                    //If robot not busy
+            if(queueService.getContentQueue().size() == 0){
 
-                    if(!dataService.robotBusy) {
-                        Terminal.printTerminal("Robot not busy");
-                        Terminal.printTerminal(queueService.getContentQueue().toString());
-                        String s = queueService.getJob();
-                        Terminal.printTerminal("Sending: " + s);
-                        sender.sendCommand(s);
-                        //change looking coordinate when turning
-                        if(dataService.getCurrentLocation()!=-1)
-                            if(dataService.getMap().changeLookingDir(dataService.getCurrentLocation(), dataService.getTag())!=null)
-                                dataService.setLookingCoordiante(dataService.getMap().changeLookingDir(dataService.getCurrentLocation(), dataService.getTag()));
-                        System.out.println("coordinate: "+dataService.getLookingCoordiante());
+            }else{
+                if(!dataService.robotBusy){
 
-                        if(!s.contains("DRIVE DISTANCE")) {
+                    if(dataService.firstOfQueue){
+                        RequestLock();
+                    }
 
-                            dataService.robotBusy = true;
-                            dataService.setLocationVerified(false);
+                    Terminal.printTerminal("Robot not busy");
+                    Terminal.printTerminal(queueService.getContentQueue().toString());
+                    String s = queueService.getJob();
+                    Terminal.printTerminal("Sending: " + s);
+                    sender.sendCommand(s);
+
+                    dataService.robotBusy = true;
+                    Terminal.printTerminal("DRIVING.........");
+                    if(s.contains("DRIVE FOLLOWLINE")){
+                        while(dataService.robotBusy){
                         }
-                        if(s.contains("DRIVE FOLLOWLINE")){
-                            //Next Link
-                            if(first) {
-                                first = false;
-                                Terminal.printTerminal("Setting up");
+
+                        if(dataService.firstOfQueue){
+                            Terminal.printTerminal("First followlin of queue");
+                            dataService.firstOfQueue = false;
+                        }else{
+                            i++;
+                            Terminal.printTerminal("Current = " + dataService.getCurrentLocation() + " next = " + dataService.getNextNode() + " prev = " + dataService.getPrevNode());
+
+                            if(i < dataService.navigationParser.list.size()){
+                                dataService.setPrevNode(dataService.getCurrentLocation());
+                                dataService.setCurrentLocation(dataService.getNextNode());
+                                dataService.setNextNode(dataService.navigationParser.list.get(i).getId());
+                                RequestLock();
+                                ReleaseLock();
+
                             }else{
-                                //dataService.nextLink();
-                                //dataService.readTag();
+                                dataService.setPrevNode(dataService.getCurrentLocation());
+                                dataService.setCurrentLocation(dataService.getNextNode());
+                                dataService.firstLink();
+                                ReleaseLock(dataService.getNextNode());
                             }
 
-                            //TODO when sending manual commands calling getNextNode will crash the program
-                            //When changing link reset permission
-                            if(dataService.hasPermission() == dataService.getNextNode()){
-                                //Leave permission
-                            }else {
-                                dataService.setPermission(-1);
-                                Terminal.printTerminal("Permission reset");
-                                lockGranted = false;
-                            }
-
-                            //Unlock point
-                            Terminal.printTerminal("resetting point :" + dataService.getPrevNode());
-                            RestTemplate rest = new RestTemplate();
-                            boolean setlock = rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/setlock/" + dataService.getPrevNode() + "/0", Boolean.class);
-                            Terminal.printTerminal("resetting point");
+                            Terminal.printTerminal("Current = " + dataService.getCurrentLocation() + " next = " + dataService.getNextNode() + " prev = " + dataService.getPrevNode());
                         }
+                    }else{
+                        while(dataService.robotBusy){
+                        }
+
                     }
                 }
-                //System.out.println("CrunchifyBlockingConsumer: Message - " + queueService.getJob() + " consumed.");
+            }
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -211,24 +154,45 @@ public class QueueConsumer implements Runnable
             dataService.setTag("NONE");
             sender.sendCommand("DRIVE BACKWARDS 150");
             sender.sendCommand("SPEAKER SAY TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT");
-            while(dataService.getTag().equals("NONE") || dataService.getTag().equals("NO_TAG")){
-
-            }
-            Terminal.printTerminal("Tag found : " + dataService.getTag() + "end");
-            sender.sendCommand("DRIVE ABORT");
-            sender.sendCommand("SPEAKER MUTE");
-                /*
-            sender.sendCommand("DRIVE BACKWARDS 400");
-
-
-            }
-
-
-            */
         }catch (Exception e){
             e.printStackTrace();
         }
 
 
+    }
+
+    public void RequestLock(){
+        try{
+            if(dataService.getNextNode() != -1) {
+                RestTemplate rest = new RestTemplate();
+                boolean response = false;
+                Terminal.printTerminal("Lock Requested : " + dataService.getNextNode());
+
+                while (!response) {
+
+                    response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/requestlock/" + dataService.getNextNode(), boolean.class);
+
+                    if (!response) {
+                        Terminal.printTerminal("Lock Denied: " + dataService.getNextNode());
+                        Thread.sleep(200);
+                    }
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
+    public void ReleaseLock(){
+        Terminal.printTerminal("resetting point :" + dataService.getPrevNode());
+        RestTemplate restTemplate = new RestTemplate();
+        boolean setlock = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/point/setlock/" + dataService.getPrevNode() + "/0", Boolean.class);
+    }
+
+    public void ReleaseLock(Long pointToRelease){
+        Terminal.printTerminal("resetting point :" + dataService.getPrevNode());
+        RestTemplate restTemplate = new RestTemplate();
+        boolean setlock = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/point/setlock/" + pointToRelease + "/0", Boolean.class);
     }
 }

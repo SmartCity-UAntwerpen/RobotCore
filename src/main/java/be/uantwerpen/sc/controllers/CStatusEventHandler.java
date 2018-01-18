@@ -67,8 +67,6 @@ public class CStatusEventHandler implements Runnable
     @Override
     public void run()
     {
-
-
         while(!Thread.currentThread().isInterrupted()){
             try {
                 String s = readData();
@@ -178,7 +176,6 @@ public class CStatusEventHandler implements Runnable
                 b = (char)dIn.readByte();
 
             }
-
             return recvData;
         }catch(Exception e){
             e.printStackTrace();

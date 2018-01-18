@@ -1,6 +1,7 @@
 package be.uantwerpen.sc.services;
 
 import be.uantwerpen.sc.controllers.CCommandSender;
+import be.uantwerpen.sc.models.Job;
 import be.uantwerpen.sc.models.links.Link;
 import be.uantwerpen.sc.models.map.Map;
 import be.uantwerpen.sc.models.map.Node;
@@ -53,6 +54,10 @@ public class DataService
     public boolean jobfinished = false;
     public boolean tempjob = false;
     public boolean executingJob = false;
+
+    public boolean firstOfQueue = true;
+
+    public Job job = null;
 
     public Long getNextNode() {
         return nextNode;
@@ -226,21 +231,15 @@ public class DataService
 
     public void readTag(){
 
-        try {
-                    //Read tag
-            if(map != null){
+        while (getTag().trim().equals("NONE") || getTag().equals("NO_TAG")) {
+            try {
+                //Read tag
                 commandSender.sendCommand("TAG READ UID");
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-
-            //Thread.sleep(100);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-        /*
-        if(tag != null && !tag.equals("NONE") && !tag.equals("NO_TAG")){
-            currentLocation = map.getNodeByRFID(tag);
-        }
-        */
     }
 
     public void nextLink(){

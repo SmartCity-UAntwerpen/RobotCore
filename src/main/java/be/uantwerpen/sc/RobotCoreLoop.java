@@ -128,8 +128,6 @@ public class RobotCoreLoop implements Runnable
         dataService.map = mapController.getMap();
         Terminal.printTerminal("Map received " + dataService.map.getNodeList());
 
-
-
         //Set location of bot
         dataService.setCurrentLocation(dataService.map.getNodeByRFID(dataService.getTag()));
         Terminal.printTerminal("Start Location: " + dataService.getCurrentLocation()+"\n\n");
@@ -139,30 +137,15 @@ public class RobotCoreLoop implements Runnable
         Terminal.printTerminal("link updated");
         Terminal.printTerminal("next: "+dataService.getNextNode());
 
-        /*
-        for(int i = 0; i < dataService.map.getNodeList().size();i++){
-            for(int j = 0; j < dataService.map.getNodeList().get(i).getNeighbours().size();j++){
-                Terminal.printTerminal("NodeId = " +  dataService.map.getNodeList().get(i).getNodeId() + " Rfid = " + dataService.map.getNodeList().get(i).getPointEntity().getRfid());
-                Terminal.printTerminal("Stop direction" + dataService.map.getNodeList().get(i).getNeighbours().get(j).getStopDirection());
-                Terminal.printTerminal("Start direction" + dataService.map.getNodeList().get(i).getNeighbours().get(j).getStartDirection());
-            }
-
-        }
-        */
-        //Set looking dir of bot
-//        dataService.setLookingCoordiante(dataService.map.getNodeList().get(dataService.getCurrentLocation().intValue()).getNeighbours().get(0).getStartDirection());
         Terminal.printTerminal("looking in direction " + dataService.getLookingCoordiante());
 
-
-        //queueService.insertJob("DRIVE FORWARD 120");
-        //Terminal.printTerminal("LINE");
-        //queueService.insertJob("DRIVE FOLLOWLINE");
-        //Terminal.printTerminal("CROSS");
-        //queueService.insertJob("DRIVE FORWARD 50");
-        //Terminal.printTerminal("LINE");
-        //queueService.insertJob("DRIVE FOLLOWLINE");
-
         while(!Thread.interrupted()){
+
+            if(dataService.job != null){
+                jobService.performJob(dataService.job);
+                dataService.job = null;
+            }
+
         /*
             switch(workingmodeType.getType()){
                 case PARTIALSERVER:
