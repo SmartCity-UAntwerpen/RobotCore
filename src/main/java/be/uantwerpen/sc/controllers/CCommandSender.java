@@ -45,7 +45,6 @@ public class CCommandSender
         {
 
             //socket openen met de robot driver
-
             socket = new Socket(coreIP, coreCommandPort);
             socket.setSoTimeout(500);
             dOut = new DataOutputStream(socket.getOutputStream());

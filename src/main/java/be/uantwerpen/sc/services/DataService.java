@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 /**
  * Created by Arthur on 24/04/2016.
  */
+//Class waarin bijna alles wordt bijgehouden
 @Service
 public class DataService
 {
@@ -31,9 +32,11 @@ public class DataService
     private Long linkMillis;
 
     private Long nextNode = -1L;
-    boolean locationVerified = false;
     private Long prevNode = -1L;
+
+    boolean locationVerified = false;
     private int hasPermission = -1;
+
     public boolean robotBusy = false;
     public boolean locationUpdated = true;
     public String trafficLightStatus;
@@ -233,12 +236,18 @@ public class DataService
 
         locationUpdated = false;
         int timesTried = 0;
-        while (getTag().trim().equals("NONE") || getTag().equals("NO_TAG") || locationUpdated == false || timesTried < 5) {
+        while (getTag().trim().equals("NONE") || getTag().equals("NO_TAG") || locationUpdated == false) {
             try {
                 //Read tag
+                Terminal.printTerminal("Trying to read tag " + timesTried);
                 timesTried++;
                 commandSender.sendCommand("TAG READ UID");
                 Thread.sleep(2000);
+
+                if(timesTried > 4){
+                    break;
+                }
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

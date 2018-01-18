@@ -34,6 +34,7 @@ public class NavigationParser {
             Vertex current = list.get(0);
             System.out.println("current: "+current);
             Vertex previous = list.get(0);
+
             Vertex next = list.get(1);
             System.out.println("next: "+next+"\n");
             if(list.size()==2){
@@ -82,11 +83,7 @@ public class NavigationParser {
     }
 
     private direction findStartDir(Vertex current){
-        Terminal.printTerminal("Find start dir________________");
         int i = current.getPrevious().getAdjacencies().indexOf(current);
-
-        System.out.println("Start link id" + current.getPrevious().getAdjacencies().get(i).getLinkEntity().getId());
-
         String dirString = current.getPrevious().getAdjacencies().get(i).getLinkEntity().getStopDirection();
         direction dir = getDirection(dirString);
 
@@ -109,11 +106,7 @@ public class NavigationParser {
     }
 
     private direction findStopDir(Vertex next){
-        Terminal.printTerminal("________________Find stop dir________________");
         int i = next.getPrevious().getAdjacencies().indexOf(next);
-
-        System.out.println("Stop link id" + next.getPrevious().getAdjacencies().get(i).getLinkEntity().getId());
-        System.out.println("Stop start dir" + next.getPrevious().getAdjacencies().get(i).getLinkEntity().getStartDirection());
         String dirString = next.getPrevious().getAdjacencies().get(i).getLinkEntity().getStartDirection();
         direction dir = getDirection(dirString);
 

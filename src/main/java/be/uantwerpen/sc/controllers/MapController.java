@@ -26,28 +26,6 @@ public class MapController
     @Value("#{new Integer(${sc.core.port}) ?: 1994}")
     private int serverPort;
 
-    /*@RequestMapping(method = RequestMethod.GET)
-    public String getMap() throws IOException {
-        System.out.println("DoSomething");
-
-        // supposed this is your FirstController url.
-        //String url = "http://localhost:1994/map/";
-        // create request.
-        HttpClient client = HttpClientBuilder.create().build();
-        HttpGet request = new HttpGet(url);
-        // execute your request.
-        HttpResponse response = client.execute(request);
-        // do whatever with the response.
-        BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-        StringBuffer result = new StringBuffer();
-        String line = "";
-        while ((line = rd.readLine()) != null) {
-            result.append(line);
-        }
-        //System.out.println(result.toString());
-        return result.toString();
-    }*/
-
     @RequestMapping(method = RequestMethod.GET)
     public Map getMap(){
         RestTemplate restTemplate = new RestTemplate();

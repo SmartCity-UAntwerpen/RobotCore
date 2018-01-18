@@ -3,6 +3,7 @@ package be.uantwerpen.sc.tools;
 import java.util.ArrayList;
 import java.util.List;
 
+//Used to receive an a list of commands with rest
 public class DriveDirEncapsulator {
     private List<DriveDir> driveDirs;
     public DriveDirEncapsulator() {

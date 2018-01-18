@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 /**
  * Created by Arthur on 11/05/2016.
  */
+
+//Als de bot aan het rijden is moet er om de zoveel tijd een bericht gestuurd worden locatie en progress
 @Service
 public class CLocationPoller implements Runnable
 {

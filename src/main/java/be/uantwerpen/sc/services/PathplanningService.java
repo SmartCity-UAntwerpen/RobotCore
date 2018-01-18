@@ -49,7 +49,6 @@ public class PathplanningService implements IPathplanning
                                 realLink = linkEntity;
                             }
                         }
-                        //edges.add(new Edge(v.getId(),neighbour.getWeight(),linkControlService.getLink(neighbour.getPointEntity().getPid())));
                         edges.add(new Edge(v.getId(),neighbour.getWeight(),realLink));
                     }
                 }
@@ -62,19 +61,21 @@ public class PathplanningService implements IPathplanning
             vertexes.get(j).setAdjacencies(edgeslistinlist.get(j));
         }
 
-        Vertex v = vertexes.get(start-1);
+        Vertex v = new Vertex();
+        for(int k = 0; i < vertexes.size();k++){
+
+            if(vertexes.get(k).getId() == start){
+                v = vertexes.get(i);
+            }
+
+        }
+
 
         dijkstra.computePaths(v,vertexes); // run Dijkstra
-        System.out.println("Distance to " + vertexes.get(stop-1) + ": " + vertexes.get(stop-1).getMinDistance());
+        //System.out.println("Distance to " + vertexes.get(stop-1) + ": " + vertexes.get(stop-1).getMinDistance());
         List<Vertex> path = dijkstra.getShortestPathTo((stop),vertexes);
         System.out.println("Path: " + path);
         //return ("Distance to " + vertexes.get(stop-1) + ": " + vertexes.get(stop-1).minDistance) + ( "Path: " + path);
         return path;
     }
-
-    /*@Override
-    public Vertex nextRandomPath(Map map, int start) {
-
-        return null;
-    }*/
 }

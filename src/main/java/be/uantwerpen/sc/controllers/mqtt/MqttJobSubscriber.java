@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
  */
 
 /*
-Class voor het subscriben van de bot
+Class voor het subscriben van de bot bij de backend
  */
 @Service
 public class MqttJobSubscriber

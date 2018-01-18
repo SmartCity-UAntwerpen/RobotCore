@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 /**
  * Created by Arthur on 9/05/2016.
  */
+
+// Class waarmee de mqtt berichten worden gestuurd
 @Service
 public class MqttPublisher
 {
@@ -58,10 +60,7 @@ public class MqttPublisher
                 connOpts.setCleanSession(true);
                 connOpts.setUserName(mqttUsername);
                 connOpts.setPassword(mqttPassword.toCharArray());
-                //System.out.println("Connecting to broker: "+broker);
                 client.connect(connOpts);
-                //System.out.println("Connected");
-                //System.out.println("Publishing message: " + content);
                 MqttMessage message = new MqttMessage(content.getBytes());
                 message.setQos(qos);
                 client.publish(topic, message);
@@ -98,8 +97,6 @@ public class MqttPublisher
 
     public void sendAlive(){
         try {
-
-
             String topic = "BOT/alive";
             String broker = "tcp://" + mqttIP + ":" + mqttPort;
             String clientId = dataService.getRobotID().toString();
@@ -114,8 +111,6 @@ public class MqttPublisher
             connOpts.setPassword(mqttPassword.toCharArray());
 
             client.connect(connOpts);
-            //System.out.println("Connected");
-            //System.out.println("Publishing message: " + content);
             String content = "botid:" + clientId;
             MqttMessage message = new MqttMessage(content.getBytes());
             message.setQos(2);

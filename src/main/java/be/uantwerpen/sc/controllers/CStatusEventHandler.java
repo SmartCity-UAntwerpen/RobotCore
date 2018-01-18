@@ -15,6 +15,7 @@ import java.net.Socket;
 /**
  * Created by Arthur on 4/05/2016.
  */
+//Hier worden de antwoorden van de robotdriver opgevangen
 @Service
 public class CStatusEventHandler implements Runnable
 {
@@ -69,8 +70,7 @@ public class CStatusEventHandler implements Runnable
     {
         while(!Thread.currentThread().isInterrupted()){
             try {
-                String s = readData();
-                //TODO Continue this method
+                String s = readData(); //Waiting foor meassages
                 if (s.startsWith("DRIVE EVENT: FINISHED")){
                     synchronized (this){
                         dataService.robotBusy = false;
@@ -92,26 +92,9 @@ public class CStatusEventHandler implements Runnable
                     }
                 }
                 if (s.startsWith("TRAVEL DISTANCE EVENT")){
-                    //Terminal.printTerminal("Travel distance event: " + s);
                     String millisString = s.split(":", 2)[1].trim();
                     int millis = Integer.parseInt(millisString);
                     locationPublisher.publishLocation(millis, 45L);
-                    /*
-                    if(!dataService.isLocationVerified()){
-                        if(millis < 50){
-                            dataService.setLocationVerified(true);
-                        }else{
-                            dataService.setMillis(0);
-                        }
-                    }else{
-                        synchronized (this) {
-                            //Terminal.printTerminal("Distance: " + millis);
-                            dataService.setMillis(millis);
-                            locationPublisher.publishLocation(millis, 45L); ////whuuuuuuut
-                        }
-                    }
-                    */
-
 
                 }if (s.startsWith("TAG DETECTION EVENT")){
                     String tag = s.split(":", 2)[1].trim();
@@ -119,7 +102,6 @@ public class CStatusEventHandler implements Runnable
                         dataService.setTag(tag);
                         dataService.robotBusy = false;
 
-                        //dataService.setCurrentLocationAccordingTag();
                         if(!tag.trim().equals("NONE") && !tag.trim().equals("NO_TAG"))
                         {
                             if(dataService.getMap() != null){

@@ -3,6 +3,7 @@ package be.uantwerpen.sc.models;
 /**
  * Created by Niels on 4/05/2016.
  */
+//Hierin wordt alle info van de job bewaard
 public class Job
 {
     private Long jobId,botid,startid,endid;

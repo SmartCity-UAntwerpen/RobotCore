@@ -58,7 +58,7 @@ public class QueueConsumer implements Runnable
                 if((dataService.getCurrentLocation() == dataService.getDestination()) && (dataService.getDestination() != -1L) && (dataService.getCurrentLocation() != -1L)){
                     Terminal.printTerminal("Current location : " + dataService.getCurrentLocation() + " destination : " + dataService.getDestination() + " tempjob : " + dataService.tempjob);
 
-                    if(!dataService.tempjob){
+                    if(!dataService.tempjob){ //end of total job
                         Park();
                         Terminal.printTerminal("Total job Finished");
                         dataService.robotDriving = false;
@@ -70,7 +70,7 @@ public class QueueConsumer implements Runnable
                         dataService.setDestination(-1L);
                         dataService.firstOfQueue = true;
                         dataService.jobfinished = true;
-                    }else{
+                    }else{ //end of temp job
                         Terminal.printTerminal("Temp job finished");
                         Park();
                         dataService.setDestination(-1L);
@@ -91,7 +91,7 @@ public class QueueConsumer implements Runnable
 
                     switch(dataService.getWorkingmodeEnum()){
                         case INDEPENDENT:
-
+                            Terminal.printTerminal("case independent");
                             if(dataService.firstOfQueue){
                                 RequestLock();
                             }
@@ -105,7 +105,7 @@ public class QueueConsumer implements Runnable
                             dataService.robotBusy = true;
                             Terminal.printTerminal("DRIVING.........");
                             if(s.contains("DRIVE FOLLOWLINE")){
-                                while(dataService.robotBusy){
+                                while(dataService.robotBusy){ //wait till drive event is finished
                                 }
 
                                 if(dataService.firstOfQueue){
@@ -136,16 +136,12 @@ public class QueueConsumer implements Runnable
                                 }
                             }else{
 
-                                while(dataService.robotBusy){
+                                while(dataService.robotBusy){//wait till drive event is finished
                                 }
 
                             }
                             break;
                      default:
-                         if(dataService.firstOfQueue){
-                             RequestLock();
-                         }
-
                          Terminal.printTerminal("Robot not busy");
                          Terminal.printTerminal(queueService.getContentQueue().toString());
                          String c = queueService.getJob();
@@ -155,12 +151,12 @@ public class QueueConsumer implements Runnable
                          dataService.robotBusy = true;
                          Terminal.printTerminal("DRIVING.........");
                          if(c.contains("DRIVE FOLLOWLINE")){
-                             while(dataService.robotBusy){
+                             while(dataService.robotBusy){//wait till drive event is finished
                              }
                              dataService.readTag();
                          }else{
 
-                             while(dataService.robotBusy){
+                             while(dataService.robotBusy){//wait till drive event is finished
                              }
 
                          }
@@ -183,12 +179,18 @@ public class QueueConsumer implements Runnable
             sender.sendCommand("SPEAKER UNMUTE");
             sender.sendCommand("SPEAKER SAY PARKING");
 
+            dataService.robotBusy = true;
             sender.sendCommand("DRIVE ROTATE R 180");
+            while(dataService.robotBusy){
+            }
 
-            Thread.sleep(6000);
+            //Thread.sleep(6000);
 
             dataService.setTag("NONE");
+            dataService.robotBusy = true;
             sender.sendCommand("DRIVE BACKWARDS 150");
+            while(dataService.robotBusy){
+            }
             sender.sendCommand("SPEAKER SAY TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT");
         }catch (Exception e){
             e.printStackTrace();

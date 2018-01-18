@@ -125,16 +125,14 @@ public class JobService
                     dataService.firstOfQueue = true;
 
 
-                        if((dataService.getCurrentLocation() != job.getStartid()) && (!dataService.executingJob)){
+                        if((dataService.getCurrentLocation() != job.getStartid()) && (!dataService.executingJob)){ //bot is not located at start of job
                             Terminal.printTerminal("start location not currentLocation. Going to " + job.getStartid());
                             dataService.setDestination(job.getStartid());
                             dataService.tempjob = true;
                             dataService.executingJob = true;
                             startPathPlanning(startInt);
 
-                            while(dataService.tempjob){}
-
-                            //Terminal.printTerminal("first part of job done, new destination = " + job.getEndid());
+                            while(dataService.tempjob){} //wait till tempjob is finished
 
                             dataService.tempjob = false;
                             dataService.executingJob = true;
@@ -159,9 +157,11 @@ public class JobService
                 break;
             case PARTIALSERVER:
                 try {
-                    //int endInt = Integer.parseInt(end);
-                    //get commands from server
+                    dataService.setDestination(job.getEndid());
                     dataService.robotDriving = true;
+                    dataService.tempjob = false;
+                    dataService.executingJob = true;
+
                     startPathRobotcore(startInt,endInt);
                 } catch (NumberFormatException e) {
                     Terminal.printTerminalError(e.getMessage());
@@ -170,9 +170,8 @@ public class JobService
                 break;
             case PARTIALSERVERNG:
                 try {
-                    //int endInt = Integer.parseInt(end);
-                    //get commands from server
                     dataService.robotDriving = true;
+
                     startPathRobotcoreNg(startInt,endInt);
                 } catch (NumberFormatException e) {
                     Terminal.printTerminalError(e.getMessage());
@@ -182,91 +181,24 @@ public class JobService
             case FULLSERVER:
                 try {
                     Terminal.printTerminal("FullServer mode");
-                    //int endInt = Integer.parseInt(end);
                     Terminal.printTerminal("Current Location = " + dataService.getCurrentLocation() + " end int = " + endInt);
+                    dataService.setDestination(job.getEndid());
                     dataService.robotDriving = true;
+                    dataService.tempjob = false;
+                    dataService.executingJob = true;
                     while(dataService.getCurrentLocation()!=endInt){
 
-                        //Terminal.printTerminal("get Content queue = " + queueService.getContentQueue().size());
                         if(queueService.getContentQueue().size() == 0){
-                            //get first command from server
                             Terminal.printTerminal("StartPathFullRobotCore");
                             startPathFullRobotcore(startInt, endInt);
                         }
                     }
-
-
                 } catch (NumberFormatException e) {
                     Terminal.printTerminalError(e.getMessage());
                     Terminal.printTerminalInfo("Usage: navigate end");
                 }
                 break;
         }
-
-
-        /*
-        String jobDescription = job.getJobDescription();
-
-        System.out.println("JOB DESCRIPTION: " + jobDescription);
-
-        switch(jobDescription.split(" ", 2)[0].toLowerCase())
-        {
-            case "navigate":
-                try {
-                    String end = jobDescription.split(" ", 2)[1].toLowerCase();
-                    switch(dataService.getWorkingmodeEnum()) {
-                        case INDEPENDENT:
-                            try {
-                                int endInt = Integer.parseInt(end);
-                                //compute path on robot
-                                startPathPlanning(endInt);
-                            } catch (NumberFormatException e) {
-                                Terminal.printTerminalError(e.getMessage());
-                                Terminal.printTerminalInfo("Usage: navigate end");
-                            }
-                            break;
-                        case PARTIALSERVER:
-                            try {
-                                int endInt = Integer.parseInt(end);
-                                //get commands from server
-                                startPathRobotcore(endInt);
-                            } catch (NumberFormatException e) {
-                                Terminal.printTerminalError(e.getMessage());
-                                Terminal.printTerminalInfo("Usage: navigate end");
-                            }
-                            break;
-                        case FULLSERVER:
-                            try {
-                                int endInt = Integer.parseInt(end);
-                                while(dataService.getCurrentLocation()!=endInt)
-                                    if(queueService.getContentQueue().size() == 0){
-                                        //get first command from server
-                                        startPathFullRobotcore(endInt);
-                                    }
-                            } catch (NumberFormatException e) {
-                                Terminal.printTerminalError(e.getMessage());
-                                Terminal.printTerminalInfo("Usage: navigate end");
-                            }
-                            break;
-                    }
-                }catch(ArrayIndexOutOfBoundsException e){
-                    Terminal.printTerminalInfo("Usage: navigate end");
-                }
-                break;
-            case "playaudio":
-                sender.sendCommand("SPEAKER UNMUTE");
-                sender.sendCommand("SPEAKER PLAY QMusic");
-                try{
-                    Thread.sleep(1000);
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-                sender.sendCommand("SPEAKER PLAY cantina");
-                break;
-            default:
-                System.out.println("Unknown job description: " + jobDescription);
-        }
-        */
     }
 
     private void startPathPlanning(int end2){
@@ -275,9 +207,6 @@ public class JobService
         dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2), dataService);
         //Parse Map
         dataService.navigationParser.parseMap();
-        //dataService.navigationParser.parseRandomMap(dataService);
-
-        //removeDriveCommands();
 
         //Setup for driving
         int start = (int)(long)dataService.navigationParser.list.get(0).getId();
@@ -352,10 +281,7 @@ public class JobService
         DriveDirEncapsulator nextPath = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/map/getnexthop/"
                 + start + "/" + dataService.getCurrentLocation() + "/" + end, DriveDirEncapsulator.class);
 
-        Terminal.printTerminal("Drive dir Ontvangen = " + nextPath);
-        //Process map but only 2 first commands
         for (int i = 0; i < nextPath.getDriveDirs().size();i++) {
-            Terminal.printTerminal("Full server command: " + nextPath.getDriveDirs().get(i).toString());
             queueService.insertJob(nextPath.getDriveDirs().get(i).toString());
         }
     }
