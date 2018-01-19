@@ -183,15 +183,12 @@ public class QueueConsumer implements Runnable
             sender.sendCommand("DRIVE ROTATE R 180");
             while(dataService.robotBusy){
             }
-
-            //Thread.sleep(6000);
-
-            dataService.setTag("NONE");
+            sender.sendCommand("SPEAKER SAY TUUT TUUT TUUT TUUT");
             dataService.robotBusy = true;
             sender.sendCommand("DRIVE BACKWARDS 150");
             while(dataService.robotBusy){
             }
-            sender.sendCommand("SPEAKER SAY TUUT TUUT TUUT TUUT TUUT TUUT TUUT TUUT");
+
         }catch (Exception e){
             e.printStackTrace();
         }
