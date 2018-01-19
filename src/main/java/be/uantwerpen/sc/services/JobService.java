@@ -124,7 +124,6 @@ public class JobService
                     dataService.executingJob = false;
                     dataService.firstOfQueue = true;
 
-
                         if((dataService.getCurrentLocation() != job.getStartid()) && (!dataService.executingJob)){ //bot is not located at start of job
                             Terminal.printTerminal("start location not currentLocation. Going to " + job.getStartid());
                             dataService.setDestination(job.getStartid());
@@ -139,16 +138,12 @@ public class JobService
                             dataService.setDestination(job.getEndid());
                             startPathPlanning(endInt);
 
-
                         }else{
                             dataService.tempjob = false;
                             dataService.executingJob = true;
                             dataService.setDestination(job.getEndid());
                             startPathPlanning(endInt);
                         }
-
-
-
 
                 } catch (NumberFormatException e) {
                     Terminal.printTerminalError(e.getMessage());
@@ -171,7 +166,6 @@ public class JobService
             case PARTIALSERVERNG:
                 try {
                     dataService.robotDriving = true;
-
                     startPathRobotcoreNg(startInt,endInt);
                 } catch (NumberFormatException e) {
                     Terminal.printTerminalError(e.getMessage());

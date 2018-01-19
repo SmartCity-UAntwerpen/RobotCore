@@ -123,7 +123,8 @@ public class RobotCoreLoop implements Runnable
 
         //We have the map now, update link
 
-        dataService.firstLink();
+        if(dataService.getWorkingmodeEnum()==WorkingmodeEnum.INDEPENDENT)
+            dataService.firstLink();
         Terminal.printTerminal("link updated");
         Terminal.printTerminal("next: "+dataService.getNextNode());
 
