@@ -1,5 +1,6 @@
 package be.uantwerpen.sc.controllers.mqtt;
 
+import be.uantwerpen.sc.controllers.DriverStatusEventHandler;
 import be.uantwerpen.sc.services.DataService;
 import be.uantwerpen.sc.tools.Terminal;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -7,6 +8,8 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -33,6 +36,8 @@ public class MqttPublisher
 
     @Value("${mqtt.password:default}")
     private String mqttPassword;
+    private Logger logger = LoggerFactory.getLogger(MqttPublisher.class);
+
 
     public void publishLocation(Integer drivenDistance)
     {
@@ -70,13 +75,9 @@ public class MqttPublisher
             }
             catch(MqttException me)
             {
-                System.err.println("Could not publish topic: " + topic + " to mqtt service!");
-                System.err.println("reason " + me.getReasonCode());
-                System.err.println("msg " + me.getMessage());
-                System.err.println("loc " + me.getLocalizedMessage());
-                System.err.println("cause " + me.getCause());
-                System.err.println("excep " + me);
-                me.printStackTrace();
+                logger.error("Could not publish topic: " + topic + " to mqtt service!");
+                logger.error("reason " + me.getReasonCode());
+                logger.error("msg " + me.getMessage());
             }
         }
     }

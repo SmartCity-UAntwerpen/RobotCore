@@ -4,6 +4,8 @@ import be.uantwerpen.sc.RobotCoreLoop;
 import be.uantwerpen.sc.controllers.DriverCommandSender;
 import be.uantwerpen.sc.models.Job;
 import be.uantwerpen.sc.tools.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,9 +38,10 @@ public class JobService
 
     private RobotCoreLoop robotCoreLoop;
 
+    private Logger logger = LoggerFactory.getLogger(JobService.class);
     private int endJob;
 
-    private Long jobid,botid,startid,endid;
+    private Long jobid;
 
     public int getEndJob(){
         return endJob;
@@ -87,7 +90,9 @@ public class JobService
         Long startid = Long.parseLong(idstartNumber);
         Long endid = Long.parseLong(idendNumber);
 
+        logger.info("Parsed: jobid = " + jobid + " botid = " + botid + " startid = " + startid + " endid = " + endid);
         System.out.println("Parsed: jobid = " + jobid + " botid = " + botid + " startid = " + startid + " endid = " + endid);
+
 
         Job parsedJob = new Job(jobid,botid,startid,endid);
 
@@ -114,7 +119,6 @@ public class JobService
         switch(dataService.getWorkingmodeEnum()) {
             case INDEPENDENT:
                 try {
-                    //int endInt = Integer.parseInt(end);
                     //compute path on robot
                     dataService.robotDriving = true;
                     dataService.jobfinished = false;

@@ -32,9 +32,6 @@ public class RobotCoreLoop implements Runnable
     private MqttJobSubscriber jobSubscriber;
 
     @Autowired
-    private MqttPublisher locationPublisher;
-
-    @Autowired
     private JobService jobService;
 
     @Value("${sc.core.ip:localhost}")
@@ -52,8 +49,6 @@ public class RobotCoreLoop implements Runnable
 
     public IPathplanning pathplanning;
 
-    private boolean first = true;
-
     private TerminalService terminalService;
 
     public RobotCoreLoop(){
@@ -65,13 +60,6 @@ public class RobotCoreLoop implements Runnable
         //Setup type
         Terminal.printTerminalInfo("Selected PathplanningType: " + pathplanningType.getType().name());
         Terminal.printTerminalInfo("Selected WorkingmodeType: " + workingmodeType.getType().name());
-    }
-
-    @Deprecated
-    public void setServerCoreIP(String ip, int port)
-    {
-        this.serverIP = ip;
-        this.serverPort = port;
     }
 
     public void run() {
