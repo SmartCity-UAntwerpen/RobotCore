@@ -1,7 +1,7 @@
 package be.uantwerpen.sc.services;
 
 import be.uantwerpen.sc.RobotCoreLoop;
-import be.uantwerpen.sc.controllers.CCommandSender;
+import be.uantwerpen.sc.controllers.DriverCommandSender;
 import be.uantwerpen.sc.models.Job;
 import be.uantwerpen.sc.tools.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +11,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -34,7 +32,7 @@ public class JobService
     private QueueService queueService;
 
     @Autowired
-    private CCommandSender sender;
+    private DriverCommandSender sender;
 
     private RobotCoreLoop robotCoreLoop;
 

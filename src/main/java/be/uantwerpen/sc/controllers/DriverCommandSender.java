@@ -18,21 +18,18 @@ Class waarmee robot core gaat communiceren met robot driver
 */
 
 @Service
-public class CCommandSender
+public class DriverCommandSender
 {
     private Socket socket;
     private DataOutputStream dOut;
-    private DataInputStream dIn;
-    private boolean serverActive;
 
-    //@Value("${car.ccore.ip:localhost}")
-    @Value("${car.ccore.ip:146.175.140.187}")
-    private String coreIP;
+    @Value("${car.driver.ip:146.175.140.187}")
+    private String driverIp;
 
-    @Value("#{new Integer(${car.ccore.taskport}) ?: 1313}")
-    private int coreCommandPort;
+    @Value("#{new Integer(${car.driver.taskport}) ?: 1313}")
+    private int driverCommandPort;
 
-    public CCommandSender()
+    public DriverCommandSender()
     {
 
     }
@@ -40,27 +37,21 @@ public class CCommandSender
     @PostConstruct
     private void postConstruct()
     {
-        //IP / port-values are initialised at the end of the constructor
+        //IP and port-values are initialised at the end of the constructor
         try
         {
 
             //socket openen met de robot driver
-            socket = new Socket(coreIP, coreCommandPort);
+            socket = new Socket(driverIp, driverCommandPort);
             socket.setSoTimeout(500);
             dOut = new DataOutputStream(socket.getOutputStream());
-            dIn = new DataInputStream(socket.getInputStream());
-            serverActive = true;
-
         }
-
-
         catch(Exception e)
         {
             e.printStackTrace();
-            serverActive = false;
+
         }
     }
-
 
     public void closeConnection(){
         try {

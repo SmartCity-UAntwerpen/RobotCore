@@ -19,7 +19,7 @@ luisteren naar inkomende jobs
 public class JobListenerController
 {
     @Autowired
-    private CCommandSender cCommandSender;
+    private DriverCommandSender cCommandSender;
 
     @Autowired
     private QueueService queueService;

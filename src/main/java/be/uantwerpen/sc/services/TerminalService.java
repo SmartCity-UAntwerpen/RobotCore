@@ -1,7 +1,7 @@
 package be.uantwerpen.sc.services;
 
 import be.uantwerpen.sc.RobotCoreLoop;
-import be.uantwerpen.sc.controllers.CCommandSender;
+import be.uantwerpen.sc.controllers.DriverCommandSender;
 import be.uantwerpen.sc.controllers.PathController;
 import be.uantwerpen.sc.models.map.Path;
 import be.uantwerpen.sc.tools.*;
@@ -34,7 +34,7 @@ public class TerminalService
     @Autowired
     private PathController pathController;
     @Autowired
-    private CCommandSender sender;
+    private DriverCommandSender sender;
     @Autowired
     private QueueService queueService;
     @Autowired

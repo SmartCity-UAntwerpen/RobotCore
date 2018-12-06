@@ -34,11 +34,11 @@ public class MqttPublisher
     @Value("${mqtt.password:default}")
     private String mqttPassword;
 
-    public void publishLocation(Integer location, Long jobid)
+    public void publishLocation(Integer drivenDistance)
     {
         String content      = "Location:{id:"+dataService.getRobotID()
                 +"/ vertex:"+dataService.getCurrentLocation()
-                +"/ progress:"+ dataService.getMillis()+"}";
+                +"/ progress:"+ drivenDistance+"}";
         int qos             = 2;
         String topic        = "BOT/" + dataService.getRobotID()+"/loc";
         String broker       = "tcp://" + mqttIP + ":" + mqttPort;

@@ -11,19 +11,16 @@ import org.springframework.stereotype.Service;
 
 //Als de bot aan het rijden is moet er om de zoveel tijd een bericht gestuurd worden locatie en progress
 @Service
-public class CLocationPoller implements Runnable
+public class DriverLocationPoller implements Runnable
 {
     @Autowired
-    CCommandSender cCommandSender;
+    DriverCommandSender driverCommandSender;
 
     @Autowired
     MqttPublisher mqttPublisher;
 
     @Autowired
     DataService dataService;
-
-    @Autowired
-    CCommandSender commandSender;
 
     public void run()
     {
@@ -41,8 +38,8 @@ public class CLocationPoller implements Runnable
 
             if(dataService.map != null && dataService.robotDriving){
                 //dataService.readTag();
-
-                cCommandSender.sendCommand("DRIVE DISTANCE");
+                //Vraagt op hoeveel mm er al gereden is
+                driverCommandSender.sendCommand("DRIVE DISTANCE");
             }
         }
     }

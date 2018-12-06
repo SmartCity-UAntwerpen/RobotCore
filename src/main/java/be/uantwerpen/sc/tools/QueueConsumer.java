@@ -1,12 +1,9 @@
 package be.uantwerpen.sc.tools;
 
-import be.uantwerpen.sc.controllers.CCommandSender;
+import be.uantwerpen.sc.controllers.DriverCommandSender;
 import be.uantwerpen.sc.services.DataService;
 import be.uantwerpen.sc.services.QueueService;
-import org.mockito.internal.matchers.Null;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.expression.spel.ast.NullLiteral;
-import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.concurrent.BlockingQueue;
@@ -24,7 +21,7 @@ public class QueueConsumer implements Runnable
     @Value("#{new Integer(${sc.core.port}) ?: 1994}")
     private int serverPort;
 
-    private CCommandSender sender;
+    private DriverCommandSender sender;
     private QueueService queueService;
     private DataService dataService;
 
@@ -34,7 +31,7 @@ public class QueueConsumer implements Runnable
 
     private BlockingQueue<String> jobQueue;
 
-    public QueueConsumer(QueueService queueService, CCommandSender sender, DataService dataService, String serverIP, int serverPort)
+    public QueueConsumer(QueueService queueService, DriverCommandSender sender, DataService dataService, String serverIP, int serverPort)
     {
         this.queueService = queueService;
         this.sender = sender;

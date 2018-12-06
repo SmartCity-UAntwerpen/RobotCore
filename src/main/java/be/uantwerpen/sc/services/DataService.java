@@ -1,6 +1,6 @@
 package be.uantwerpen.sc.services;
 
-import be.uantwerpen.sc.controllers.CCommandSender;
+import be.uantwerpen.sc.controllers.DriverCommandSender;
 import be.uantwerpen.sc.models.Job;
 import be.uantwerpen.sc.models.links.Link;
 import be.uantwerpen.sc.models.map.Map;
@@ -24,7 +24,7 @@ public class DataService
     private int serverPort;
 
     @Autowired
-    CCommandSender commandSender;
+    DriverCommandSender commandSender;
 
     private Long robotID;
 
@@ -109,10 +109,6 @@ public class DataService
     public void setCurrentLocation(Long currentLocation) {
         this.currentLocation = currentLocation;
     }
-
-    public int getMillis() {return millis;}
-    public void setMillis(int millis) {this.millis = millis;}
-
     public Long getLinkMillis() {
         return linkMillis;
     }

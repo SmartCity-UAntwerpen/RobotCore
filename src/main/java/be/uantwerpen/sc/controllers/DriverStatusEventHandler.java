@@ -3,6 +3,8 @@ package be.uantwerpen.sc.controllers;
 import be.uantwerpen.sc.controllers.mqtt.MqttPublisher;
 import be.uantwerpen.sc.services.DataService;
 import be.uantwerpen.sc.tools.Terminal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,7 +19,7 @@ import java.net.Socket;
  */
 //Hier worden de antwoorden van de robotdriver opgevangen
 @Service
-public class CStatusEventHandler implements Runnable
+public class DriverStatusEventHandler implements Runnable
 {
     @Autowired
     DataService dataService;
@@ -28,14 +30,16 @@ public class CStatusEventHandler implements Runnable
     Socket socket;
     DataInputStream dIn;
 
+    Logger logger = LoggerFactory.getLogger(DriverStatusEventHandler.class);
+
     //@Value("${car.ccore.ip:localhost}")
-    @Value("${car.ccore.ip:146.175.140.187}")
-    private String coreIP;
+    @Value("${car.driver.ip:146.175.140.187}")
+    private String driverIp;
 
-    @Value("#{new Integer(${car.ccore.eventport}) ?: 1314}")
-    private int coreEventPort;
+    @Value("#{new Integer(${car.driver.eventport}) ?: 1314}")
+    private int driverEventPort;
 
-    public CStatusEventHandler()
+    public DriverStatusEventHandler()
     {
 
     }
@@ -43,11 +47,11 @@ public class CStatusEventHandler implements Runnable
     @PostConstruct
     private void postConstruct()
     {
-        //IP / port-values are initialised at the end of the constructor
+        //IP and port-values are initialised at the end of the constructor
         try
         {
 
-            socket = new Socket(coreIP, coreEventPort);
+            socket = new Socket(driverIp, driverEventPort);
             dIn = new DataInputStream(socket.getInputStream());
 
         }
@@ -70,7 +74,7 @@ public class CStatusEventHandler implements Runnable
     {
         while(!Thread.currentThread().isInterrupted()){
             try {
-                String s = readData(); //Waiting foor meassages
+                String s = readData(); //Waiting for messages
                 if (s.startsWith("DRIVE EVENT: FINISHED")){
                     synchronized (this){
                         dataService.robotBusy = false;
@@ -92,9 +96,8 @@ public class CStatusEventHandler implements Runnable
                     }
                 }
                 if (s.startsWith("TRAVEL DISTANCE EVENT")){
-                    String millisString = s.split(":", 2)[1].trim();
-                    int millis = Integer.parseInt(millisString);
-                    locationPublisher.publishLocation(millis, 45L);
+                    String travelledDistance = s.split(":", 2)[1].trim();
+                    locationPublisher.publishLocation(Integer.parseInt(travelledDistance));
 
                 }if (s.startsWith("TAG DETECTION EVENT")){
                     String tag = s.split(":", 2)[1].trim();
@@ -122,14 +125,14 @@ public class CStatusEventHandler implements Runnable
         }
 
         try{
-            Terminal.printTerminal("connection closed with bot");
+            Terminal.printTerminal("Closed connection to bot");
             socket.close();
 
         }catch (Exception e){
             e.printStackTrace();
         }
 
-        Terminal.printTerminal("CstatusEventHandler end");
+        Terminal.printTerminal("DriverStatusEventHandler end");
 
     }
 
@@ -140,10 +143,11 @@ public class CStatusEventHandler implements Runnable
             if(dIn==null){
                 try
                 {
-                    socket = new Socket(coreIP, coreEventPort);
+                    socket = new Socket(driverIp, driverEventPort);
                     dIn = new DataInputStream(socket.getInputStream());
                     if(socket.getInputStream()==null) {
-                        Terminal.printTerminal("get is null");
+                        logger.error("No inputstream for event socket");
+                        Terminal.printTerminal("There is no inputstream for the event socket");
                     }
                 }
                 catch(Exception e)

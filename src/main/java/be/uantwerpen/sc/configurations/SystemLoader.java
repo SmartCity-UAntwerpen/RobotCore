@@ -30,7 +30,7 @@ public class SystemLoader implements ApplicationRunner
 
 
     @Autowired
-    private CCommandSender cCommandSender;
+    private DriverCommandSender cCommandSender;
 
 
     @Autowired
@@ -46,7 +46,7 @@ public class SystemLoader implements ApplicationRunner
 
 
     @Autowired
-    private CStatusEventHandler cStatusEventHandler;
+    private DriverStatusEventHandler driverStatusEventHandler;
 
 
     @Autowired
@@ -57,7 +57,7 @@ public class SystemLoader implements ApplicationRunner
     private MqttPublisher locationPublisher;
 
     @Autowired
-    private CLocationPoller cLocationPoller;
+    private DriverLocationPoller driverLocationPoller;
 
     @Autowired KeepAliveController keepAlivePoller;
 
@@ -94,10 +94,10 @@ public class SystemLoader implements ApplicationRunner
             QueueConsumer queueConsumer = new QueueConsumer(queueService,cCommandSender, dataService,serverIP,serverPort);
 
             new Thread(robotCoreLoop).start();
-            new Thread(cStatusEventHandler).start();
+            new Thread(driverStatusEventHandler).start();
             new Thread(queueConsumer).start();
             new Thread(keepAlivePoller).start();
-            new Thread(cLocationPoller).start();
+            new Thread(driverLocationPoller).start();
 
             terminalService.systemReady();
         }
