@@ -28,7 +28,6 @@ public class DataService
 
     private Long robotID;
 
-    private int millis;
     private Long linkMillis;
 
     private Long nextNode = -1L;

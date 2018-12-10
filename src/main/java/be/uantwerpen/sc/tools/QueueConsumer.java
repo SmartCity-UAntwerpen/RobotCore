@@ -40,18 +40,11 @@ public class QueueConsumer implements Runnable
         this.serverPort = serverPort;
     }
 
-    @Deprecated
-    public void setServerCoreIP(String ip, int port)
-    {
-
-    }
-
     @Override
     public void run() {
         int i = 1;
         while (!Thread.currentThread().isInterrupted()) {
             try {
-
                 if((dataService.getCurrentLocation() == dataService.getDestination()) && (dataService.getDestination() != -1L) && (dataService.getCurrentLocation() != -1L)){
                     Terminal.printTerminal("Current location : " + dataService.getCurrentLocation() + " destination : " + dataService.getDestination() + " tempjob : " + dataService.tempjob);
 
@@ -61,8 +54,8 @@ public class QueueConsumer implements Runnable
                         dataService.robotDriving = false;
 
                         RestTemplate restTemplate = new RestTemplate(); //standaard resttemplate gebruiken
-                        restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/job/finished/" + dataService.getRobotID()//aan de server laten weten dat er een nieuwe bot zich aanbied
-                                , Void.class); //Aan de server laten weten in welke mode de bot werkt
+                        restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/job/finished/" + dataService.getRobotID()
+                                , Void.class);
 
                         dataService.setDestination(-1L);
                         dataService.firstOfQueue = true;
