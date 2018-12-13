@@ -108,7 +108,7 @@ public class DriverStatusEventHandler implements Runnable
                         if(!tag.trim().equals("NONE") && !tag.trim().equals("NO_TAG"))
                         {
                             if(dataService.getMap() != null){
-                                dataService.setCurrentLocation(dataService.map.getNodeByRFID(tag,dataService.getCurrentLocation()));
+                                dataService.setCurrentLocation(dataService.map.getLocationByRFID(tag));
                             }
                             dataService.locationUpdated = true;
                         }

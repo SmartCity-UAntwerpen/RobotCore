@@ -1,9 +1,9 @@
 package be.uantwerpen.sc.services;
 
 import be.uantwerpen.sc.controllers.PathController;
-import be.uantwerpen.sc.models.map.Map;
+import be.uantwerpen.rc.models.map.Map;
 import be.uantwerpen.sc.tools.IPathplanning;
-import be.uantwerpen.sc.tools.Vertex;
+import be.uantwerpen.rc.tools.Vertex;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class RandomPathPlanning implements IPathplanning
     }
 
     @Override
-    public List<Vertex> Calculatepath(Map map, int start, int stop) {
-        return pathController.getRandomPath(start).getPath();
+    public List<Vertex> Calculatepath(Map map, long start, long stop) {
+        return pathController.getRandomPath((int)start).getPath();
     }
 }

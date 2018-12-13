@@ -62,11 +62,14 @@
 			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
 			<version>1.0.2</version>
 		</dependency>
+
 		<dependency>
-			<groupId>be.uantwerpen.sc</groupId>
-			<artifactId>SmartCityCommon</artifactId>
+			<groupId>be.uantwerpen.rc</groupId>
+			<artifactId>RobotCommon</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+
+
 	</dependencies>
 
 	<build>

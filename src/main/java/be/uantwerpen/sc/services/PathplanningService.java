@@ -1,11 +1,10 @@
 package be.uantwerpen.sc.services;
 
-import be.uantwerpen.sc.models.links.Link;
-import be.uantwerpen.sc.models.map.*;
-import be.uantwerpen.sc.tools.Dijkstra;
-import be.uantwerpen.sc.tools.Edge;
+import be.uantwerpen.rc.models.map.*;
+import be.uantwerpen.rc.tools.pathplanning.Dijkstra;
+import be.uantwerpen.rc.tools.Edge;
+import be.uantwerpen.rc.tools.Vertex;
 import be.uantwerpen.sc.tools.IPathplanning;
-import be.uantwerpen.sc.tools.Vertex;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,7 @@ public class PathplanningService implements IPathplanning
     }
 
     @Override
-    public List<Vertex> Calculatepath(Map map, int start, int stop) {
+    public List<Vertex> Calculatepath(Map map, long start, long stop) {
         //MapJson mapJsonServer = mapControlService.buildMapJson();
         List<Link> linkEntityList = new ArrayList<>();
         List<Vertex> vertexes = new ArrayList<>();
@@ -43,9 +42,9 @@ public class PathplanningService implements IPathplanning
             edges = new ArrayList<>();
             for (Link neighbour : nj.getNeighbours()){
                 for (Vertex v : vertexes){
-                    if(v.getId() == neighbour.getStopPoint().getId()){
+                    if(v.getId() == neighbour.getEndPoint().getId()){
                         for(Link linkEntity: linkEntityList){
-                            if(linkEntity.getStopPoint().getId() == v.getId() && linkEntity.getStartPoint().getId() == nj.getPointEntity().getId()){
+                            if(linkEntity.getEndPoint().getId() == v.getId() && linkEntity.getStartPoint().getId() == nj.getPointEntity().getId()){
                                 realLink = linkEntity;
                             }
                         }
@@ -62,11 +61,11 @@ public class PathplanningService implements IPathplanning
             vertexes.get(j).setAdjacencies(edgeslistinlist.get(j));
         }
 
-        Vertex v = vertexes.get(start-1);
+        Vertex v = vertexes.get((int)start-1);
 
-        dijkstra.computePaths(v,vertexes); // run Dijkstra
-        System.out.println("Distance to " + vertexes.get(stop-1) + ": " + vertexes.get(stop-1).getMinDistance());
-        List<Vertex> path = dijkstra.getShortestPathTo((stop),vertexes);
+        dijkstra.computePaths(v.getId(), vertexes); // run Dijkstra
+        System.out.println("Distance to " + vertexes.get((int)stop-1) + ": " + vertexes.get((int)stop-1).getMinDistance());
+        List<Vertex> path = dijkstra.getShortestPathTo(stop,vertexes).getPath();
         System.out.println("Path: " + path);
         //return ("Distance to " + vertexes.get(stop-1) + ": " + vertexes.get(stop-1).minDistance) + ( "Path: " + path);
         return path;

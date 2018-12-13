@@ -1,7 +1,8 @@
 package be.uantwerpen.sc.controllers;
 
-import be.uantwerpen.sc.models.map.Map;
-import be.uantwerpen.sc.tools.Vertex;
+import be.uantwerpen.rc.models.map.Map;
+import be.uantwerpen.rc.tools.Vertex;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;

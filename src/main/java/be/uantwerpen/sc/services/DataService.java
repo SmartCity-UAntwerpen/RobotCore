@@ -2,9 +2,10 @@ package be.uantwerpen.sc.services;
 
 import be.uantwerpen.sc.controllers.DriverCommandSender;
 import be.uantwerpen.sc.models.Job;
-import be.uantwerpen.sc.models.links.Link;
-import be.uantwerpen.sc.models.map.Map;
-import be.uantwerpen.sc.models.map.Node;
+import be.uantwerpen.rc.models.map.Link;
+import be.uantwerpen.rc.models.map.Map;
+import be.uantwerpen.rc.models.map.Node;
+import be.uantwerpen.rc.tools.Edge;
 import be.uantwerpen.sc.tools.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -127,56 +128,6 @@ public class DataService
         LookingCoordiante = lookingCoordiante;
     }
 
-    public void changeLookingCoordiante(String command){
-        if(command.equals("DRIVE TURN L")){
-            switch(getLookingCoordiante()){
-                case "N":
-                    setLookingCoordiante("W");
-                    break;
-                case "E":
-                    setLookingCoordiante("N");
-                    break;
-                case "Z":
-                    setLookingCoordiante("E");
-                    break;
-                case "W":
-                    setLookingCoordiante("Z");
-            }
-        }
-
-        if(command.equals("DRIVE TURN R")){
-            switch(getLookingCoordiante()){
-                case "N":
-                    setLookingCoordiante("E");
-                    break;
-                case "E":
-                    setLookingCoordiante("Z");
-                    break;
-                case "Z":
-                    setLookingCoordiante("W");
-                    break;
-                case "W":
-                    setLookingCoordiante("N");
-            }
-        }
-
-        if(command.equals("DRIVE ROTATE R 180")){
-            switch(getLookingCoordiante()){
-                case "N":
-                    setLookingCoordiante("Z");
-                    break;
-                case "E":
-                    setLookingCoordiante("W");
-                    break;
-                case "Z":
-                    setLookingCoordiante("N");
-                    break;
-                case "W":
-                    setLookingCoordiante("E");
-            }
-        }
-
-    }
 
     public PathplanningEnum getPathplanningEnum() {
         return pathplanningEnum;
@@ -210,13 +161,12 @@ public class DataService
         if(map != null) {
             Long start = getCurrentLocation();
             Long lid = -1L;
-            for(Node node : map.getNodeList()){
-                if(node.getNodeId() == start){
+            for(Node node : map.getNodeList()) {
+                if(node.getNodeId() == start) {
                     Link link = node.getNeighbours().get(0);
                     lid = link.getId();
-                    nextNode = link.getStopPoint().getId();
+                    nextNode = link.getEndPoint().getId();
                     prevNode = link.getStartPoint().getId();
-                    linkMillis = link.getLength();
                 }
             }
             lid=getCurrentLocation();   //BIJGEVOEGD      =====FOUT
@@ -264,8 +214,6 @@ public class DataService
             for (Edge e : navigationParser.list.get(0).getAdjacencies()) {
                 if (e.getTarget() == end) {
                     lid = e.getLinkEntity().getId();
-                    linkMillis = e.getLinkEntity().getLength();
-                    Terminal.printTerminal("New Link Distance: " + linkMillis);
                 }
             }
 

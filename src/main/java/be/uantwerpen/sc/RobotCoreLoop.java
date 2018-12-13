@@ -3,7 +3,6 @@ package be.uantwerpen.sc;
 import be.uantwerpen.sc.controllers.MapController;
 import be.uantwerpen.sc.controllers.PathController;
 import be.uantwerpen.sc.controllers.mqtt.MqttJobSubscriber;
-import be.uantwerpen.sc.controllers.mqtt.MqttPublisher;
 import be.uantwerpen.sc.services.*;
 import be.uantwerpen.sc.tools.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,7 +105,7 @@ public class RobotCoreLoop implements Runnable
         Terminal.printTerminal("Map received " + dataService.map.getNodeList());
 
         //Set location of bot
-        dataService.setCurrentLocation(dataService.map.getNodeByRFID(dataService.getTag()));
+        dataService.setCurrentLocation(dataService.map.getLocationByRFID(dataService.getTag()));
         Terminal.printTerminal("Start Location: " + dataService.getCurrentLocation()+"\n\n");
 
         //We have the map now, update link
