@@ -42,7 +42,7 @@ public class MqttJobSubscriberCallback implements MqttCallback
 
         try
         {
-            jobService.parseJob(payloadString); //ontvangen bericht toevoegen aand de jobs
+            jobService.parseJob(payloadString); //ontvangen bericht toevoegen aan de jobs
         }
         catch(Exception e)
         {

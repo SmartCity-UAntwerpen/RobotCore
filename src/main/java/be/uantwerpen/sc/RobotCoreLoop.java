@@ -115,8 +115,6 @@ public class RobotCoreLoop implements Runnable
         Terminal.printTerminal("link updated");
         Terminal.printTerminal("next: "+dataService.getNextNode());
 
-        Terminal.printTerminal("looking in direction " + dataService.getLookingCoordiante());
-
         RestTemplate rest = new RestTemplate();
         Terminal.printTerminal("Lock Requested : " + dataService.getCurrentLocation());
         rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/requestlock/" + dataService.getCurrentLocation(), boolean.class);

@@ -55,7 +55,7 @@ public class DataService
     public boolean robotDriving = false;
 
     public boolean jobfinished = false;
-    public boolean tempjob = false;
+    public boolean tempjob = false;     //used to go to start location of job
     public boolean executingJob = false;
 
     public boolean firstOfQueue = true;
@@ -119,15 +119,6 @@ public class DataService
 
     public String getTag() {return tag;}
     public void setTag(String tag) {this.tag = tag;}
-
-    public String getLookingCoordiante() {
-        return LookingCoordiante;
-    }
-
-    public void setLookingCoordiante(String lookingCoordiante) {
-        LookingCoordiante = lookingCoordiante;
-    }
-
 
     public PathplanningEnum getPathplanningEnum() {
         return pathplanningEnum;

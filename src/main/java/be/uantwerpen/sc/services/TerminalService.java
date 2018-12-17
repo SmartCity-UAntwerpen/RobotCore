@@ -280,7 +280,7 @@ public class TerminalService
         int currentLocation = (int)(long)dataService.getCurrentLocation();
         if(currentLocation < 0) {
             currentLocation = 4;
-            dataService.setLookingCoordiante("N");
+            //dataService.setLookingCoordiante("N");
         }
         List<Vertex> path = pathController.getRandomPath(currentLocation).getPath();
         NavigationParser navigationParser = new NavigationParser(path, dataService);

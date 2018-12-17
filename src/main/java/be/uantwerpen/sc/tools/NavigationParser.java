@@ -41,13 +41,20 @@ public class NavigationParser {
             if(list.size()==2){
                 System.out.println(dataService.getPrevNode());
                 System.out.println(dataService.getNextNode());
-                DriveDir relDir=null;
             }else{
                 for(int i = 2; i < list.size(); i++) {
                     previous = current;
                     current = next;
                     next = list.get(i);
                     System.out.println("previous: " + previous + " current: " + current + " next: " + next);
+                    //Check at what angle the crossroad needs to be passed
+                    for(Edge edge: current.getAdjacencies()) {
+                        if(edge.getLinkEntity().getStartPoint().getId() == current.getId() && edge.getLinkEntity().getEndPoint().getId() == next.getId()) {
+                            if(edge.getLinkEntity().getAngle() > -181 && edge.getLinkEntity().getAngle() < 181)
+                                //rotate R -90 == rotate L 90
+                                commands.add(new DriveDir(DriveDirEnum.RIGHT, edge.getLinkEntity().getAngle()));
+                        }
+                    }
                     //Drive followLine
                     commands.add(new DriveDir(DriveDirEnum.FOLLOW));
                 }

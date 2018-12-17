@@ -11,7 +11,12 @@ public class DriveDir {
 
     }
 
-    public DriveDir(DriveDirEnum dir){
+    public DriveDir(DriveDirEnum dir, double angle){
+        this.dir = dir;
+        this.angle = angle;
+    }
+
+    public DriveDir(DriveDirEnum dir) {
         this.dir = dir;
     }
 
@@ -41,7 +46,7 @@ public class DriveDir {
         return angle;
     }
 
-    public void setAngle(double angle) {
+    public void setAngle(int angle) {
         this.angle = angle;
     }
 }

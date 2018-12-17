@@ -68,9 +68,7 @@ public class JobService
     {
 
         System.out.println("Parsing job");
-
-        //try
-        //{
+        logger.info("Parsing job...");
 
         String tempStr = job.split(":")[2];
         String jobidNumber = tempStr.split("/")[0];
@@ -96,18 +94,11 @@ public class JobService
 
         Job parsedJob = new Job(jobid,botid,startid,endid);
 
-        //dataService.setDestination(endid);
         Terminal.printTerminal("job parsed");
 
         dataService.job = parsedJob;
         //performJob(parsedJob);
 
-
-        //}
-//        catch(Exception e)
-//        {
-//            throw new ParseException("Can not parse job from: " + job + "\nInvalid format!", 0);
-//        }
     }
 
     public void performJob(Job job)
@@ -115,6 +106,7 @@ public class JobService
 
         int endInt = job.getEndid().intValue();
         int startInt = job.getStartid().intValue();
+        logger.info("Performing job with destination: "+endInt);
         Terminal.printTerminal("performJob end int = " + endInt);
         switch(dataService.getWorkingmodeEnum()) {
             case INDEPENDENT:
@@ -139,8 +131,7 @@ public class JobService
                             dataService.executingJob = true;
                             dataService.setDestination(job.getEndid());
                             startPathPlanning(endInt);
-
-                        }else{
+                        }else {
                             dataService.tempjob = false;
                             dataService.executingJob = true;
                             dataService.setDestination(job.getEndid());
