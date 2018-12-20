@@ -91,12 +91,19 @@ public class JobService
         logger.info("Parsed: jobid = " + jobid + " botid = " + botid + " startid = " + startid + " endid = " + endid);
         System.out.println("Parsed: jobid = " + jobid + " botid = " + botid + " startid = " + startid + " endid = " + endid);
 
-
-        Job parsedJob = new Job(jobid,botid,startid,endid);
+        if(!(dataService.getCurrentLocation().equals(endid) && dataService.getCurrentLocation().equals(startid))) {
+            Job parsedJob = new Job(jobid,botid,startid,endid);
+            dataService.job = parsedJob;
+        } else {
+            logger.info("Already on destination");
+            //let the backend know that the job is finished
+            RestTemplate restTemplate = new RestTemplate();
+            restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/job/finished/" + dataService.getRobotID()
+                    , Void.class);
+        }
 
         Terminal.printTerminal("job parsed");
 
-        dataService.job = parsedJob;
         //performJob(parsedJob);
 
     }
@@ -118,8 +125,8 @@ public class JobService
                     dataService.executingJob = false;
                     dataService.firstOfQueue = true;
 
-                        if((dataService.getCurrentLocation() != job.getStartid()) && (!dataService.executingJob)){ //bot is not located at start of job
-                            Terminal.printTerminal("start location not currentLocation. Going to " + job.getStartid());
+                        if(!dataService.getCurrentLocation().equals(job.getStartid()) && (!dataService.executingJob)){ //bot is not located at start of job
+                            Terminal.printTerminal("start location not current Location. Going to " + job.getStartid());
                             dataService.setDestination(job.getStartid());
                             dataService.tempjob = true;
                             dataService.executingJob = true;
@@ -196,11 +203,12 @@ public class JobService
         dataService.navigationParser.parseMap();
 
         //Setup for driving
-        int start = (int)(long)dataService.navigationParser.list.get(0).getId();
-        int end = (int)(long)dataService.navigationParser.list.get(1).getId();
+        int start = (int)(long)dataService.navigationParser.path.get(0).getId();
+        int end = (int)(long)dataService.navigationParser.path.get(1).getId();
         dataService.setNextNode((long)end);
         dataService.setPrevNode((long)start);
         dataService.robotDriving = true;
+        //necessary to get past the first white space
         queueService.insertJob("DRIVE FOLLOWLINE");
         queueService.insertJob("DRIVE FORWARD 110");
 

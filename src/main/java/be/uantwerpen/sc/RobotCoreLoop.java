@@ -39,6 +39,7 @@ public class RobotCoreLoop implements Runnable
     @Value("#{new Integer(${sc.core.port}) ?: 1994}")
     private int serverPort;
 
+    private Long botId = 1L;
     @Autowired
     private QueueService queueService;
     @Autowired
@@ -66,7 +67,7 @@ public class RobotCoreLoop implements Runnable
         terminalService=new TerminalService(); //terminal service starten. terminal wordt gebruikt om bepaalde dingen te printen en commandos in te geven
         RestTemplate restTemplate = new RestTemplate(); //standaard resttemplate gebruiken
 
-        Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/initiate/" //aan de server laten weten dat er een nieuwe bot zich aanbied
+        Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/initiate/" + botId + "/" //aan de server laten weten dat er een nieuwe bot zich aanbied
                 +workingmodeType.getType().toString(), Long.class); //Aan de server laten weten in welke mode de bot werkt
 
         dataService.setRobotID(robotID);
@@ -105,7 +106,8 @@ public class RobotCoreLoop implements Runnable
         Terminal.printTerminal("Map received " + dataService.map.getNodeList());
 
         //Set location of bot
-        dataService.setCurrentLocation(dataService.map.getLocationByRFID(dataService.getTag()));
+        Long locationID = dataService.map.getLocationByRFID(dataService.getTag());
+        dataService.setCurrentLocation(locationID);
         Terminal.printTerminal("Start Location: " + dataService.getCurrentLocation()+"\n\n");
 
         //We have the map now, update link
@@ -116,8 +118,9 @@ public class RobotCoreLoop implements Runnable
         Terminal.printTerminal("next: "+dataService.getNextNode());
 
         RestTemplate rest = new RestTemplate();
+        rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + botId + "/locationUpdate/" +dataService.getCurrentLocation(), boolean.class);
         Terminal.printTerminal("Lock Requested : " + dataService.getCurrentLocation());
-        rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/requestlock/" + dataService.getCurrentLocation(), boolean.class);
+        //rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/requestlock/" + dataService.getCurrentLocation(), boolean.class);
 
         while(!Thread.interrupted()){
 

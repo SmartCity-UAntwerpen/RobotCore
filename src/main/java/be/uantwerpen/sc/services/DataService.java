@@ -47,7 +47,6 @@ public class DataService
 
     private String tag = "NO_TAG";
 
-    private String LookingCoordiante;
     private PathplanningEnum pathplanningEnum;
     private WorkingmodeEnum workingmodeEnum;
 
@@ -191,9 +190,9 @@ public class DataService
     }
 
     public void nextLink(){
-        if(map != null && navigationParser != null && navigationParser.list != null && !navigationParser.list.isEmpty() && navigationParser.list.size() != 1) {
-            Long start = navigationParser.list.get(0).getId();
-            Long end = navigationParser.list.get(1).getId();
+        if(map != null && navigationParser != null && navigationParser.path != null && !navigationParser.path.isEmpty() && navigationParser.path.size() != 1) {
+            Long start = navigationParser.path.get(0).getId();
+            Long end = navigationParser.path.get(1).getId();
             if(getTag().trim().equals("NONE")){
                 currentLocation = nextNode;
             }
@@ -202,7 +201,7 @@ public class DataService
             prevNode = start;
             Long lid = -1L;
             //find link from start to end
-            for (Edge e : navigationParser.list.get(0).getAdjacencies()) {
+            for (Edge e : navigationParser.path.get(0).getAdjacencies()) {
                 if (e.getTarget() == end) {
                     lid = e.getLinkEntity().getId();
                 }
@@ -212,7 +211,7 @@ public class DataService
             Terminal.printTerminal("Current Link: " + lid);
             if(this.pathplanningEnum == PathplanningEnum.DIJKSTRA) {
                 //delete entry from navigationParser
-                navigationParser.list.remove(0);
+                navigationParser.path.remove(0);
             }
             //RestTemplate rest = new RestTemplate();
             //rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + robotID + "/lid/" + lid, Integer.class);

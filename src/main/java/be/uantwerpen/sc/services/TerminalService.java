@@ -258,8 +258,8 @@ public class TerminalService
         //dataService.navigationParser.parseRandomMap(dataService);
 
         //Setup for driving
-        int start = (int)(long)dataService.navigationParser.list.get(0).getId();
-        int end = (int)(long)dataService.navigationParser.list.get(1).getId();
+        int start = (int)(long)dataService.navigationParser.path.get(0).getId();
+        int end = (int)(long)dataService.navigationParser.path.get(1).getId();
         dataService.setNextNode((long)end);
         dataService.setPrevNode((long)start);
         queueService.insertJob("DRIVE FOLLOWLINE");

@@ -14,49 +14,57 @@ public class NavigationParser {
 
     @Autowired
     private DataService dataService;
-    public List<Vertex> list;
+    public List<Vertex> path;
     public Queue<DriveDir> commands = new LinkedList<DriveDir>();
 
-    public NavigationParser(List<Vertex> list, DataService dataservice){
-        this.list = list;
+    public NavigationParser(List<Vertex> path, DataService dataservice){
+        this.path = path;
         this.dataService=dataservice;
     }
 
-    public List<Vertex> getList(){
-        return list;
+    public List<Vertex> getPath(){
+        return path;
     }
 
     public Queue<DriveDir> parseMap(){
-        if(list.isEmpty()){
+        if(path.isEmpty()){
             Terminal.printTerminalError("Cannot parse empty map");
         }else{
             //First part is always driving forward.
             commands.add(new DriveDir(DriveDirEnum.FOLLOW));
             //Second part is parsing the rest of the map
-            Vertex current = list.get(0);
+            Vertex current = path.get(0);
             System.out.println("current: "+current);
-            Vertex previous = list.get(0);
-            Vertex next = list.get(1);
+            Vertex previous;
+            Vertex next = path.get(1);
             System.out.println("next: "+next+"\n");
-            if(list.size()==2){
+            if(path.size()==2){
                 System.out.println(dataService.getPrevNode());
                 System.out.println(dataService.getNextNode());
             }else{
-                for(int i = 2; i < list.size(); i++) {
+                for(int i = 2; i < path.size()-1; i++) {
                     previous = current;
                     current = next;
-                    next = list.get(i);
+                    next = path.get(i);
                     System.out.println("previous: " + previous + " current: " + current + " next: " + next);
+
                     //Check at what angle the crossroad needs to be passed
                     for(Edge edge: current.getAdjacencies()) {
                         if(edge.getLinkEntity().getStartPoint().getId() == current.getId() && edge.getLinkEntity().getEndPoint().getId() == next.getId()) {
                             if(edge.getLinkEntity().getAngle() > -181 && edge.getLinkEntity().getAngle() < 181)
-                                //rotate R -90 == rotate L 90
-                                commands.add(new DriveDir(DriveDirEnum.RIGHT, edge.getLinkEntity().getAngle()));
+                                if(edge.getLinkEntity().getAngle() == 0) {
+                                    commands.add(new DriveDir(DriveDirEnum.FORWARD));
+                                } else if(Math.abs(edge.getLinkEntity().getAngle()) == 180) {
+                                    commands.add(new DriveDir(DriveDirEnum.TURN));
+                                } else {
+                                    //rotate R -90 == rotate L 90
+                                    commands.add(new DriveDir(DriveDirEnum.RIGHT, edge.getLinkEntity().getAngle()));
+                                }
+                            // execute follow line after each crossroad
+                            commands.add(new DriveDir(DriveDirEnum.FOLLOW));
                         }
+                        break;
                     }
-                    //Drive followLine
-                    commands.add(new DriveDir(DriveDirEnum.FOLLOW));
                 }
             }
         }

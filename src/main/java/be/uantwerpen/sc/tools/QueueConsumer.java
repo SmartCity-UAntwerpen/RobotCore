@@ -1,8 +1,12 @@
 package be.uantwerpen.sc.tools;
 
 import be.uantwerpen.sc.controllers.DriverCommandSender;
+import be.uantwerpen.sc.controllers.mqtt.MqttPublisher;
 import be.uantwerpen.sc.services.DataService;
 import be.uantwerpen.sc.services.QueueService;
+import be.uantwerpen.rc.models.map.Point;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestTemplate;
 
@@ -31,6 +35,8 @@ public class QueueConsumer implements Runnable
 
     private BlockingQueue<String> jobQueue;
 
+    private Logger logger = LoggerFactory.getLogger(QueueConsumer.class);
+
     public QueueConsumer(QueueService queueService, DriverCommandSender sender, DataService dataService, String serverIP, int serverPort)
     {
         this.queueService = queueService;
@@ -45,14 +51,14 @@ public class QueueConsumer implements Runnable
         int i = 1;
         while (!Thread.currentThread().isInterrupted()) {
             try {
+                //Terminal.printTerminal("loc:" +dataService.getCurrentLocation() + " dest:" +dataService.getDestination());
                 if((dataService.getCurrentLocation() == dataService.getDestination()) && (dataService.getDestination() != -1L) && (dataService.getCurrentLocation() != -1L)){
                     Terminal.printTerminal("Current location : " + dataService.getCurrentLocation() + " destination : " + dataService.getDestination() + " tempjob : " + dataService.tempjob);
 
                     if(!dataService.tempjob){ //end of total job
                         Park();
-                        Terminal.printTerminal("Total job Finished");
+                        logger.info("Total job finished, Waiting for new job...");
                         dataService.robotDriving = false;
-
                         RestTemplate restTemplate = new RestTemplate(); //standaard resttemplate gebruiken
                         restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/job/finished/" + dataService.getRobotID()
                                 , Void.class);
@@ -61,7 +67,7 @@ public class QueueConsumer implements Runnable
                         dataService.firstOfQueue = true;
                         dataService.jobfinished = true;
                     }else{ //end of temp job
-                        Terminal.printTerminal("Temp job finished");
+                        logger.info("Arrived to starting location, executing job...");
                         Park();
                         dataService.setDestination(-1L);
                         dataService.robotDriving = false;
@@ -83,7 +89,7 @@ public class QueueConsumer implements Runnable
                         case INDEPENDENT:
                             Terminal.printTerminal("case independent");
                             if(dataService.firstOfQueue){
-                                RequestLock();
+                               // RequestLock();
                             }
 
                             Terminal.printTerminal("Robot not busy");
@@ -97,34 +103,43 @@ public class QueueConsumer implements Runnable
                             if(s.contains("DRIVE FOLLOWLINE")){
                                 while(dataService.robotBusy){ //wait till drive event is finished
                                 }
-
                                 if(dataService.firstOfQueue){
-                                    Terminal.printTerminal("First followlin of queue");
+                                    Terminal.printTerminal("First followline of queue");
                                     dataService.firstOfQueue = false;
-                                }else{
                                     i++;
+                                }else{
                                     Terminal.printTerminal("Current = " + dataService.getCurrentLocation() + " next = " + dataService.getNextNode() + " prev = " + dataService.getPrevNode());
 
-                                    if(i < dataService.navigationParser.list.size()){
+                                    if(i < dataService.navigationParser.path.size()){
                                         dataService.setPrevNode(dataService.getCurrentLocation());
                                         dataService.setCurrentLocation(dataService.getNextNode());
-                                        dataService.setNextNode(dataService.navigationParser.list.get(i).getId());
-                                        RequestLock();
-                                        ReleaseLock();
+                                        dataService.setNextNode(dataService.navigationParser.path.get(i).getId());
+                                       // RequestLock();
+                                       // ReleaseLock();
 
                                     }else{
                                         dataService.setPrevNode(dataService.getCurrentLocation());
-                                        ReleaseLock(dataService.getCurrentLocation());
+                                        //ReleaseLock(dataService.getCurrentLocation());
                                         dataService.setCurrentLocation(dataService.getNextNode());
-                                        dataService.firstLink();
-
                                     }
 
                                     Terminal.printTerminal("Current = " + dataService.getCurrentLocation() + " next = " + dataService.getNextNode() + " prev = " + dataService.getPrevNode());
                                     Terminal.printTerminal("Current = " + dataService.getCurrentLocation() + " destination = " + dataService.getDestination());
                                     Terminal.printTerminal("");
+                                    i++;
                                 }
-                            }else{
+                            } else if(s.contains("DRIVE TURN") || s.contains("DRIVE FORWARD")) {
+                                while(dataService.robotBusy){ //wait till drive event is finished
+                                }
+                                //the robot is passing a crosspoint
+                                Point temp = dataService.map.getPointById(dataService.getCurrentLocation());
+                                if(dataService.map.getPointById(dataService.getCurrentLocation()).getTile().getType().toLowerCase().equals("crossing")) {
+                                    dataService.setPrevNode(dataService.getCurrentLocation());
+                                    dataService.setCurrentLocation(dataService.getNextNode());
+                                    dataService.setNextNode(dataService.navigationParser.path.get(i).getId());
+                                    i++; //pay attention where i is located
+                                }
+                            } else{
 
                                 while(dataService.robotBusy){//wait till drive event is finished
                                 }
@@ -173,7 +188,7 @@ public class QueueConsumer implements Runnable
             sender.sendCommand("DRIVE ROTATE R 180");
             while(dataService.robotBusy){
             }
-            sender.sendCommand("SPEAKER SAY TUUT TUUT TUUT TUUT");
+            sender.sendCommand("SPEAKER SAY BEEP BEEP BEEP BEEP");
             dataService.robotBusy = true;
             sender.sendCommand("DRIVE BACKWARDS 150");
             while(dataService.robotBusy){

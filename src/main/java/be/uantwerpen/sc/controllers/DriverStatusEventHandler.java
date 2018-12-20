@@ -164,7 +164,7 @@ public class DriverStatusEventHandler implements Runnable
             }
             return recvData;
         }catch(Exception e){
-            e.printStackTrace();
+            System.err.println("Lost connection to robot");
         }
         return recvData;
     }
