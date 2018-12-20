@@ -196,8 +196,10 @@ public class JobService
     }
 
     private void startPathPlanning(int end2){
+        //first remove commands from possible earlier jobs
+        removeDriveCommands();
+        logger.info("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end2);
 
-        Terminal.printTerminal("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end2);
         dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2), dataService);
         //Parse Map
         dataService.navigationParser.parseMap();
@@ -209,8 +211,10 @@ public class JobService
         dataService.setPrevNode((long)start);
         dataService.robotDriving = true;
         //necessary to get past the first white space
-        queueService.insertJob("DRIVE FOLLOWLINE");
-        queueService.insertJob("DRIVE FORWARD 110");
+        if(dataService.map.getPointById(new Long(end2)).getTile().getType().toLowerCase().equals("end"))
+            queueService.insertJob("DRIVE FOLLOWLINE");
+            queueService.insertJob("DRIVE FORWARD 110");
+            queueService.insertJob("DRIVE FOLLOWLINE");
 
         //Process map
         for (DriveDir command : dataService.navigationParser.commands) {

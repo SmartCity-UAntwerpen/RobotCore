@@ -56,7 +56,8 @@ public class QueueConsumer implements Runnable
                     Terminal.printTerminal("Current location : " + dataService.getCurrentLocation() + " destination : " + dataService.getDestination() + " tempjob : " + dataService.tempjob);
 
                     if(!dataService.tempjob){ //end of total job
-                        Park();
+                        if(dataService.map.getPointById(dataService.getCurrentLocation()).getTile().getType().toLowerCase().equals("end"))
+                            Park();
                         logger.info("Total job finished, Waiting for new job...");
                         dataService.robotDriving = false;
                         RestTemplate restTemplate = new RestTemplate(); //standaard resttemplate gebruiken
@@ -68,7 +69,8 @@ public class QueueConsumer implements Runnable
                         dataService.jobfinished = true;
                     }else{ //end of temp job
                         logger.info("Arrived to starting location, executing job...");
-                        Park();
+                        if(dataService.map.getPointById(dataService.getCurrentLocation()).getTile().getType().toLowerCase().equals("end"))
+                            Park();
                         dataService.setDestination(-1L);
                         dataService.robotDriving = false;
                         dataService.tempjob = false;

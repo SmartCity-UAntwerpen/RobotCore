@@ -29,9 +29,9 @@ public class NavigationParser {
     public Queue<DriveDir> parseMap(){
         if(path.isEmpty()){
             Terminal.printTerminalError("Cannot parse empty map");
-        }else{
+        }else {
             //First part is always driving forward.
-            commands.add(new DriveDir(DriveDirEnum.FOLLOW));
+            //commands.add(new DriveDir(DriveDirEnum.FOLLOW));
             //Second part is parsing the rest of the map
             Vertex current = path.get(0);
             System.out.println("current: "+current);
@@ -42,7 +42,7 @@ public class NavigationParser {
                 System.out.println(dataService.getPrevNode());
                 System.out.println(dataService.getNextNode());
             }else{
-                for(int i = 2; i < path.size()-1; i++) {
+                for(int i = 2; i < path.size(); i++ ) {
                     previous = current;
                     current = next;
                     next = path.get(i);
@@ -57,8 +57,10 @@ public class NavigationParser {
                                 } else if(Math.abs(edge.getLinkEntity().getAngle()) == 180) {
                                     commands.add(new DriveDir(DriveDirEnum.TURN));
                                 } else {
-                                    //rotate R -90 == rotate L 90
-                                    commands.add(new DriveDir(DriveDirEnum.RIGHT, edge.getLinkEntity().getAngle()));
+                                    if(edge.getLinkEntity().getAngle() >0)
+                                        commands.add(new DriveDir(DriveDirEnum.RIGHT, edge.getLinkEntity().getAngle()));
+                                    else
+                                        commands.add(new DriveDir(DriveDirEnum.LEFT, Math.abs(edge.getLinkEntity().getAngle())));
                                 }
                             // execute follow line after each crossroad
                             commands.add(new DriveDir(DriveDirEnum.FOLLOW));
