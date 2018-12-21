@@ -57,35 +57,61 @@ public class NavigationParser {
             Terminal.printTerminalError("Cannot parse empty map");
         }else {
             Vertex current;
+            Vertex driveTo;
             Vertex next;
-            for(int i = 0; i < path.size() - 1; i++) {
+            for(int i = 0;  i < path.size() - 1; i++) {
                 current = path.get(i);
-                next = path.get(i+1);
+                driveTo = path.get(i+1);
+                if(i+2  < path.size())
+                    next = path.get(i+2);
+                else
+                    next = driveTo;
+
                 switch (dataService.map.getPointById(path.get(i).getId()).getTile().getType().toLowerCase()) {
                     case "crossing":
                             //Check at what angle the crossroad needs to be passed
-                           decideOnCrossing(current, next);
+                           decideOnCrossing(current, driveTo);
+                           commands.add(new DriveDir("UPDATE LOCATION"+" "+driveTo.getId()+" "+next.getId()));
                         break;
                     case "tlight":
                         //followline is needed to continue driving, forward is needed to get over the gap
                         commands.add(new DriveDir(DriveDirEnum.FORWARD));
                         commands.add(new DriveDir(DriveDirEnum.FOLLOW));
+                        commands.add(new DriveDir("UPDATE LOCATION"+" "+driveTo.getId()+" "+next.getId()));
+
                         break;
                     case "end":
+                        System.out.println("debug");
                         if(i == 0) {
                             commands.add(new DriveDir(DriveDirEnum.FOLLOW));
                             commands.add(new DriveDir(DriveDirEnum.FORWARD));
                             commands.add(new DriveDir(DriveDirEnum.FOLLOW));
+                            commands.add(new DriveDir("UPDATE LOCATION"+" "+driveTo.getId()+" "+next.getId()));
+
                         } else {
                             commands.add(new DriveDir(DriveDirEnum.LONGDRIVE));
                             commands.add(new DriveDir(DriveDirEnum.TURN));
                             commands.add(new DriveDir(DriveDirEnum.FOLLOW));
                             commands.add(new DriveDir(DriveDirEnum.FORWARD));
+                            commands.add(new DriveDir("UPDATE LOCATION"+" "+driveTo.getId()+" "+next.getId()));
+
                         }
                         break;
                     default:
                         }
+
             }
+            if(dataService.map.getPointById(path.get(path.size()-1).getId()).getTile().getType().toLowerCase().equals("end")) {
+                //last point -> park
+                commands.add(new DriveDir("SPEAKER UNMUTE"));
+                commands.add(new DriveDir("SPEAKER SAY PARKING"));
+                commands.add(new DriveDir("DRIVE ROTATE R 180"));
+                commands.add(new DriveDir("SPEAKER SAY BEEP BEEP BEEP BEEP"));
+                commands.add(new DriveDir("DRIVE BACKWARDS 150"));
+            }
+            commands.add((new DriveDir("SEND LOCATION")));
+
+
         }
         return commands;
     }

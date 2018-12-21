@@ -48,16 +48,11 @@ public class QueueConsumer implements Runnable
 
     @Override
     public void run() {
-        int i = 1;
         while (!Thread.currentThread().isInterrupted()) {
-            try {
-                //Terminal.printTerminal("loc:" +dataService.getCurrentLocation() + " dest:" +dataService.getDestination());
                 if((dataService.getCurrentLocation() == dataService.getDestination()) && (dataService.getDestination() != -1L) && (dataService.getCurrentLocation() != -1L)){
                     Terminal.printTerminal("Current location : " + dataService.getCurrentLocation() + " destination : " + dataService.getDestination() + " tempjob : " + dataService.tempjob);
 
                     if(!dataService.tempjob){ //end of total job
-                        if(dataService.map.getPointById(dataService.getCurrentLocation()).getTile().getType().toLowerCase().equals("end"))
-                            Park();
                         logger.info("Total job finished, Waiting for new job...");
                         dataService.robotDriving = false;
                         RestTemplate restTemplate = new RestTemplate(); //standaard resttemplate gebruiken
@@ -65,141 +60,53 @@ public class QueueConsumer implements Runnable
                                 , Void.class);
 
                         dataService.setDestination(-1L);
-                        dataService.firstOfQueue = true;
                         dataService.jobfinished = true;
-                    }else{ //end of temp job
+                    }else { //end of temp job
                         logger.info("Arrived to starting location, executing job...");
-                        if(dataService.map.getPointById(dataService.getCurrentLocation()).getTile().getType().toLowerCase().equals("end"))
-                            Park();
                         dataService.setDestination(-1L);
                         dataService.robotDriving = false;
                         dataService.tempjob = false;
-                        dataService.firstOfQueue = true;
-
                     }
 
                     dataService.executingJob = false;
-                    i = 1;
                 }
 
-            if(queueService.getContentQueue().size() == 0){
-
-            }else{
+            if(queueService.getContentQueue().size() != 0){
                 if(!dataService.robotBusy && (dataService.getWorkingmodeEnum() != null)){
 
                     switch(dataService.getWorkingmodeEnum()){
                         case INDEPENDENT:
-                            Terminal.printTerminal("case independent");
-                            if(dataService.firstOfQueue){
-                               // RequestLock();
-                            }
-
-                            Terminal.printTerminal("Robot not busy");
-                            Terminal.printTerminal(queueService.getContentQueue().toString());
+                            logger.info("Independent case");
+                            logger.info("Robot not busy");
+                            logger.info(queueService.getContentQueue().toString());
                             String s = queueService.getJob();
-                            Terminal.printTerminal("Sending: " + s);
-                            sender.sendCommand(s);
+                            logger.info("executing: " + s);
 
-                            dataService.robotBusy = true;
-                            Terminal.printTerminal("DRIVING.........");
-                            if(s.contains("DRIVE FOLLOWLINE")){
-                                while(dataService.robotBusy){ //wait till drive event is finished
-                                }
-                                if(dataService.firstOfQueue && dataService.map.getPointById(dataService.getCurrentLocation()).getTile().getType().toLowerCase().equals("end")){
-                                    Terminal.printTerminal("First followline of queue");
-                                    dataService.firstOfQueue = false;
-                                    i++;
-                                }else{
-                                    logger.info("Current = " + dataService.getCurrentLocation() + " next = " + dataService.getNextNode() + " prev = " + dataService.getPrevNode());
-                                    if(i < dataService.navigationParser.path.size()){
-                                        dataService.setPrevNode(dataService.getCurrentLocation());
-                                        dataService.setCurrentLocation(dataService.getNextNode());
-                                        dataService.setNextNode(dataService.navigationParser.path.get(i).getId());
-                                       // RequestLock();
-                                       // ReleaseLock();
-
-                                    }else{
-                                        dataService.setPrevNode(dataService.getCurrentLocation());
-                                        //ReleaseLock(dataService.getCurrentLocation());
-                                        dataService.setCurrentLocation(dataService.getNextNode());
+                            if (s.contains("UPDATE LOCATION")) {
+                                String split[] = s.split(" ");
+                                dataService.setPrevNode(dataService.getCurrentLocation());
+                                dataService.setCurrentLocation(Long.parseLong(split[2]));
+                                dataService.setNextNode(Long.parseLong(split[3]));
+                            } else if(s.equals("SEND LOCATION")) {
+                                RestTemplate rest = new RestTemplate();
+                                rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + dataService.getRobotID() + "/locationUpdate/" +dataService.getCurrentLocation(), boolean.class);
+                            } else {
+                                sender.sendCommand(s);
+                                if(!s.contains("SPEAKER")) {
+                                    dataService.robotBusy = true;
+                                    while(dataService.robotBusy){ //wait till drive event is finished
                                     }
-
-                                    Terminal.printTerminal("Current = " + dataService.getCurrentLocation() + " next = " + dataService.getNextNode() + " prev = " + dataService.getPrevNode());
-                                    Terminal.printTerminal("Current = " + dataService.getCurrentLocation() + " destination = " + dataService.getDestination());
-                                    Terminal.printTerminal("");
-                                    i++;
                                 }
-                            } else if(s.contains("DRIVE TURN") || s.contains("DRIVE FORWARD")) {
-                                while(dataService.robotBusy){ //wait till drive event is finished
-                                }
-                                //the robot is passing a crosspoint
-                                Point temp = dataService.map.getPointById(dataService.getCurrentLocation());
-                                if(dataService.map.getPointById(dataService.getCurrentLocation()).getTile().getType().toLowerCase().equals("crossing")) {
-                                    dataService.setPrevNode(dataService.getCurrentLocation());
-                                    dataService.setCurrentLocation(dataService.getNextNode());
-                                    dataService.setNextNode(dataService.navigationParser.path.get(i).getId());
-                                    i++; //pay attention where i is located
-                                }
-                            } else{
-
-                                while(dataService.robotBusy){//wait till drive event is finished
-                                }
-
                             }
+
                             break;
                      default:
-                         Terminal.printTerminal("Robot not busy");
-                         Terminal.printTerminal(queueService.getContentQueue().toString());
-                         String c = queueService.getJob();
-                         Terminal.printTerminal("Sending: " + c);
-                         sender.sendCommand(c);
-
-                         dataService.robotBusy = true;
-                         Terminal.printTerminal("DRIVING.........");
-                         if(c.contains("DRIVE FOLLOWLINE")){
-                             while(dataService.robotBusy){//wait till drive event is finished
-                             }
-                             dataService.readTag();
-                         }else{
-
-                             while(dataService.robotBusy){//wait till drive event is finished
-                             }
-
-                         }
                          break;
                     }
 
                 }
             }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
-    }
-
-    public void Park(){
-        try{
-            Terminal.printTerminal("Parking");
-
-            sender.sendCommand("SPEAKER UNMUTE");
-            sender.sendCommand("SPEAKER SAY PARKING");
-
-            dataService.robotBusy = true;
-            sender.sendCommand("DRIVE ROTATE R 180");
-            while(dataService.robotBusy){
-            }
-            sender.sendCommand("SPEAKER SAY BEEP BEEP BEEP BEEP");
-            dataService.robotBusy = true;
-            sender.sendCommand("DRIVE BACKWARDS 150");
-            while(dataService.robotBusy){
-            }
-
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
-
     }
 
     public void RequestLock(Long robotID, long nextNode){

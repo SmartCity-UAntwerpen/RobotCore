@@ -7,6 +7,7 @@ public class DriveDir {
 
     DriveDirEnum dir;
     double angle = 90;
+    String command;
     DriveDir(){
 
     }
@@ -14,7 +15,14 @@ public class DriveDir {
     public DriveDir(DriveDirEnum dir, double angle){
         this.dir = dir;
         this.angle = angle;
+        command = "MISSING";
     }
+
+    public DriveDir(String command){
+        this.dir = DriveDirEnum.NONE;
+        this.command = command;
+    }
+
 
     public DriveDir(DriveDirEnum dir) {
         this.dir = dir;
@@ -36,7 +44,7 @@ public class DriveDir {
             case LONGDRIVE:
                 return "DRIVE FORWARD 150";
             default:
-                return "MISSING";
+                return command;
         }
     }
 

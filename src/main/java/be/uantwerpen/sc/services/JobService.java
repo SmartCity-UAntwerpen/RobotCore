@@ -123,7 +123,6 @@ public class JobService
                     dataService.jobfinished = false;
                     dataService.tempjob = false;
                     dataService.executingJob = false;
-                    dataService.firstOfQueue = true;
 
                         if(!dataService.getCurrentLocation().equals(job.getStartid()) && (!dataService.executingJob)){ //bot is not located at start of job
                             Terminal.printTerminal("start location not current Location. Going to " + job.getStartid());
@@ -197,23 +196,18 @@ public class JobService
 
     private void startPathPlanning(int end2){
         //first remove commands from possible earlier jobs
-        removeDriveCommands();
+        //removeDriveCommands();
         logger.info("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end2);
 
         dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2), dataService);
         //Parse Map
         dataService.navigationParser.parseMap();
-
         //Setup for driving
-        int start = (int)(long)dataService.navigationParser.path.get(0).getId();
-        int end = (int)(long)dataService.navigationParser.path.get(1).getId();
-        dataService.setNextNode((long)end);
-        dataService.setPrevNode((long)start);
         dataService.robotDriving = true;
 
         //Process map
         for (DriveDir command : dataService.navigationParser.commands) {
-            logger.info("insert job" + command.toString());
+            logger.info("insert job " + command.toString());
             queueService.insertJob(command.toString());
         }
     }

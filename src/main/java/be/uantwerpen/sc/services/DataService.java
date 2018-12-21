@@ -28,7 +28,7 @@ public class DataService
     DriverCommandSender commandSender;
 
     private Long robotID;
-
+    public boolean rotating = false;
     private Long linkMillis;
 
     private Long nextNode = -1L;
@@ -56,9 +56,6 @@ public class DataService
     public boolean jobfinished = false;
     public boolean tempjob = false;     //used to go to start location of job
     public boolean executingJob = false;
-
-    public boolean firstOfQueue = true;
-
     public Job job = null;
 
     public Long getNextNode() {
