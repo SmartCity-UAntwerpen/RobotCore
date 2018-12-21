@@ -33,6 +33,8 @@ public class DriveDir {
                 return "DRIVE FOLLOWLINE";
             case TURN:
                 return "DRIVE ROTATE R 180";
+            case LONGDRIVE:
+                return "DRIVE FORWARD 150";
             default:
                 return "MISSING";
         }

@@ -105,13 +105,12 @@ public class QueueConsumer implements Runnable
                             if(s.contains("DRIVE FOLLOWLINE")){
                                 while(dataService.robotBusy){ //wait till drive event is finished
                                 }
-                                if(dataService.firstOfQueue){
+                                if(dataService.firstOfQueue && dataService.map.getPointById(dataService.getCurrentLocation()).getTile().getType().toLowerCase().equals("end")){
                                     Terminal.printTerminal("First followline of queue");
                                     dataService.firstOfQueue = false;
                                     i++;
                                 }else{
-                                    Terminal.printTerminal("Current = " + dataService.getCurrentLocation() + " next = " + dataService.getNextNode() + " prev = " + dataService.getPrevNode());
-
+                                    logger.info("Current = " + dataService.getCurrentLocation() + " next = " + dataService.getNextNode() + " prev = " + dataService.getPrevNode());
                                     if(i < dataService.navigationParser.path.size()){
                                         dataService.setPrevNode(dataService.getCurrentLocation());
                                         dataService.setCurrentLocation(dataService.getNextNode());
@@ -203,19 +202,19 @@ public class QueueConsumer implements Runnable
 
     }
 
-    public void RequestLock(){
+    public void RequestLock(Long robotID, long nextNode){
         try{
             if(dataService.getNextNode() != -1) {
                 RestTemplate rest = new RestTemplate();
                 boolean response = false;
-                Terminal.printTerminal("Lock Requested : " + dataService.getNextNode());
+                logger.trace("Lock Requested : " + dataService.getNextNode());
 
                 while (!response) {
 
-                    response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/requestlock/" + dataService.getNextNode(), boolean.class);
+                    response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/requestlock/" + robotID + "/" + nextNode, boolean.class);
 
                     if (!response) {
-                        Terminal.printTerminal("Lock Denied: " + dataService.getNextNode());
+                        logger.warn("Lock Denied: " + nextNode);
                         Thread.sleep(200);
                     }
                 }

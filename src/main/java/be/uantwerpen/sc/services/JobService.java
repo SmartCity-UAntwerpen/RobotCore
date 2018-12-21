@@ -210,15 +210,10 @@ public class JobService
         dataService.setNextNode((long)end);
         dataService.setPrevNode((long)start);
         dataService.robotDriving = true;
-        //necessary to get past the first white space
-        if(dataService.map.getPointById(new Long(end2)).getTile().getType().toLowerCase().equals("end"))
-            queueService.insertJob("DRIVE FOLLOWLINE");
-            queueService.insertJob("DRIVE FORWARD 110");
-            queueService.insertJob("DRIVE FOLLOWLINE");
 
         //Process map
         for (DriveDir command : dataService.navigationParser.commands) {
-            Terminal.printTerminal("insert job" + command.toString());
+            logger.info("insert job" + command.toString());
             queueService.insertJob(command.toString());
         }
     }
