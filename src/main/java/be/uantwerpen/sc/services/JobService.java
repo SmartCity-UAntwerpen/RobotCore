@@ -195,8 +195,6 @@ public class JobService
     }
 
     private void startPathPlanning(int end2){
-        //first remove commands from possible earlier jobs
-        //removeDriveCommands();
         logger.info("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end2);
 
         dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2), dataService);

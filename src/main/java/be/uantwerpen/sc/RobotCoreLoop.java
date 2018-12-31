@@ -5,6 +5,8 @@ import be.uantwerpen.sc.controllers.PathController;
 import be.uantwerpen.sc.controllers.mqtt.MqttJobSubscriber;
 import be.uantwerpen.sc.services.*;
 import be.uantwerpen.sc.tools.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -50,6 +52,8 @@ public class RobotCoreLoop implements Runnable
     public IPathplanning pathplanning;
 
     private TerminalService terminalService;
+    private Logger logger = LoggerFactory.getLogger(RobotCoreLoop.class);
+
 
     public RobotCoreLoop(){
 
@@ -82,7 +86,7 @@ public class RobotCoreLoop implements Runnable
 
         //Setup interface for correct mode of pathplanning
         setupInterface();
-        Terminal.printTerminal("Interface is set up");
+        logger.info("Interface is set up");
         //Wait for tag read
         //Read tag where bot is located
         synchronized (this) {
@@ -97,30 +101,41 @@ public class RobotCoreLoop implements Runnable
             }
         }
 
-        Terminal.printTerminal("Tag: " + dataService.getTag());
+        logger.info("Tag: " + dataService.getTag());
 
        // updateStartLocation();
 
         //Request map at server with rest
         dataService.map = mapController.getMap();
-        Terminal.printTerminal("Map received " + dataService.map.getNodeList());
+        logger.info("Map received " + dataService.map.getNodeList());
 
         //Set location of bot
         Long locationID = dataService.map.getLocationByRFID(dataService.getTag());
         dataService.setCurrentLocation(locationID);
-        Terminal.printTerminal("Start Location: " + dataService.getCurrentLocation()+"\n\n");
+        logger.info("Start Location: " + dataService.getCurrentLocation()+"\n\n");
 
         //We have the map now, update link
 
         if(dataService.getWorkingmodeEnum()==WorkingmodeEnum.INDEPENDENT)
             dataService.firstLink();
-        Terminal.printTerminal("link updated");
-        Terminal.printTerminal("next: "+dataService.getNextNode());
+        logger.info("link updated");
+        logger.info("next: "+dataService.getNextNode());
 
         RestTemplate rest = new RestTemplate();
         rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + botId + "/locationUpdate/" +dataService.getCurrentLocation(), boolean.class);
-        Terminal.printTerminal("Lock Requested : " + dataService.getCurrentLocation());
-        //rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/requestlock/" + dataService.getCurrentLocation(), boolean.class);
+        boolean response = false;
+        while(!response) {
+            response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/requestlock/" +dataService.getRobotID()+ "/" + dataService.getCurrentLocation(), boolean.class);
+            logger.info("Lock Requested : " + dataService.getCurrentLocation());
+            if(!response) {
+                logger.trace("First point lock denied with id : " + dataService.getCurrentLocation());
+                try {
+                    Thread.sleep(200);
+                } catch(InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 
         while(!Thread.interrupted()){
 

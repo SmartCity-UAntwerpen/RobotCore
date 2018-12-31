@@ -66,39 +66,42 @@ public class NavigationParser {
                     next = path.get(i+2);
                 else
                     next = driveTo;
-
+                Long linkId = new Long(-1);
+                for(Edge edge : current.getAdjacencies()) {
+                    if(edge.getLinkEntity().getStartPoint().getId() == current.getId() && edge.getLinkEntity().getEndPoint().getId() == driveTo.getId()) {
+                        linkId = edge.getLinkEntity().getId();
+                        break;
+                    }
+                }
+                commands.add(new DriveDir("REQUEST LOCKS "+driveTo.getId() + " " + linkId));
                 switch (dataService.map.getPointById(path.get(i).getId()).getTile().getType().toLowerCase()) {
                     case "crossing":
                             //Check at what angle the crossroad needs to be passed
                            decideOnCrossing(current, driveTo);
-                           commands.add(new DriveDir("UPDATE LOCATION"+" "+driveTo.getId()+" "+next.getId()));
                         break;
                     case "tlight":
                         //followline is needed to continue driving, forward is needed to get over the gap
                         commands.add(new DriveDir(DriveDirEnum.FORWARD));
                         commands.add(new DriveDir(DriveDirEnum.FOLLOW));
-                        commands.add(new DriveDir("UPDATE LOCATION"+" "+driveTo.getId()+" "+next.getId()));
 
                         break;
                     case "end":
-                        System.out.println("debug");
                         if(i == 0) {
                             commands.add(new DriveDir(DriveDirEnum.FOLLOW));
                             commands.add(new DriveDir(DriveDirEnum.FORWARD));
                             commands.add(new DriveDir(DriveDirEnum.FOLLOW));
-                            commands.add(new DriveDir("UPDATE LOCATION"+" "+driveTo.getId()+" "+next.getId()));
-
                         } else {
                             commands.add(new DriveDir(DriveDirEnum.LONGDRIVE));
                             commands.add(new DriveDir(DriveDirEnum.TURN));
                             commands.add(new DriveDir(DriveDirEnum.FOLLOW));
                             commands.add(new DriveDir(DriveDirEnum.FORWARD));
-                            commands.add(new DriveDir("UPDATE LOCATION"+" "+driveTo.getId()+" "+next.getId()));
-
                         }
                         break;
                     default:
                         }
+                commands.add(new DriveDir("UPDATE LOCATION"+" "+driveTo.getId()+" "+next.getId()));
+                commands.add(new DriveDir("RELEASE LOCKS " + current.getId() + " " + linkId));
+
 
             }
             if(dataService.map.getPointById(path.get(path.size()-1).getId()).getTile().getType().toLowerCase().equals("end")) {

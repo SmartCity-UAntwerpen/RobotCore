@@ -28,7 +28,6 @@ public class DataService
     DriverCommandSender commandSender;
 
     private Long robotID;
-    public boolean rotating = false;
     private Long linkMillis;
 
     private Long nextNode = -1L;
