@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.ConnectException;
+import java.sql.Connection;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -96,7 +98,7 @@ public class QueueConsumer implements Runnable
                                 Long point = Long.parseLong(split[2]);
                                 Long linkId =  Long.parseLong(split[3]);
                                 releasePointLock(dataService.getRobotID(), point);
-                                requestLinkLock(dataService.getRobotID(), linkId);
+                                releaseLinkLock(dataService.getRobotID(), linkId);
                             } else {
                                 //commands that have to be executed on the robot driver
                                 sender.sendCommand(s);
@@ -140,11 +142,12 @@ public class QueueConsumer implements Runnable
 
     public void requestLinkLock(Long robotId, Long linkId) {
         if(linkId != -1) {
+
             RestTemplate rest = new RestTemplate();
             boolean response = false;
             logger.trace("Link lock requested: " + linkId);
             while(!response) {
-                response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/link/requestlock/" + robotId + "/" + linkId, boolean.class);
+                    response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/link/requestlock/" + robotId + "/" + linkId, boolean.class);
                 if(!response) {
                     logger.warn("Link lock denied: " + linkId);
                     try {
@@ -163,35 +166,15 @@ public class QueueConsumer implements Runnable
     public void releasePointLock(Long robotId, Long pointId) {
         logger.trace("releasing point lock: " + pointId);
         RestTemplate rest = new RestTemplate();
-        boolean response = false;
-        while(!response) {
-            response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/unlock/" + robotId + "/" + pointId, boolean.class);
-            if(!response) {
-                logger.warn("Point release denied: " + pointId);
-                try {
-                    Thread.sleep(200);
-                } catch(InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+            boolean response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/unlock/" + robotId + "/" + pointId, boolean.class);
+
     }
 
     public void releaseLinkLock(Long robotId, Long linkId) {
         logger.trace("releasing link lock: " + linkId);
         RestTemplate rest = new RestTemplate();
         boolean response = false;
-        while(!response) {
-            response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/link/unlock/" + robotId + "/" + linkId, boolean.class);
-            if(!response) {
-                logger.warn("Link release denied: " + linkId);
-                try {
-                    Thread.sleep(200);
-                } catch(InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/link/unlock/" + robotId + "/" + linkId, boolean.class);
     }
 
 }

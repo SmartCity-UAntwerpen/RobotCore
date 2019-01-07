@@ -98,7 +98,7 @@ public class NavigationParser {
                         }
                         break;
                     default:
-                        }
+                }
                 commands.add(new DriveDir("UPDATE LOCATION"+" "+driveTo.getId()+" "+next.getId()));
                 commands.add(new DriveDir("RELEASE LOCKS " + current.getId() + " " + linkId));
 
