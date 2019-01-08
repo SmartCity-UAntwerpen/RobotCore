@@ -41,7 +41,9 @@ public class RobotCoreLoop implements Runnable
     @Value("#{new Integer(${sc.core.port}) ?: 1994}")
     private int serverPort;
 
-    private Long botId = 1L;
+    @Value("#{new Long(${robot.id}) ?: 0}")
+    private Long botId;
+
     @Autowired
     private QueueService queueService;
     @Autowired

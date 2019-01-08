@@ -1,7 +1,7 @@
 package be.uantwerpen.sc.services;
 
 import be.uantwerpen.sc.controllers.DriverCommandSender;
-import be.uantwerpen.sc.models.Job;
+import be.uantwerpen.rc.models.Job;
 import be.uantwerpen.rc.models.map.Link;
 import be.uantwerpen.rc.models.map.Map;
 import be.uantwerpen.rc.models.map.Node;

@@ -214,8 +214,8 @@ public class TerminalService
     {
         //aan RobotBackend late wete dat bot shutdownt
         RestTemplate resttemplate = new RestTemplate();
-        resttemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/delete/" //aan de server laten weten dat er een nieuwe bot zich aanbied
-                + dataService.getRobotID(), void.class); //Aan de server laten weten in welke mode de bot werkt
+        resttemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/delete/"
+                + dataService.getRobotID(), void.class);
 
 
         System.exit(0);
@@ -280,11 +280,9 @@ public class TerminalService
         int currentLocation = (int)(long)dataService.getCurrentLocation();
         if(currentLocation < 0) {
             currentLocation = 4;
-            //dataService.setLookingCoordiante("N");
         }
         List<Vertex> path = pathController.getRandomPath(currentLocation).getPath();
         NavigationParser navigationParser = new NavigationParser(path, dataService);
-        //System.out.println(navigationParser.parseRandomMap().toString());
 
     }
 

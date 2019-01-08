@@ -2,7 +2,7 @@ package be.uantwerpen.sc.services;
 
 import be.uantwerpen.sc.RobotCoreLoop;
 import be.uantwerpen.sc.controllers.DriverCommandSender;
-import be.uantwerpen.sc.models.Job;
+import be.uantwerpen.rc.models.Job;
 import be.uantwerpen.sc.tools.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +92,7 @@ public class JobService
         System.out.println("Parsed: jobid = " + jobid + " botid = " + botid + " startid = " + startid + " endid = " + endid);
 
         if(!(dataService.getCurrentLocation().equals(endid) && dataService.getCurrentLocation().equals(startid))) {
-            Job parsedJob = new Job(jobid,botid,startid,endid);
+            Job parsedJob = new Job(jobid,startid,endid);
             dataService.job = parsedJob;
         } else {
             logger.info("Already on destination");
@@ -111,8 +111,8 @@ public class JobService
     public void performJob(Job job)
     {
 
-        int endInt = job.getEndid().intValue();
-        int startInt = job.getStartid().intValue();
+        int endInt = job.getIdEnd().intValue();
+        int startInt = job.getIdStart().intValue();
         logger.info("Performing job with destination: "+endInt);
         Terminal.printTerminal("performJob end int = " + endInt);
         switch(dataService.getWorkingmodeEnum()) {
@@ -124,9 +124,9 @@ public class JobService
                     dataService.tempjob = false;
                     dataService.executingJob = false;
 
-                        if(!dataService.getCurrentLocation().equals(job.getStartid()) && (!dataService.executingJob)){ //bot is not located at start of job
-                            Terminal.printTerminal("start location not current Location. Going to " + job.getStartid());
-                            dataService.setDestination(job.getStartid());
+                        if(!dataService.getCurrentLocation().equals(job.getIdStart()) && (!dataService.executingJob)){ //bot is not located at start of job
+                            Terminal.printTerminal("start location not current Location. Going to " + job.getIdStart());
+                            dataService.setDestination(job.getIdStart());
                             dataService.tempjob = true;
                             dataService.executingJob = true;
                             startPathPlanning(startInt);
@@ -135,12 +135,12 @@ public class JobService
 
                             dataService.tempjob = false;
                             dataService.executingJob = true;
-                            dataService.setDestination(job.getEndid());
+                            dataService.setDestination(job.getIdEnd());
                             startPathPlanning(endInt);
                         }else {
                             dataService.tempjob = false;
                             dataService.executingJob = true;
-                            dataService.setDestination(job.getEndid());
+                            dataService.setDestination(job.getIdEnd());
                             startPathPlanning(endInt);
                         }
 
@@ -151,7 +151,7 @@ public class JobService
                 break;
             case PARTIALSERVER:
                 try {
-                    dataService.setDestination(job.getEndid());
+                    dataService.setDestination(job.getIdEnd());
                     dataService.robotDriving = true;
                     dataService.tempjob = false;
                     dataService.executingJob = true;
@@ -175,7 +175,7 @@ public class JobService
                 try {
                     Terminal.printTerminal("FullServer mode");
                     Terminal.printTerminal("Current Location = " + dataService.getCurrentLocation() + " end int = " + endInt);
-                    dataService.setDestination(job.getEndid());
+                    dataService.setDestination(job.getIdEnd());
                     dataService.robotDriving = true;
                     dataService.tempjob = false;
                     dataService.executingJob = true;
