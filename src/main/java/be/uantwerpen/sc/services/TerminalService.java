@@ -26,10 +26,10 @@ public class TerminalService
 {
     private Terminal terminal;
 
-    @Value("${sc.core.ip:localhost}")
+    @Value("${sc.backend.ip:localhost}")
     private String serverIP;
 
-    @Value("#{new Integer(${sc.core.port}) ?: 1994}")
+    @Value("#{new Integer(${sc.backend.port}) ?: 1994}")
     private int serverPort;
 
     @Autowired

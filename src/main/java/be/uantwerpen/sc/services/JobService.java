@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.ParseException;
@@ -21,10 +22,10 @@ import java.util.concurrent.BlockingQueue;
 @Service
 public class JobService
 {
-    @Value("${sc.core.ip:localhost}")
+    @Value("${sc.backend.ip:localhost}")
     private String serverIP;
 
-    @Value("#{new Integer(${sc.core.port}) ?: 1994}")
+    @Value("#{new Integer(${sc.backend.port}) ?: 1994}")
     private int serverPort;
 
     @Autowired
@@ -89,7 +90,6 @@ public class JobService
         Long endid = Long.parseLong(idendNumber);
 
         logger.info("Parsed: jobid = " + jobid + " botid = " + botid + " startid = " + startid + " endid = " + endid);
-        System.out.println("Parsed: jobid = " + jobid + " botid = " + botid + " startid = " + startid + " endid = " + endid);
 
         if(!(dataService.getCurrentLocation().equals(endid) && dataService.getCurrentLocation().equals(startid))) {
             Job parsedJob = new Job(jobid,startid,endid);
@@ -98,8 +98,17 @@ public class JobService
             logger.info("Already on destination");
             //let the backend know that the job is finished
             RestTemplate restTemplate = new RestTemplate();
-            restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/job/finished/" + dataService.getRobotID()
-                    , Void.class);
+            while(true) {
+                try {
+                    restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/job/finished/" + dataService.getRobotID()
+                            , Void.class);
+                    break;
+                } catch(RestClientException e ) {
+                    logger.error("Can't connect to the database to send job finished, retrying...");
+                }
+            }
+
+
         }
 
         Terminal.printTerminal("job parsed");
@@ -132,7 +141,6 @@ public class JobService
                             startPathPlanning(startInt);
 
                             while(dataService.tempjob){} //wait till tempjob is finished
-
                             dataService.tempjob = false;
                             dataService.executingJob = true;
                             dataService.setDestination(job.getIdEnd());
@@ -196,7 +204,6 @@ public class JobService
 
     private void startPathPlanning(int end2){
         logger.info("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end2);
-
         dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2), dataService);
         //Parse Map
         dataService.navigationParser.parseMap();

@@ -18,10 +18,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class DataService
 {
-    @Value("${sc.core.ip:localhost}")
+    @Value("${sc.backend.ip:localhost}")
     private String serverIP;
 
-    @Value("#{new Integer(${sc.core.port}) ?: 1994}")
+    @Value("#{new Integer(${sc.backend.port}) ?: 1994}")
     private int serverPort;
 
     @Autowired
@@ -162,62 +162,6 @@ public class DataService
 
         }
     }
-
-    public void readTag(){
-
-        locationUpdated = false;
-        int timesTried = 0;
-        while (getTag().trim().equals("NONE") || getTag().equals("NO_TAG") || locationUpdated == false) {
-            try {
-                //Read tag
-                Terminal.printTerminal("Trying to read tag " + timesTried);
-                timesTried++;
-                commandSender.sendCommand("TAG READ UID");
-                Thread.sleep(2000);
-
-                if(timesTried > 4){
-                    break;
-                }
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void nextLink(){
-        if(map != null && navigationParser != null && navigationParser.path != null && !navigationParser.path.isEmpty() && navigationParser.path.size() != 1) {
-            Long start = navigationParser.path.get(0).getId();
-            Long end = navigationParser.path.get(1).getId();
-            if(getTag().trim().equals("NONE")){
-                currentLocation = nextNode;
-            }
-            //setCurrentLocationAccordingTag();
-            nextNode = end;
-            prevNode = start;
-            Long lid = -1L;
-            //find link from start to end
-            for (Edge e : navigationParser.path.get(0).getAdjacencies()) {
-                if (e.getTarget() == end) {
-                    lid = e.getLinkEntity().getId();
-                }
-            }
-
-            setCurrentLocation(lid);
-            Terminal.printTerminal("Current Link: " + lid);
-            if(this.pathplanningEnum == PathplanningEnum.DIJKSTRA) {
-                //delete entry from navigationParser
-                navigationParser.path.remove(0);
-            }
-            //RestTemplate rest = new RestTemplate();
-            //rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + robotID + "/lid/" + lid, Integer.class);
-        }else{
-            //TODO update location
-            Terminal.printTerminal("Entering manual manouvering mode. Location will be inaccurate");
-            prevNode = nextNode;
-        }
-    }
-
     public void setDestination(Long dest){this.destination = dest;}
     public Long getDestination(){return this.destination;}
 }

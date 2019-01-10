@@ -62,10 +62,10 @@ public class SystemLoader implements ApplicationRunner
     @Autowired KeepAliveController keepAlivePoller;
 
 
-    @Value("${sc.core.ip:localhost}")
+    @Value("${sc.backend.ip:localhost}")
     String serverIP;
 
-    @Value("#{new Integer(${sc.core.port})}")
+    @Value("#{new Integer(${sc.backend.port})}")
     int serverPort;
 
     @Autowired

@@ -19,6 +19,7 @@ public class KeepAliveController implements Runnable{
         while(!Thread.currentThread().isInterrupted()){
             try
             {
+                //Thread.currentThread().sleep(120000); //wait 2 minutes
                 Thread.currentThread().sleep(120000); //wait 2 minutes
             }
             catch (Exception e)

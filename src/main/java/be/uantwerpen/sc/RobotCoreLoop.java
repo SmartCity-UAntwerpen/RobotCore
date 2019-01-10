@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
@@ -35,10 +36,10 @@ public class RobotCoreLoop implements Runnable
     @Autowired
     private JobService jobService;
 
-    @Value("${sc.core.ip:localhost}")
+    @Value("${sc.backend.ip:localhost}")
     private String serverIP;
 
-    @Value("#{new Integer(${sc.core.port}) ?: 1994}")
+    @Value("#{new Integer(${sc.backend.port}) ?: 1994}")
     private int serverPort;
 
     @Value("#{new Long(${robot.id}) ?: 0}")
@@ -127,15 +128,17 @@ public class RobotCoreLoop implements Runnable
         rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + botId + "/locationUpdate/" +dataService.getCurrentLocation(), boolean.class);
         boolean response = false;
         while(!response) {
-            response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/requestlock/" +dataService.getRobotID()+ "/" + dataService.getCurrentLocation(), boolean.class);
-            logger.info("Lock Requested : " + dataService.getCurrentLocation());
-            if(!response) {
-                logger.trace("First point lock denied with id : " + dataService.getCurrentLocation());
-                try {
+            try {
+                response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/requestlock/" +dataService.getRobotID()+ "/" + dataService.getCurrentLocation(), boolean.class);
+                logger.info("Lock Requested : " + dataService.getCurrentLocation());
+                if(!response) {
+                    logger.trace("First point lock denied with id : " + dataService.getCurrentLocation());
                     Thread.sleep(200);
-                } catch(InterruptedException e) {
-                    e.printStackTrace();
                 }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch(RestClientException e) {
+                logger.error("Can't connect to the database to lock first point, retrying...");
             }
         }
 

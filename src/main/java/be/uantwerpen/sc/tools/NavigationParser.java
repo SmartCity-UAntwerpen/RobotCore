@@ -81,6 +81,7 @@ public class NavigationParser {
                         break;
                     case "tlight":
                         //followline is needed to continue driving, forward is needed to get over the gap
+                        commands.add(new DriveDir("TRAFFICLIGHT DETECTION "+current.getId()));
                         commands.add(new DriveDir(DriveDirEnum.FORWARD));
                         commands.add(new DriveDir(DriveDirEnum.FOLLOW));
 
@@ -101,6 +102,9 @@ public class NavigationParser {
                 }
                 commands.add(new DriveDir("UPDATE LOCATION"+" "+driveTo.getId()+" "+next.getId()));
                 commands.add(new DriveDir("RELEASE LOCKS " + current.getId() + " " + linkId));
+                // needed to relock the tile since points on crosspoints reffer to same tile -> same lock
+                commands.add(new DriveDir("RELOCK TILE " + driveTo.getId()));
+
 
 
             }
