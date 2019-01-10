@@ -1,6 +1,6 @@
 package be.uantwerpen.sc;
 
-import be.uantwerpen.sc.controllers.MapController;
+import be.uantwerpen.rc.models.map.Map;
 import be.uantwerpen.sc.controllers.PathController;
 import be.uantwerpen.sc.controllers.mqtt.MqttJobSubscriber;
 import be.uantwerpen.sc.services.*;
@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -47,8 +48,7 @@ public class RobotCoreLoop implements Runnable
 
     @Autowired
     private QueueService queueService;
-    @Autowired
-    private MapController mapController;
+
     @Autowired
     private PathController pathController;
 
@@ -109,7 +109,7 @@ public class RobotCoreLoop implements Runnable
        // updateStartLocation();
 
         //Request map at server with rest
-        dataService.map = mapController.getMap();
+        getMap();
         logger.info("Map received " + dataService.map.getNodeList());
 
         //Set location of bot
@@ -156,6 +156,20 @@ public class RobotCoreLoop implements Runnable
         return this.pathplanning;
     }
 
+    private void getMap() {
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<Map> responseList;
+        while(true) {
+            try {
+                responseList = restTemplate.getForEntity("http://" + serverIP + ":" + serverPort + "/map/", Map.class);
+                break;
+            } catch(RestClientException e) {
+                logger.error("Can't connect to the backend to retrieve map, retrying...");
+            }
+        }
+        Map map = responseList.getBody();
+        dataService.map = map;
+    }
 
     private void setupInterface(){
         switch (pathplanningType.getType()){

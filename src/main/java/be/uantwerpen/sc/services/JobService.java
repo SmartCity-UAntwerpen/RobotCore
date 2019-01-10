@@ -1,5 +1,6 @@
 package be.uantwerpen.sc.services;
 
+import be.uantwerpen.rc.models.map.Map;
 import be.uantwerpen.sc.RobotCoreLoop;
 import be.uantwerpen.sc.controllers.DriverCommandSender;
 import be.uantwerpen.rc.models.Job;
@@ -8,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -204,6 +206,8 @@ public class JobService
 
     private void startPathPlanning(int end2){
         logger.info("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end2);
+        //first retrieve the most updated version of the map (weights are dynamic)
+        getUpdatedMap();
         dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2), dataService);
         //Parse Map
         dataService.navigationParser.parseMap();
@@ -215,6 +219,21 @@ public class JobService
             logger.info("insert job " + command.toString());
             queueService.insertJob(command.toString());
         }
+    }
+
+    private void getUpdatedMap() {
+        logger.info("Receiving updated map...");
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<Map> responseList;
+        while(true) {
+            try {
+                responseList = restTemplate.getForEntity("http://" + serverIP + ":" + serverPort + "/map/", Map.class);
+                break;
+            } catch(RestClientException e) {
+                logger.error("Can't connect to the backend to retrieve map, retrying...");
+            }
+        }
+        dataService.map = responseList.getBody();
     }
 
     public void startPathRobotcore(int start, int end){

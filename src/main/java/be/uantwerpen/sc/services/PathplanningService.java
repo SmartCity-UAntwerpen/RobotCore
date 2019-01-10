@@ -62,7 +62,7 @@ public class PathplanningService implements IPathplanning
         //Vertex v = vertexes.get((int)start-1);
 
         dijkstra.computePaths(start, vertexes); // run Dijkstra
-        System.out.println("Distance to " + vertexes.get((int)stop-1) + ": " + vertexes.get((int)stop-1).getMinDistance());
+//        System.out.println("Distance to " + vertexes.get((int)stop-1) + ": " + vertexes.get((int)stop-1).getMinDistance());
         List<Vertex> path = dijkstra.getShortestPathTo(stop,vertexes).getPath();
         System.out.println("Path: " + path);
         return path;

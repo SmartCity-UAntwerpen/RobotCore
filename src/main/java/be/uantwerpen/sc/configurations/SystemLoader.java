@@ -32,11 +32,6 @@ public class SystemLoader implements ApplicationRunner
     @Autowired
     private DriverCommandSender cCommandSender;
 
-
-    @Autowired
-    private MapController mapController;
-
-
     @Autowired
     private PathController pathController;
 

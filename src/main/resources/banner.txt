@@ -6,4 +6,4 @@
  |_____/|_| |_| |_|\__,_|_|   \__|\_____|_|\__|\__, |
                                                 __/ |
  ==============================================|___/=
- :: ${application.title} - 2016 ::         (v. ${application.version})
+ :: ${application.title} - 2018-2019 ::         (v. ${application.version})
