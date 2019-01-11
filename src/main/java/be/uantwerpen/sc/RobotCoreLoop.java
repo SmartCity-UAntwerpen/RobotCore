@@ -93,7 +93,7 @@ public class RobotCoreLoop implements Runnable
         //Wait for tag read
         //Read tag where bot is located
         synchronized (this) {
-            while (dataService.getTag().trim().equals("NONE") || dataService.getTag().equals("NO_TAG")) {
+            while (dataService.getTag().trim().equals("NONE") || dataService.getTag().trim().equals("NO_TAG")) {
                 try {
                     //Read tag
                     queueService.insertJob("TAG READ UID");

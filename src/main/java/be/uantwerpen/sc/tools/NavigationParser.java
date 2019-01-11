@@ -1,6 +1,8 @@
 package be.uantwerpen.sc.tools;
 
 import be.uantwerpen.sc.services.DataService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import be.uantwerpen.rc.tools.Vertex;
 import be.uantwerpen.rc.tools.Edge;
@@ -11,6 +13,7 @@ import java.util.*;
  * Created by Arthur on 28/04/2016.
  */
 public class NavigationParser {
+    private Logger logger = LoggerFactory.getLogger(NavigationParser.class);
 
     @Autowired
     private DataService dataService;
@@ -54,7 +57,7 @@ public class NavigationParser {
 
     public Queue<DriveDir> parseMap(){
         if(path.isEmpty()){
-            Terminal.printTerminalError("Cannot parse empty map");
+            logger.warn("Cannot parse empty path");
         }else {
             Vertex current;
             Vertex driveTo;

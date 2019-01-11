@@ -54,17 +54,7 @@ public class QueueConsumer implements Runnable
                     if(!dataService.tempjob){ //end of total job
                         logger.info("Total job finished, Waiting for new job...");
                         dataService.robotDriving = false;
-                        RestTemplate restTemplate = new RestTemplate(); //standaard resttemplate gebruiken
-                        while(true) {
-                            try {
-                                logger.info("Sending job finished to backend");
-                                restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/job/finished/" + dataService.getRobotID()
-                                        , Void.class);
-                                break;
-                            } catch(RestClientException e) {
-                                logger.error("Can't connect to the backend to finish job, retrying...");
-                            }
-                        }
+                        sendJobFinish();
                         dataService.setDestination(-1L);
                         dataService.jobfinished = true;
                     } else { //end of temp job
@@ -103,18 +93,7 @@ public class QueueConsumer implements Runnable
                                     locationPublisher.publishLocation(new Integer(Math.round(progress)));
                                 }
                             } else if(s.equals("SEND LOCATION")) {
-                                RestTemplate rest = new RestTemplate();
-                                while(true) {
-                                    try {
-                                        rest.getForObject("http://" + serverIP + ":" + serverPort +
-                                                "/bot/" + dataService.getRobotID() + "/locationUpdate/" +
-                                                dataService.getCurrentLocation(), boolean.class);
-                                        break;
-                                    } catch(RestClientException e) {
-                                        logger.error("Can't connect to the backend for location update, retrying...");
-                                    }
-                                }
-
+                                sendLocation();
                             } else if (s.contains("REQUEST LOCKS") || (s.contains("RELOCK TILE")) ) {
                                 String split[] = s.split(" ");
                                 Long driveTo = Long.parseLong(split[2]);
@@ -160,6 +139,35 @@ public class QueueConsumer implements Runnable
                     }
 
                 }
+            }
+        }
+    }
+
+    private void sendLocation() {
+        RestTemplate rest = new RestTemplate();
+        while (true) {
+            try {
+                logger.info("Sending location to backend");
+                rest.getForObject("http://" + serverIP + ":" + serverPort +
+                        "/bot/" + dataService.getRobotID() + "/locationUpdate/" +
+                        dataService.getCurrentLocation(), boolean.class);
+                break;
+            } catch (RestClientException e) {
+                logger.error("Can't connect to the backend for location update, retrying...");
+            }
+        }
+    }
+    private void sendJobFinish() {
+        logger.info("Finishing the total job");
+        RestTemplate restTemplate = new RestTemplate(); //standaard resttemplate gebruiken
+        while(true) {
+            try {
+                logger.info("Sending job finished to backend");
+                restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/job/finished/" + dataService.getRobotID()
+                        , Void.class);
+                break;
+            } catch(RestClientException e) {
+                logger.error("Can't connect to the backend to finish job, retrying...");
             }
         }
     }

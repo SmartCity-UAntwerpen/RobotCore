@@ -1,6 +1,7 @@
 package be.uantwerpen.sc.services;
 
 import be.uantwerpen.rc.models.map.Map;
+import be.uantwerpen.rc.tools.Vertex;
 import be.uantwerpen.sc.RobotCoreLoop;
 import be.uantwerpen.sc.controllers.DriverCommandSender;
 import be.uantwerpen.rc.models.Job;
@@ -17,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -209,7 +211,8 @@ public class JobService
         logger.info("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end2);
         //first retrieve the most updated version of the map (weights are dynamic)
         getUpdatedMap();
-        dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2), dataService);
+        List<Vertex> temp = robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2);
+        dataService.navigationParser = new NavigationParser(temp, dataService);
         //Parse Map
         dataService.navigationParser.parseMap();
         //Setup for driving
