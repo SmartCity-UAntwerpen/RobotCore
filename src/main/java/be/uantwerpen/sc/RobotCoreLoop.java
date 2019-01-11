@@ -1,13 +1,17 @@
 package be.uantwerpen.sc;
 
-import be.uantwerpen.sc.controllers.MapController;
+import be.uantwerpen.rc.models.map.Map;
 import be.uantwerpen.sc.controllers.PathController;
 import be.uantwerpen.sc.controllers.mqtt.MqttJobSubscriber;
 import be.uantwerpen.sc.services.*;
 import be.uantwerpen.sc.tools.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
@@ -33,23 +37,26 @@ public class RobotCoreLoop implements Runnable
     @Autowired
     private JobService jobService;
 
-    @Value("${sc.core.ip:localhost}")
+    @Value("${sc.backend.ip:localhost}")
     private String serverIP;
 
-    @Value("#{new Integer(${sc.core.port}) ?: 1994}")
+    @Value("#{new Integer(${sc.backend.port}) ?: 1994}")
     private int serverPort;
 
-    private Long botId = 1L;
+    @Value("#{new Long(${robot.id}) ?: 0}")
+    private Long botId;
+
     @Autowired
     private QueueService queueService;
-    @Autowired
-    private MapController mapController;
+
     @Autowired
     private PathController pathController;
 
     public IPathplanning pathplanning;
 
     private TerminalService terminalService;
+    private Logger logger = LoggerFactory.getLogger(RobotCoreLoop.class);
+
 
     public RobotCoreLoop(){
 
@@ -82,7 +89,7 @@ public class RobotCoreLoop implements Runnable
 
         //Setup interface for correct mode of pathplanning
         setupInterface();
-        Terminal.printTerminal("Interface is set up");
+        logger.info("Interface is set up");
         //Wait for tag read
         //Read tag where bot is located
         synchronized (this) {
@@ -97,30 +104,43 @@ public class RobotCoreLoop implements Runnable
             }
         }
 
-        Terminal.printTerminal("Tag: " + dataService.getTag());
+        logger.info("Tag: " + dataService.getTag());
 
        // updateStartLocation();
 
         //Request map at server with rest
-        dataService.map = mapController.getMap();
-        Terminal.printTerminal("Map received " + dataService.map.getNodeList());
+        getMap();
+        logger.info("Map received " + dataService.map.getNodeList());
 
         //Set location of bot
         Long locationID = dataService.map.getLocationByRFID(dataService.getTag());
         dataService.setCurrentLocation(locationID);
-        Terminal.printTerminal("Start Location: " + dataService.getCurrentLocation()+"\n\n");
+        logger.info("Start Location: " + dataService.getCurrentLocation()+"\n\n");
 
         //We have the map now, update link
 
         if(dataService.getWorkingmodeEnum()==WorkingmodeEnum.INDEPENDENT)
             dataService.firstLink();
-        Terminal.printTerminal("link updated");
-        Terminal.printTerminal("next: "+dataService.getNextNode());
+        logger.info("link updated");
+        logger.info("next: "+dataService.getNextNode());
 
         RestTemplate rest = new RestTemplate();
         rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + botId + "/locationUpdate/" +dataService.getCurrentLocation(), boolean.class);
-        Terminal.printTerminal("Lock Requested : " + dataService.getCurrentLocation());
-        //rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/requestlock/" + dataService.getCurrentLocation(), boolean.class);
+        boolean response = false;
+        while(!response) {
+            try {
+                response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/requestlock/" +dataService.getRobotID()+ "/" + dataService.getCurrentLocation(), boolean.class);
+                logger.info("Lock Requested : " + dataService.getCurrentLocation());
+                if(!response) {
+                    logger.trace("First point lock denied with id : " + dataService.getCurrentLocation());
+                    Thread.sleep(200);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch(RestClientException e) {
+                logger.error("Can't connect to the database to lock first point, retrying...");
+            }
+        }
 
         while(!Thread.interrupted()){
 
@@ -136,6 +156,20 @@ public class RobotCoreLoop implements Runnable
         return this.pathplanning;
     }
 
+    private void getMap() {
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<Map> responseList;
+        while(true) {
+            try {
+                responseList = restTemplate.getForEntity("http://" + serverIP + ":" + serverPort + "/map/", Map.class);
+                break;
+            } catch(RestClientException e) {
+                logger.error("Can't connect to the backend to retrieve map, retrying...");
+            }
+        }
+        Map map = responseList.getBody();
+        dataService.map = map;
+    }
 
     private void setupInterface(){
         switch (pathplanningType.getType()){

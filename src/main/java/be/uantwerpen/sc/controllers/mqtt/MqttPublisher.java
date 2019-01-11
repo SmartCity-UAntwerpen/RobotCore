@@ -69,7 +69,7 @@ public class MqttPublisher
                 MqttMessage message = new MqttMessage(content.getBytes());
                 message.setQos(qos);
                 client.publish(topic, message);
-                System.out.println("Message published: "+ content + " destination: " + dataService.getDestination() + " nextprevnode : " + dataService.getNextNode() + " " + dataService.getPrevNode());
+                logger.info("Message published: "+ content + " destination: " + dataService.getDestination() + " nextprevnode : " + dataService.getNextNode() + " " + dataService.getPrevNode());
 
                 client.disconnect();
             }
@@ -117,8 +117,7 @@ public class MqttPublisher
             message.setQos(2);
 
             client.publish(topic, message);
-            System.out.println("Message published: "+ content);
-
+            logger.info("Keep alive published: "+ content);
             client.disconnect();
         }catch(Exception e){
             e.printStackTrace();
