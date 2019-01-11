@@ -1,6 +1,7 @@
 package be.uantwerpen.sc.services;
 
 import be.uantwerpen.rc.models.map.Map;
+import be.uantwerpen.rc.tools.Vertex;
 import be.uantwerpen.sc.RobotCoreLoop;
 import be.uantwerpen.sc.controllers.DriverCommandSender;
 import be.uantwerpen.rc.models.Job;
@@ -14,8 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -141,7 +144,7 @@ public class JobService
                             dataService.tempjob = true;
                             dataService.executingJob = true;
                             startPathPlanning(startInt);
-
+                            logger.info("Wait till tempjob is finished");
                             while(dataService.tempjob){} //wait till tempjob is finished
                             dataService.tempjob = false;
                             dataService.executingJob = true;
@@ -208,7 +211,8 @@ public class JobService
         logger.info("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end2);
         //first retrieve the most updated version of the map (weights are dynamic)
         getUpdatedMap();
-        dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2), dataService);
+        List<Vertex> temp = robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2);
+        dataService.navigationParser = new NavigationParser(temp, dataService);
         //Parse Map
         dataService.navigationParser.parseMap();
         //Setup for driving
@@ -223,17 +227,7 @@ public class JobService
 
     private void getUpdatedMap() {
         logger.info("Receiving updated map...");
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<Map> responseList;
-        while(true) {
-            try {
-                responseList = restTemplate.getForEntity("http://" + serverIP + ":" + serverPort + "/map/", Map.class);
-                break;
-            } catch(RestClientException e) {
-                logger.error("Can't connect to the backend to retrieve map, retrying...");
-            }
-        }
-        dataService.map = responseList.getBody();
+        robotCoreLoop.getMap();
     }
 
     public void startPathRobotcore(int start, int end){

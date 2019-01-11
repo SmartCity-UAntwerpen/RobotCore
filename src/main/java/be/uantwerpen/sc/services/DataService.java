@@ -33,11 +33,11 @@ public class DataService
     private Long nextNode = -1L;
     private Long prevNode = -1L;
 
-    boolean locationVerified = false;
+    volatile boolean locationVerified = false;
     private int hasPermission = -1;
 
-    public boolean robotBusy = false;
-    public boolean locationUpdated = true;
+    volatile public boolean robotBusy = false;
+    volatile public boolean locationUpdated = true;
     public String trafficLightStatus;
     private Long currentLocation = -1L;
 
@@ -50,11 +50,12 @@ public class DataService
     private WorkingmodeEnum workingmodeEnum;
 
     public Long destination = -1L;
-    public boolean robotDriving = false;
+    //volatile is needed for jar to work!
+    volatile public boolean robotDriving = false;
 
-    public boolean jobfinished = false;
-    public boolean tempjob = false;     //used to go to start location of job
-    public boolean executingJob = false;
+    volatile public boolean jobfinished = false;
+    volatile public boolean tempjob = false;     //used to go to start location of job
+    volatile public boolean executingJob = false;
     public Job job = null;
 
     public Long getNextNode() {

@@ -93,7 +93,7 @@ public class RobotCoreLoop implements Runnable
         //Wait for tag read
         //Read tag where bot is located
         synchronized (this) {
-            while (dataService.getTag().trim().equals("NONE") || dataService.getTag().equals("NO_TAG")) {
+            while (dataService.getTag().trim().equals("NONE") || dataService.getTag().trim().equals("NO_TAG")) {
                 try {
                     //Read tag
                     queueService.insertJob("TAG READ UID");
@@ -156,7 +156,7 @@ public class RobotCoreLoop implements Runnable
         return this.pathplanning;
     }
 
-    private void getMap() {
+    public void getMap() {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<Map> responseList;
         while(true) {
@@ -165,6 +165,11 @@ public class RobotCoreLoop implements Runnable
                 break;
             } catch(RestClientException e) {
                 logger.error("Can't connect to the backend to retrieve map, retrying...");
+                try {
+                    Thread.sleep(200);
+                } catch(InterruptedException er) {
+                    er.printStackTrace();
+                }
             }
         }
         Map map = responseList.getBody();

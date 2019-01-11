@@ -51,8 +51,8 @@ public class SystemLoader implements ApplicationRunner
     @Autowired
     private MqttPublisher locationPublisher;
 
-    @Autowired
-    private DriverLocationPoller driverLocationPoller;
+    //@Autowired
+    //private DriverLocationPoller driverLocationPoller;
 
     @Autowired KeepAliveController keepAlivePoller;
 
@@ -86,13 +86,13 @@ public class SystemLoader implements ApplicationRunner
                 //Thread interrupted
             }
 
-            QueueConsumer queueConsumer = new QueueConsumer(queueService,cCommandSender, dataService,serverIP,serverPort);
+            QueueConsumer queueConsumer = new QueueConsumer(queueService,cCommandSender, dataService,serverIP,serverPort, locationPublisher);
 
             new Thread(robotCoreLoop).start();
             new Thread(driverStatusEventHandler).start();
             new Thread(queueConsumer).start();
             new Thread(keepAlivePoller).start();
-            new Thread(driverLocationPoller).start();
+            //new Thread(driverLocationPoller).start();
 
             terminalService.systemReady();
         }
