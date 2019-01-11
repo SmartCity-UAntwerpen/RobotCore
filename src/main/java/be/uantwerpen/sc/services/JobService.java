@@ -142,7 +142,7 @@ public class JobService
                             dataService.executingJob = true;
                             startPathPlanning(startInt);
                             logger.info("Wait till tempjob is finished");
-                            while(dataService.tempjob){} //wait till tempjob is finished
+                            while(dataService.tempjob){logger.info("test");} //wait till tempjob is finished
                             dataService.tempjob = false;
                             dataService.executingJob = true;
                             dataService.setDestination(job.getIdEnd());
