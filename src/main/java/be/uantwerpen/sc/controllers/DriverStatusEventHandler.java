@@ -96,8 +96,9 @@ public class DriverStatusEventHandler implements Runnable
                     }
                 }
                 if (s.startsWith("TRAVEL DISTANCE EVENT")){
-                    String travelledDistance = s.split(":", 2)[1].trim();
-                    locationPublisher.publishLocation(Integer.parseInt(travelledDistance));
+                    //TODO use this link progress to determine a better progress
+                    //String travelledDistance = s.split(":", 2)[1].trim();
+                    //locationPublisher.publishLocation(Integer.parseInt(travelledDistance));
 
                 }if (s.startsWith("TAG DETECTION EVENT")){
                     String tag = s.split(":", 2)[1].trim();

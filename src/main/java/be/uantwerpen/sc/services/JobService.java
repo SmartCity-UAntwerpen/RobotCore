@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
@@ -142,7 +143,7 @@ public class JobService
                             dataService.executingJob = true;
                             startPathPlanning(startInt);
                             logger.info("Wait till tempjob is finished");
-                            while(dataService.tempjob){logger.info("test");} //wait till tempjob is finished
+                            while(dataService.tempjob){} //wait till tempjob is finished
                             dataService.tempjob = false;
                             dataService.executingJob = true;
                             dataService.setDestination(job.getIdEnd());
@@ -223,17 +224,7 @@ public class JobService
 
     private void getUpdatedMap() {
         logger.info("Receiving updated map...");
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<Map> responseList;
-        while(true) {
-            try {
-                responseList = restTemplate.getForEntity("http://" + serverIP + ":" + serverPort + "/map/", Map.class);
-                break;
-            } catch(RestClientException e) {
-                logger.error("Can't connect to the backend to retrieve map, retrying...");
-            }
-        }
-        dataService.map = responseList.getBody();
+        robotCoreLoop.getMap();
     }
 
     public void startPathRobotcore(int start, int end){

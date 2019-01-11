@@ -50,6 +50,7 @@ public class DataService
     private WorkingmodeEnum workingmodeEnum;
 
     public Long destination = -1L;
+    //volatile is needed for jar to work!
     volatile public boolean robotDriving = false;
 
     volatile public boolean jobfinished = false;

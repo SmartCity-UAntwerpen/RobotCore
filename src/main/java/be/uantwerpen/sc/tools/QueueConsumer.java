@@ -1,11 +1,13 @@
 package be.uantwerpen.sc.tools;
 
 import be.uantwerpen.sc.controllers.DriverCommandSender;
+import be.uantwerpen.sc.controllers.mqtt.MqttPublisher;
 import be.uantwerpen.sc.services.DataService;
 import be.uantwerpen.sc.services.QueueService;
 import org.hibernate.stat.internal.ConcurrentNaturalIdCacheStatisticsImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -25,18 +27,22 @@ public class QueueConsumer implements Runnable
     @Value("#{new Integer(${sc.backend.port}) ?: 1994}")
     private int serverPort;
 
+    private MqttPublisher locationPublisher;
+
     private DriverCommandSender sender;
     private QueueService queueService;
     private DataService dataService;
     private Logger logger = LoggerFactory.getLogger(QueueConsumer.class);
 
-    public QueueConsumer(QueueService queueService, DriverCommandSender sender, DataService dataService, String serverIP, int serverPort)
+    public QueueConsumer(QueueService queueService, DriverCommandSender sender, DataService dataService,
+                         String serverIP, int serverPort, MqttPublisher locationPublisher)
     {
         this.queueService = queueService;
         this.sender = sender;
         this.dataService = dataService;
         this.serverIP = serverIP;
         this.serverPort = serverPort;
+        this.locationPublisher = locationPublisher;
     }
 
     @Override
@@ -88,6 +94,14 @@ public class QueueConsumer implements Runnable
                                 dataService.setPrevNode(dataService.getCurrentLocation());
                                 dataService.setCurrentLocation(Long.parseLong(split[2]));
                                 dataService.setNextNode(Long.parseLong(split[3]));
+
+                                //send progress to backend
+                                if(dataService.tempjob) {
+                                    locationPublisher.publishLocation(new Integer(0));
+                                } else {
+                                    float progress = (Float.parseFloat(split[4]));
+                                    locationPublisher.publishLocation(new Integer(Math.round(progress)));
+                                }
                             } else if(s.equals("SEND LOCATION")) {
                                 RestTemplate rest = new RestTemplate();
                                 while(true) {
@@ -114,12 +128,18 @@ public class QueueConsumer implements Runnable
                                 Long point = Long.parseLong(split[2]);
                                 Long linkId =  Long.parseLong(split[3]);
                                 boolean success;
-                                do {
-                                    success = releasePointLock(dataService.getRobotID(), point);
-                                } while(success == false);
-                                do {
-                                    releaseLinkLock(dataService.getRobotID(), linkId);
-                                } while(success == false);
+                                try {
+                                    do {
+                                        success = releasePointLock(dataService.getRobotID(), point);
+                                        Thread.sleep(200);
+                                    } while(success == false);
+                                    do {
+                                        releaseLinkLock(dataService.getRobotID(), linkId);
+                                        Thread.sleep(200);
+                                    } while(success == false);
+                                }catch(InterruptedException e) {
+                                    e.printStackTrace();
+                                }
                             } else if (s.contains("TRAFFICLIGHT DETECTION")) {
                                 String split [] = s.split(" ");
                                 Long point = Long.parseLong(split[2]);
@@ -198,6 +218,7 @@ public class QueueConsumer implements Runnable
             boolean response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/unlock/" + robotId + "/" + pointId, boolean.class);
             return true;
         } catch(RestClientException e ) {
+            logger.error("Can't connect to the backend");
             return false;
         }
 

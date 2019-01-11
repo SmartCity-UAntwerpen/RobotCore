@@ -100,13 +100,12 @@ public class NavigationParser {
                         break;
                     default:
                 }
-                commands.add(new DriveDir("UPDATE LOCATION"+" "+driveTo.getId()+" "+next.getId()));
+                float temp = i+1;
+                float progress = temp/path.size() * 100;
+                commands.add(new DriveDir("UPDATE LOCATION"+" "+driveTo.getId()+" "+next.getId()+ " " + progress));
                 commands.add(new DriveDir("RELEASE LOCKS " + current.getId() + " " + linkId));
                 // needed to relock the tile since points on crosspoints reffer to same tile -> same lock
                 commands.add(new DriveDir("RELOCK TILE " + driveTo.getId()));
-
-
-
             }
             if(dataService.map.getPointById(path.get(path.size()-1).getId()).getTile().getType().toLowerCase().equals("end")) {
                 //last point -> park
