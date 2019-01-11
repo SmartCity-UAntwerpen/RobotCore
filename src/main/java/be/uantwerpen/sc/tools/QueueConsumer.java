@@ -43,7 +43,7 @@ public class QueueConsumer implements Runnable
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
                 if((dataService.getCurrentLocation() == dataService.getDestination()) && (dataService.getDestination() != -1L) && (dataService.getCurrentLocation() != -1L)){
-                    Terminal.printTerminal("Current location : " + dataService.getCurrentLocation() + " destination : " + dataService.getDestination() + " tempjob : " + dataService.tempjob);
+                    logger.info("Current location : " + dataService.getCurrentLocation() + " destination : " + dataService.getDestination() + " tempjob : " + dataService.tempjob);
 
                     if(!dataService.tempjob){ //end of total job
                         logger.info("Total job finished, Waiting for new job...");
@@ -51,6 +51,7 @@ public class QueueConsumer implements Runnable
                         RestTemplate restTemplate = new RestTemplate(); //standaard resttemplate gebruiken
                         while(true) {
                             try {
+                                logger.info("Sending job finished to backend");
                                 restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/job/finished/" + dataService.getRobotID()
                                         , Void.class);
                                 break;
@@ -60,7 +61,7 @@ public class QueueConsumer implements Runnable
                         }
                         dataService.setDestination(-1L);
                         dataService.jobfinished = true;
-                    }else { //end of temp job
+                    } else { //end of temp job
                         logger.info("Arrived to starting location, executing job...");
                         dataService.setDestination(-1L);
                         dataService.robotDriving = false;
@@ -71,6 +72,7 @@ public class QueueConsumer implements Runnable
                 }
 
             if(queueService.getContentQueue().size() != 0){
+                logger.info("Starting to execute the job queue");
                 if(!dataService.robotBusy && (dataService.getWorkingmodeEnum() != null)){
 
                     switch(dataService.getWorkingmodeEnum()){
