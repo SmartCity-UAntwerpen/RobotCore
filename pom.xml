@@ -125,7 +125,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<mainClass>be.uantwerpen.sc</mainClass>
+					<mainClass>be.uantwerpen.sc.RobotCoreApplication</mainClass>
 				</configuration>
 			</plugin>
 			<plugin>
