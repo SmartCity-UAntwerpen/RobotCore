@@ -5,6 +5,8 @@ import be.uantwerpen.sc.tools.Terminal;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Thomas on 01/06/2016.
@@ -15,6 +17,8 @@ Class waar de berichten van de mqtt worden opgevangen
  */
 public class MqttJobSubscriberCallback implements MqttCallback
 {
+    private Logger logger = LoggerFactory.getLogger(MqttJobSubscriberCallback.class);
+
     JobService jobService;
     MqttJobSubscriber subscriber;
 
@@ -28,6 +32,7 @@ public class MqttJobSubscriberCallback implements MqttCallback
     public void connectionLost(Throwable cause)
     {
         //This is called when the connection is lost. We could reconnect here.
+        logger.error("connection lost to mqtt broker");
     }
 
     //bericht wordt ontvangen
@@ -35,10 +40,10 @@ public class MqttJobSubscriberCallback implements MqttCallback
     public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception
     {
         //TODO Process message
-        Terminal.printTerminal("mqtt message ontvangen");
-        Terminal.printTerminal("Topic: " + topic + ", Message: " + mqttMessage);
+        logger.info("mqtt message ontvangen");
+        logger.info("Topic: " + topic + ", Message: " + mqttMessage);
         String payloadString = new String(mqttMessage.getPayload());
-        Terminal.printTerminal("payload = " + payloadString);
+        logger.info("payload = " + payloadString);
 
         try
         {

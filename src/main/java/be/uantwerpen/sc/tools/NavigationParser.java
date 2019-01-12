@@ -105,6 +105,8 @@ public class NavigationParser {
                 }
                 float temp = i+1;
                 float progress = temp/path.size() * 100;
+                if(dataService.getTempJob())
+                    progress = 0;
                 commands.add(new DriveDir("UPDATE LOCATION"+" "+driveTo.getId()+" "+next.getId()+ " " + progress));
                 commands.add(new DriveDir("RELEASE LOCKS " + current.getId() + " " + linkId));
                 // needed to relock the tile since points on crosspoints reffer to same tile -> same lock
@@ -119,6 +121,9 @@ public class NavigationParser {
                 commands.add(new DriveDir("DRIVE BACKWARDS 150"));
             }
             commands.add((new DriveDir("SEND LOCATION")));
+            if(!dataService.getTempJob()) {
+                commands.add(new DriveDir("FINISH JOB"));
+            }
 
 
         }

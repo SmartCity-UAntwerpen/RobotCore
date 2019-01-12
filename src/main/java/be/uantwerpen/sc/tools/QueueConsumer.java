@@ -4,15 +4,11 @@ import be.uantwerpen.sc.controllers.DriverCommandSender;
 import be.uantwerpen.sc.controllers.mqtt.MqttPublisher;
 import be.uantwerpen.sc.services.DataService;
 import be.uantwerpen.sc.services.QueueService;
-import org.hibernate.stat.internal.ConcurrentNaturalIdCacheStatisticsImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-
-import java.net.ConnectException;
 
 /**
  * Created by Niels on 4/05/2016.
@@ -48,35 +44,17 @@ public class QueueConsumer implements Runnable
     @Override
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
-                if((dataService.getCurrentLocation() == dataService.getDestination()) && (dataService.getDestination() != -1L) && (dataService.getCurrentLocation() != -1L)){
-                    logger.info("Current location : " + dataService.getCurrentLocation() + " destination : " + dataService.getDestination() + " tempjob : " + dataService.tempjob);
-
-                    if(!dataService.tempjob){ //end of total job
-                        logger.info("Total job finished, Waiting for new job...");
-                        dataService.robotDriving = false;
-                        sendJobFinish();
-                        dataService.setDestination(-1L);
-                        dataService.jobfinished = true;
-                    } else { //end of temp job
-                        logger.info("Arrived to starting location, executing job...");
-                        dataService.setDestination(-1L);
-                        dataService.robotDriving = false;
-                        dataService.tempjob = false;
-                    }
-
-                    dataService.executingJob = false;
-                }
 
             if(queueService.getContentQueue().size() != 0){
-                logger.info("Starting to execute the job queue");
-                if(!dataService.robotBusy && (dataService.getWorkingmodeEnum() != null)){
+                if(!dataService.getRobotBusy() && (dataService.getWorkingmodeEnum() != null)){
+                    logger.info("tempjob: "+dataService.getTempJob());
 
                     switch(dataService.getWorkingmodeEnum()){
                         case INDEPENDENT:
                             logger.info("Independent case");
                             logger.info("Robot not busy");
-                            logger.info(queueService.getContentQueue().toString());
-                            String s = queueService.getJob();
+                            logger.trace(queueService.getContentQueue().toString());
+                            String s = queueService.getCommand();
                             logger.info("executing: " + s);
 
                             if (s.contains("UPDATE LOCATION")) {
@@ -84,14 +62,8 @@ public class QueueConsumer implements Runnable
                                 dataService.setPrevNode(dataService.getCurrentLocation());
                                 dataService.setCurrentLocation(Long.parseLong(split[2]));
                                 dataService.setNextNode(Long.parseLong(split[3]));
-
-                                //send progress to backend
-                                if(dataService.tempjob) {
-                                    locationPublisher.publishLocation(new Integer(0));
-                                } else {
-                                    float progress = (Float.parseFloat(split[4]));
-                                    locationPublisher.publishLocation(new Integer(Math.round(progress)));
-                                }
+                                float progress = (Float.parseFloat(split[4]));
+                                locationPublisher.publishLocation(new Integer(Math.round(progress)));
                             } else if(s.equals("SEND LOCATION")) {
                                 sendLocation();
                             } else if (s.contains("REQUEST LOCKS") || (s.contains("RELOCK TILE")) ) {
@@ -123,16 +95,20 @@ public class QueueConsumer implements Runnable
                                 String split [] = s.split(" ");
                                 Long point = Long.parseLong(split[2]);
                                 handleTrafficLight(point);
+                            } else if (s.contains("FINISH JOB")) {
+                                //notify backend
+                                sendJobFinish();
+                                //notify other threads that the robot arrived at its location
+                                dataService.setRobotDriving(false);
                             } else {
                                 //commands that have to be executed on the robot driver
                                 sender.sendCommand(s);
                                 if(!s.contains("SPEAKER")) {
-                                    dataService.robotBusy = true;
-                                    while(dataService.robotBusy){ //wait till drive event is finished
+                                    dataService.setRobotBusy(true);
+                                    while(dataService.getRobotBusy()){ //wait till drive event is finished
                                     }
                                 }
                             }
-
                             break;
                      default:
                          break;
@@ -170,6 +146,7 @@ public class QueueConsumer implements Runnable
                 logger.error("Can't connect to the backend to finish job, retrying...");
             }
         }
+        logger.info("notified the backend!");
     }
 
     public void requestPointLock(Long robotID, Long driveTo) {

@@ -96,7 +96,7 @@ public class RobotCoreLoop implements Runnable
             while (dataService.getTag().trim().equals("NONE") || dataService.getTag().trim().equals("NO_TAG")) {
                 try {
                     //Read tag
-                    queueService.insertJob("TAG READ UID");
+                    queueService.insertCommand("TAG READ UID");
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -143,10 +143,9 @@ public class RobotCoreLoop implements Runnable
         }
 
         while(!Thread.interrupted()){
-
-            if(dataService.job != null){
-                jobService.performJob(dataService.job);
-                dataService.job = null;
+            if(dataService.getJob() != null){
+                jobService.performJob(dataService.getJob());
+                dataService.setJob(null);
             }
         }
     }

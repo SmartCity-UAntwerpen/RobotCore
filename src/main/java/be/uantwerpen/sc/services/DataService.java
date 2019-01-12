@@ -28,18 +28,14 @@ public class DataService
     DriverCommandSender commandSender;
 
     private Long robotID;
-    private Long linkMillis;
 
     private Long nextNode = -1L;
     private Long prevNode = -1L;
 
-    volatile boolean locationVerified = false;
-    private int hasPermission = -1;
-
-    volatile public boolean robotBusy = false;
-    volatile public boolean locationUpdated = true;
+    private volatile boolean robotBusy = false;
+    private volatile boolean locationUpdated = true;
     public String trafficLightStatus;
-    private Long currentLocation = -1L;
+    private volatile Long currentLocation = -1L;
 
     public Map map = null;
     public NavigationParser navigationParser = null;
@@ -49,45 +45,63 @@ public class DataService
     private PathplanningEnum pathplanningEnum;
     private WorkingmodeEnum workingmodeEnum;
 
-    public Long destination = -1L;
-    //volatile is needed for jar to work!
-    volatile public boolean robotDriving = false;
+    private volatile Long destination = -1L;
+    private volatile boolean robotDriving = false;
+    private volatile boolean tempjob = false;     //used to go to start location of job
+    private volatile Job job = null;
 
-    volatile public boolean jobfinished = false;
-    volatile public boolean tempjob = false;     //used to go to start location of job
-    volatile public boolean executingJob = false;
-    public Job job = null;
+    public synchronized  void setRobotBusy(boolean robotBusy) {
+        this.robotBusy = robotBusy;
+    }
+    public synchronized  boolean getRobotBusy() {
+        return robotBusy;
+    }
 
-    public Long getNextNode() {
+    public synchronized boolean getLocationUpdated() {
+        return locationUpdated;
+    }
+
+    public synchronized void setLocationUpdated(boolean locationUpdated) {
+        this.locationUpdated = locationUpdated;
+    }
+
+    public synchronized boolean getTempJob() {
+        return tempjob;
+    }
+
+    public synchronized  void setTempJob(boolean tempjob) {
+        this.tempjob = tempjob;
+    }
+    public synchronized boolean getRobotDriving() {
+        return robotDriving;
+    }
+
+    public synchronized void setRobotDriving(boolean robotDriving) {
+        this.robotDriving = robotDriving;
+    }
+
+    public synchronized Job getJob() {
+        return job;
+    }
+
+    public synchronized  void setJob(Job job) {
+        this.job = job;
+    }
+
+    public synchronized Long getNextNode() {
         return nextNode;
     }
 
-    public void setNextNode(Long nextNode) {
+    public synchronized void setNextNode(Long nextNode) {
         this.nextNode = nextNode;
     }
 
-    public boolean isLocationVerified() {
-        return locationVerified;
-    }
-
-    public void setLocationVerified(boolean locationVerifier) {
-        this.locationVerified = locationVerifier;
-    }
-
-    public Long getPrevNode() {
+    public synchronized Long getPrevNode() {
         return prevNode;
     }
 
-    public void setPrevNode(Long prevNode) {
+    public synchronized void setPrevNode(Long prevNode) {
         this.prevNode = prevNode;
-    }
-
-    public int hasPermission() {
-        return hasPermission;
-    }
-
-    public void setPermission(int hasPermission) {
-        this.hasPermission = hasPermission;
     }
 
     public Long getRobotID() {
@@ -98,22 +112,16 @@ public class DataService
         this.robotID = robotID;
     }
 
-    public Long getCurrentLocation() {
+    public synchronized Long getCurrentLocation() {
         return currentLocation;
     }
 
-    public void setCurrentLocation(Long currentLocation) {
+    public synchronized void setCurrentLocation(Long currentLocation) {
         this.currentLocation = currentLocation;
-    }
-    public Long getLinkMillis() {
-        return linkMillis;
-    }
-
-    public void setLinkMillis(Long linkMillis) {
-        this.linkMillis = linkMillis;
     }
 
     public String getTag() {return tag;}
+
     public void setTag(String tag) {this.tag = tag;}
 
     public PathplanningEnum getPathplanningEnum() {
@@ -131,11 +139,6 @@ public class DataService
     public void setworkingmodeEnum(WorkingmodeEnum workingmodeEnum) {
         this.workingmodeEnum = workingmodeEnum;
     }
-
-    public NavigationParser getNavigationParser(){ return navigationParser;}
-
-    public void setNavigationParser(NavigationParser parser){ this.navigationParser=parser;}
-
     public Map getMap(){
         return map;
     }
@@ -163,6 +166,6 @@ public class DataService
 
         }
     }
-    public void setDestination(Long dest){this.destination = dest;}
-    public Long getDestination(){return this.destination;}
+    public synchronized void setDestination(Long dest){this.destination = dest;}
+    public synchronized Long getDestination(){return this.destination;}
 }
