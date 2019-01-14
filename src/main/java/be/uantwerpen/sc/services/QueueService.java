@@ -10,7 +10,7 @@ import java.util.concurrent.BlockingQueue;
 @Service
 public class QueueService
 {
-    BlockingQueue<String> commandQueue = new ArrayBlockingQueue<>(100);
+    BlockingQueue<String> commandQueue = new ArrayBlockingQueue<>(10000);
 
     public QueueService()
     {

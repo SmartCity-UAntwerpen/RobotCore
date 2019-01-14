@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -158,9 +159,11 @@ public class RobotCoreLoop implements Runnable
     public void getMap() {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<Map> responseList;
+        Map map;
         while(true) {
             try {
                 responseList = restTemplate.getForEntity("http://" + serverIP + ":" + serverPort + "/map/", Map.class);
+                map = responseList.getBody();
                 break;
             } catch(RestClientException e) {
                 logger.error("Can't connect to the backend to retrieve map, retrying...");
@@ -169,9 +172,12 @@ public class RobotCoreLoop implements Runnable
                 } catch(InterruptedException er) {
                     er.printStackTrace();
                 }
+            } catch(HttpMessageNotReadableException e) {
+                logger.error("Can't get map from database, key fails");
+                if(dataService.map != null)
+                    map = dataService.map;
             }
         }
-        Map map = responseList.getBody();
         dataService.map = map;
     }
 

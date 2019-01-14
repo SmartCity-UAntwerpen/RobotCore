@@ -97,18 +97,7 @@ public class JobService
         } else {
             logger.info("Already on destination");
             //let the backend know that the job is finished
-            RestTemplate restTemplate = new RestTemplate();
-            while(true) {
-                try {
-                    restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/job/finished/" + dataService.getRobotID()
-                            , Void.class);
-                    break;
-                } catch(RestClientException e ) {
-                    logger.error("Can't connect to the database to send job finished, retrying...");
-                }
-            }
-
-
+            sendFinished();
         }
         logger.info("job parsed");
     }
@@ -124,27 +113,27 @@ public class JobService
                 try {
                     dataService.setRobotDriving(true);
                     dataService.setTempJob(false);
-                    if(!dataService.getCurrentLocation().equals(job.getIdStart())){ //bot is not located at start of job
-                        Terminal.printTerminal("start location not current Location. Going to " + job.getIdStart());
+                    if(!dataService.getCurrentLocation().equals(job.getIdStart())) {
+                        logger.info("start location not current Location. Going to " + job.getIdStart());
                         dataService.setDestination(job.getIdStart());
                         dataService.setTempJob(true);
                         startPathPlanning(startInt);
                         logger.info("Wait till tempjob is finished");
                         while(!dataService.getCurrentLocation().equals(job.getIdStart())) {
-                                Thread.sleep(1000);
+                            Thread.sleep(1000);
                         }
                         dataService.setTempJob(false);
                         dataService.setDestination(job.getIdEnd());
                         startPathPlanning(endInt);
-                    }else {
+                    } else {
                         dataService.setTempJob(false);
                         dataService.setDestination(job.getIdEnd());
                         startPathPlanning(endInt);
                     }
 
                 } catch (NumberFormatException e) {
-                    Terminal.printTerminalError(e.getMessage());
-                    Terminal.printTerminalInfo("Usage: navigate end");
+                    logger.info(e.getMessage());
+                    logger.info("Usage: navigate end");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -163,7 +152,6 @@ public class JobService
         dataService.navigationParser.parseMap();
         //Setup for driving
         dataService.setRobotDriving(true);
-
         //Process map
         for (DriveDir command : dataService.navigationParser.commands) {
             logger.info("insert job " + command.toString());
@@ -174,6 +162,43 @@ public class JobService
     private void getUpdatedMap() {
         logger.info("Receiving updated map...");
         robotCoreLoop.getMap();
+    }
+
+    private void sendFinished() {
+        RestTemplate restTemplate = new RestTemplate();
+        while(true) {
+            try {
+                restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/job/finished/" + dataService.getRobotID()
+                        , Void.class);
+                break;
+            } catch(RestClientException e ) {
+                logger.error("Can't connect to the database to send job finished, retrying...");
+                try {
+                    Thread.sleep(500);
+                } catch(InterruptedException er) {
+                    er.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void pathNotFound() {
+        RestTemplate restTemplate = new RestTemplate();
+        while(true) {
+            try {
+                logger.info("Sending path not found");
+                restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/job/pathError/" + dataService.getRobotID()
+                        , Void.class);
+                break;
+            } catch(RestClientException e ) {
+                logger.error("Can't connect to the backend to send path not found, retrying...");
+                try {
+                    Thread.sleep(500);
+                } catch(InterruptedException er) {
+                    er.printStackTrace();
+                }
+            }
+        }
     }
 
     public void startPathRobotcore(int start, int end){

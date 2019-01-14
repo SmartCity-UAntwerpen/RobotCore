@@ -82,11 +82,11 @@ public class QueueConsumer implements Runnable
                                 try {
                                     do {
                                         success = releasePointLock(dataService.getRobotID(), point);
-                                        Thread.sleep(200);
+                                        Thread.sleep(1000);
                                     } while(success == false);
                                     do {
                                         releaseLinkLock(dataService.getRobotID(), linkId);
-                                        Thread.sleep(200);
+                                        Thread.sleep(1000);
                                     } while(success == false);
                                 }catch(InterruptedException e) {
                                     e.printStackTrace();
@@ -130,6 +130,11 @@ public class QueueConsumer implements Runnable
                 break;
             } catch (RestClientException e) {
                 logger.error("Can't connect to the backend for location update, retrying...");
+                try {
+                    Thread.sleep(500);
+                } catch(InterruptedException er) {
+
+                }
             }
         }
     }
@@ -144,6 +149,11 @@ public class QueueConsumer implements Runnable
                 break;
             } catch(RestClientException e) {
                 logger.error("Can't connect to the backend to finish job, retrying...");
+                try {
+                    Thread.sleep(500);
+                } catch(InterruptedException er) {
+                    er.printStackTrace();
+                }
             }
         }
         logger.info("notified the backend!");
@@ -159,7 +169,7 @@ public class QueueConsumer implements Runnable
                     response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/requestlock/" + robotID + "/" + driveTo, boolean.class);
                     if (!response) {
                         logger.warn("Point lock denied: " + driveTo);
-                        Thread.sleep(200);
+                        Thread.sleep(1000);
                     }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -182,7 +192,7 @@ public class QueueConsumer implements Runnable
                     response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/link/requestlock/" + robotId + "/" + linkId, boolean.class);
                     if(!response) {
                         logger.warn("Link lock denied: " + linkId);
-                        Thread.sleep(200);
+                        Thread.sleep(1000);
                     }
                 } catch(InterruptedException e) {
                     e.printStackTrace();
