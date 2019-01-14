@@ -168,7 +168,7 @@ public class TerminalService
                 try {
                     String command2 = commandString.split(" ", 2)[1].toUpperCase();
                     //No override
-                    //queueService.insertJob(command2);
+                    //queueService.insertCommand(command2);
                     System.out.println("sending command :" + command2);
                     sender.sendCommand(command2);
                     //Override
@@ -240,12 +240,12 @@ public class TerminalService
     }
 
     private void startPathPlanning(int end2){
-        dataService.locationUpdated = false;
-        while(!dataService.locationUpdated){
+        dataService.setLocationUpdated(false);
+        while(!dataService.getLocationUpdated()){
             //Wait
             try {
                 //Read tag
-                queueService.insertJob("TAG READ UID");
+                queueService.insertCommand("TAG READ UID");
                 Thread.sleep(200);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -262,12 +262,12 @@ public class TerminalService
         int end = (int)(long)dataService.navigationParser.path.get(1).getId();
         dataService.setNextNode((long)end);
         dataService.setPrevNode((long)start);
-        queueService.insertJob("DRIVE FOLLOWLINE");
-        queueService.insertJob("DRIVE FORWARD 110");
+        queueService.insertCommand("DRIVE FOLLOWLINE");
+        queueService.insertCommand("DRIVE FORWARD 110");
 
         //Process map
         for (DriveDir command : dataService.navigationParser.commands) {
-            queueService.insertJob(command.toString());
+            queueService.insertCommand(command.toString());
         }
     }
 
@@ -297,7 +297,7 @@ public class TerminalService
 
         //Process map
         for (DriveDir command : nextPath) {
-            queueService.insertJob(command.toString());
+            queueService.insertCommand(command.toString());
         }
     }
 
@@ -309,7 +309,7 @@ public class TerminalService
 
         //Process map but only 2 first commands
         for (int i=0;i<2;i++) {
-            queueService.insertJob(nextPath[i].toString());
+            queueService.insertCommand(nextPath[i].toString());
         }
     }
 

@@ -1,6 +1,5 @@
 package be.uantwerpen.sc.services;
 
-import be.uantwerpen.rc.models.map.Map;
 import be.uantwerpen.rc.tools.Vertex;
 import be.uantwerpen.sc.RobotCoreLoop;
 import be.uantwerpen.sc.controllers.DriverCommandSender;
@@ -10,12 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,8 +69,6 @@ public class JobService
 
     public void parseJob(String job) throws ParseException
     {
-
-        System.out.println("Parsing job");
         logger.info("Parsing job...");
 
         String tempStr = job.split(":")[2];
@@ -98,28 +93,13 @@ public class JobService
 
         if(!(dataService.getCurrentLocation().equals(endid) && dataService.getCurrentLocation().equals(startid))) {
             Job parsedJob = new Job(jobid,startid,endid);
-            dataService.job = parsedJob;
+            dataService.setJob(parsedJob);
         } else {
             logger.info("Already on destination");
             //let the backend know that the job is finished
-            RestTemplate restTemplate = new RestTemplate();
-            while(true) {
-                try {
-                    restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/job/finished/" + dataService.getRobotID()
-                            , Void.class);
-                    break;
-                } catch(RestClientException e ) {
-                    logger.error("Can't connect to the database to send job finished, retrying...");
-                }
-            }
-
-
+            sendFinished();
         }
-
-        Terminal.printTerminal("job parsed");
-
-        //performJob(parsedJob);
-
+        logger.info("job parsed");
     }
 
     public void performJob(Job job)
@@ -128,82 +108,37 @@ public class JobService
         int endInt = job.getIdEnd().intValue();
         int startInt = job.getIdStart().intValue();
         logger.info("Performing job with destination: "+endInt);
-        Terminal.printTerminal("performJob end int = " + endInt);
         switch(dataService.getWorkingmodeEnum()) {
             case INDEPENDENT:
                 try {
-                    //compute path on robot
-                    dataService.robotDriving = true;
-                    dataService.jobfinished = false;
-                    dataService.tempjob = false;
-                    dataService.executingJob = false;
-
-                        if(!dataService.getCurrentLocation().equals(job.getIdStart()) && (!dataService.executingJob)){ //bot is not located at start of job
-                            Terminal.printTerminal("start location not current Location. Going to " + job.getIdStart());
-                            dataService.setDestination(job.getIdStart());
-                            dataService.tempjob = true;
-                            dataService.executingJob = true;
-                            startPathPlanning(startInt);
-                            logger.info("Wait till tempjob is finished");
-                            while(dataService.tempjob){} //wait till tempjob is finished
-                            dataService.tempjob = false;
-                            dataService.executingJob = true;
-                            dataService.setDestination(job.getIdEnd());
-                            startPathPlanning(endInt);
-                        }else {
-                            dataService.tempjob = false;
-                            dataService.executingJob = true;
-                            dataService.setDestination(job.getIdEnd());
-                            startPathPlanning(endInt);
+                    dataService.setRobotDriving(true);
+                    dataService.setTempJob(false);
+                    if(!dataService.getCurrentLocation().equals(job.getIdStart())) {
+                        logger.info("start location not current Location. Going to " + job.getIdStart());
+                        dataService.setDestination(job.getIdStart());
+                        dataService.setTempJob(true);
+                        startPathPlanning(startInt);
+                        logger.info("Wait till tempjob is finished");
+                        while(!dataService.getCurrentLocation().equals(job.getIdStart())) {
+                            Thread.sleep(1000);
                         }
-
-                } catch (NumberFormatException e) {
-                    Terminal.printTerminalError(e.getMessage());
-                    Terminal.printTerminalInfo("Usage: navigate end");
-                }
-                break;
-            case PARTIALSERVER:
-                try {
-                    dataService.setDestination(job.getIdEnd());
-                    dataService.robotDriving = true;
-                    dataService.tempjob = false;
-                    dataService.executingJob = true;
-
-                    startPathRobotcore(startInt,endInt);
-                } catch (NumberFormatException e) {
-                    Terminal.printTerminalError(e.getMessage());
-                    Terminal.printTerminalInfo("Usage: navigate end");
-                }
-                break;
-            case PARTIALSERVERNG:
-                try {
-                    dataService.robotDriving = true;
-                    startPathRobotcoreNg(startInt,endInt);
-                } catch (NumberFormatException e) {
-                    Terminal.printTerminalError(e.getMessage());
-                    Terminal.printTerminalInfo("Usage: navigate end");
-                }
-                break;
-            case FULLSERVER:
-                try {
-                    Terminal.printTerminal("FullServer mode");
-                    Terminal.printTerminal("Current Location = " + dataService.getCurrentLocation() + " end int = " + endInt);
-                    dataService.setDestination(job.getIdEnd());
-                    dataService.robotDriving = true;
-                    dataService.tempjob = false;
-                    dataService.executingJob = true;
-                    while(dataService.getCurrentLocation()!=endInt){
-
-                        if(queueService.getContentQueue().size() == 0){
-                            Terminal.printTerminal("StartPathFullRobotCore");
-                            startPathFullRobotcore(startInt, endInt);
-                        }
+                        dataService.setTempJob(false);
+                        dataService.setDestination(job.getIdEnd());
+                        startPathPlanning(endInt);
+                    } else {
+                        dataService.setTempJob(false);
+                        dataService.setDestination(job.getIdEnd());
+                        startPathPlanning(endInt);
                     }
+
                 } catch (NumberFormatException e) {
-                    Terminal.printTerminalError(e.getMessage());
-                    Terminal.printTerminalInfo("Usage: navigate end");
+                    logger.info(e.getMessage());
+                    logger.info("Usage: navigate end");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
                 break;
+                //TODO add full server and partial server
         }
     }
 
@@ -216,18 +151,54 @@ public class JobService
         //Parse Map
         dataService.navigationParser.parseMap();
         //Setup for driving
-        dataService.robotDriving = true;
-
+        dataService.setRobotDriving(true);
         //Process map
         for (DriveDir command : dataService.navigationParser.commands) {
             logger.info("insert job " + command.toString());
-            queueService.insertJob(command.toString());
+            queueService.insertCommand(command.toString());
         }
     }
 
     private void getUpdatedMap() {
         logger.info("Receiving updated map...");
         robotCoreLoop.getMap();
+    }
+
+    private void sendFinished() {
+        RestTemplate restTemplate = new RestTemplate();
+        while(true) {
+            try {
+                restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/job/finished/" + dataService.getRobotID()
+                        , Void.class);
+                break;
+            } catch(RestClientException e ) {
+                logger.error("Can't connect to the database to send job finished, retrying...");
+                try {
+                    Thread.sleep(500);
+                } catch(InterruptedException er) {
+                    er.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void pathNotFound() {
+        RestTemplate restTemplate = new RestTemplate();
+        while(true) {
+            try {
+                logger.info("Sending path not found");
+                restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/job/pathError/" + dataService.getRobotID()
+                        , Void.class);
+                break;
+            } catch(RestClientException e ) {
+                logger.error("Can't connect to the backend to send path not found, retrying...");
+                try {
+                    Thread.sleep(500);
+                } catch(InterruptedException er) {
+                    er.printStackTrace();
+                }
+            }
+        }
     }
 
     public void startPathRobotcore(int start, int end){
@@ -244,7 +215,7 @@ public class JobService
         //Process map
         for (int i = 0; i < nextPath.getDriveDirs().size();i++) {
             Terminal.printTerminal("Partial server command: " + nextPath.getDriveDirs().get(i).toString());
-            queueService.insertJob(nextPath.getDriveDirs().get(i).toString());
+            queueService.insertCommand(nextPath.getDriveDirs().get(i).toString());
         }
 
     }
@@ -263,7 +234,7 @@ public class JobService
         //Process map
         for (int i = 0; i < nextPath.getDriveDirs().size();i++) {
             Terminal.printTerminal("Partial server command: " + nextPath.getDriveDirs().get(i).toString());
-            queueService.insertJob(nextPath.getDriveDirs().get(i).toString());
+            queueService.insertCommand(nextPath.getDriveDirs().get(i).toString());
         }
         */
 
@@ -277,7 +248,7 @@ public class JobService
         //Process map
         for (int i = 0; i < nextPath.getDriveDirs().size();i++) {
             Terminal.printTerminal("Partial server command: " + nextPath.getDriveDirs().get(i).toString());
-            queueService.insertJob(nextPath.getDriveDirs().get(i).toString());
+            queueService.insertCommand(nextPath.getDriveDirs().get(i).toString());
         }
     }
 
@@ -288,7 +259,7 @@ public class JobService
                 + start + "/" + dataService.getCurrentLocation() + "/" + end, DriveDirEncapsulator.class);
 
         for (int i = 0; i < nextPath.getDriveDirs().size();i++) {
-            queueService.insertJob(nextPath.getDriveDirs().get(i).toString());
+            queueService.insertCommand(nextPath.getDriveDirs().get(i).toString());
         }
     }
 

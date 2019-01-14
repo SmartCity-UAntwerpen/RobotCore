@@ -10,25 +10,25 @@ import java.util.concurrent.BlockingQueue;
 @Service
 public class QueueService
 {
-    BlockingQueue<String> jobQueue = new ArrayBlockingQueue<>(100);
+    BlockingQueue<String> commandQueue = new ArrayBlockingQueue<>(10000);
 
     public QueueService()
     {
 
     }
 
-    public synchronized String getJob(){
+    public synchronized String getCommand(){
         try {
-            return jobQueue.take();
+            return commandQueue.take();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public synchronized void insertJob(String job){
+    public synchronized void insertCommand(String command){
         try {
-            jobQueue.put(job);
+            commandQueue.put(command);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -37,11 +37,11 @@ public class QueueService
 
     public BlockingQueue<String> getContentQueue(){
 
-        return this.jobQueue;
+        return this.commandQueue;
     }
 
     public void setContentQueue(BlockingQueue<String> queue){
-        this.jobQueue=queue;
+        this.commandQueue =queue;
     }
 
 }

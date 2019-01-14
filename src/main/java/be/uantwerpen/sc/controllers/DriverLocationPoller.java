@@ -36,7 +36,7 @@ public class DriverLocationPoller implements Runnable
                 e.printStackTrace();
             }
 
-            if(dataService.map != null && dataService.robotDriving){
+            if(dataService.map != null && dataService.getRobotDriving()){
                 //dataService.readTag();
                 //Vraagt op hoeveel mm er al gereden is
                 driverCommandSender.sendCommand("DRIVE DISTANCE");

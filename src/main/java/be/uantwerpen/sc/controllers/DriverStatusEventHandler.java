@@ -77,7 +77,7 @@ public class DriverStatusEventHandler implements Runnable
                 String s = readData(); //Waiting for messages
                 if (s.startsWith("DRIVE EVENT: FINISHED")){
                     synchronized (this){
-                        dataService.robotBusy = false;
+                        dataService.setRobotBusy(false);
                     }
                 }if (s.startsWith("TRAFFICLIGHT DETECTION EVENT")){
                     String statusString = s.split(":", 2)[1];
@@ -104,14 +104,14 @@ public class DriverStatusEventHandler implements Runnable
                     String tag = s.split(":", 2)[1].trim();
                     synchronized (this){
                         dataService.setTag(tag);
-                        dataService.robotBusy = false;
+                        dataService.setRobotBusy(false);
 
                         if(!tag.trim().equals("NONE") && !tag.trim().equals("NO_TAG"))
                         {
                             if(dataService.getMap() != null){
                                 dataService.setCurrentLocation(dataService.map.getLocationByRFID(tag));
                             }
-                            dataService.locationUpdated = true;
+                            dataService.setLocationUpdated(true);
                         }
                     }
                 }if (s.startsWith("TRAFFIC_LIGHT")){
