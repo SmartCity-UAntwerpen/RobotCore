@@ -39,6 +39,7 @@ public class JobService
     @Autowired
     private DriverCommandSender sender;
 
+    @Autowired
     private RobotCoreLoop robotCoreLoop;
 
     private Logger logger = LoggerFactory.getLogger(JobService.class);
@@ -104,9 +105,8 @@ public class JobService
 
     public void performJob(Job job)
     {
-
-        int endInt = job.getIdEnd().intValue();
         int startInt = job.getIdStart().intValue();
+        int endInt = job.getIdEnd().intValue();
         logger.info("Performing job with destination: "+endInt);
         switch(dataService.getWorkingmodeEnum()) {
             case INDEPENDENT:
@@ -117,18 +117,18 @@ public class JobService
                         logger.info("start location not current Location. Going to " + job.getIdStart());
                         dataService.setDestination(job.getIdStart());
                         dataService.setTempJob(true);
-                        startPathPlanning(startInt);
+                        this.startPathPlanning(startInt);
                         logger.info("Wait till tempjob is finished");
                         while(!dataService.getCurrentLocation().equals(job.getIdStart())) {
                             Thread.sleep(1000);
                         }
                         dataService.setTempJob(false);
                         dataService.setDestination(job.getIdEnd());
-                        startPathPlanning(endInt);
+                        this.startPathPlanning(endInt);
                     } else {
                         dataService.setTempJob(false);
                         dataService.setDestination(job.getIdEnd());
-                        startPathPlanning(endInt);
+                        this.startPathPlanning(endInt);
                     }
 
                 } catch (NumberFormatException e) {
@@ -142,18 +142,18 @@ public class JobService
         }
     }
 
-    private void startPathPlanning(int end2){
-        logger.info("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end2);
+    private void startPathPlanning(int end){
+        logger.info("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end);
         //first retrieve the most updated version of the map (weights are dynamic)
         getUpdatedMap();
-        List<Vertex> temp = robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2);
-        dataService.navigationParser = new NavigationParser(temp, dataService);
+        List<Vertex> temp = robotCoreLoop.getPathplanningService().Calculatepath(dataService.getMap(), (int)(long)dataService.getCurrentLocation(), end);
+        dataService.setNavigationParser(new NavigationParser(temp, dataService));
         //Parse Map
-        dataService.navigationParser.parseMap();
+        dataService.getNavigationParser().parseMap();
         //Setup for driving
         dataService.setRobotDriving(true);
         //Process map
-        for (DriveDir command : dataService.navigationParser.commands) {
+        for (DriveDir command : dataService.getNavigationParser().getCommands()) {
             logger.info("insert job " + command.toString());
             queueService.insertCommand(command.toString());
         }

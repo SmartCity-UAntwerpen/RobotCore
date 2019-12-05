@@ -53,7 +53,7 @@ public class RobotCoreLoop implements Runnable
     @Autowired
     private PathController pathController;
 
-    public IPathplanning pathplanning;
+    private IPathplanning pathplanningService;
 
     private TerminalService terminalService;
     private Logger logger = LoggerFactory.getLogger(RobotCoreLoop.class);
@@ -75,7 +75,7 @@ public class RobotCoreLoop implements Runnable
         terminalService=new TerminalService(); //terminal service starten. terminal wordt gebruikt om bepaalde dingen te printen en commandos in te geven
         RestTemplate restTemplate = new RestTemplate(); //standaard resttemplate gebruiken
 
-        Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/initiate/" + botId + "/" //aan de server laten weten dat er een nieuwe bot zich aanbied
+        Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/initiate/" + botId + "/" //aan de server laten weten dat er een nieuwe bot zich aanbiedt
                 +workingmodeType.getType().toString(), Long.class); //Aan de server laten weten in welke mode de bot werkt
 
         dataService.setRobotID(robotID);
@@ -88,8 +88,8 @@ public class RobotCoreLoop implements Runnable
             System.err.println("Could not initialise MQTT Job service!");
         }
 
-        //Setup interface for correct mode of pathplanning
-        setupInterface();
+        //Setup interface for correct mode of pathplanningService
+        this.setupInterface();
         logger.info("Interface is set up");
         //Wait for tag read
         //Read tag where bot is located
@@ -110,27 +110,26 @@ public class RobotCoreLoop implements Runnable
        // updateStartLocation();
 
         //Request map at server with rest
-        getMap();
-        logger.info("Map received " + dataService.map.getNodeList());
+        this.getMap();
+        logger.info("Map received " + dataService.getMap().getNodeList());
 
         //Set location of bot
-        Long locationID = dataService.map.getLocationByRFID(dataService.getTag());
+        Long locationID = dataService.getMap().getLocationByRFID(dataService.getTag());
         dataService.setCurrentLocation(locationID);
         logger.info("Start Location: " + dataService.getCurrentLocation()+"\n\n");
 
-        //We have the map now, update link
 
+        //We have the map now, update link
         if(dataService.getWorkingmodeEnum()==WorkingmodeEnum.INDEPENDENT)
             dataService.firstLink();
         logger.info("link updated");
         logger.info("next: "+dataService.getNextNode());
 
-        RestTemplate rest = new RestTemplate();
-        rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + botId + "/locationUpdate/" +dataService.getCurrentLocation(), boolean.class);
+        restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + botId + "/locationUpdate/" +dataService.getCurrentLocation(), boolean.class);
         boolean response = false;
         while(!response) {
             try {
-                response = rest.getForObject("http://" + serverIP + ":" + serverPort + "/point/requestlock/" +dataService.getRobotID()+ "/" + dataService.getCurrentLocation(), boolean.class);
+                response = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/point/requestlock/" +dataService.getRobotID()+ "/" + dataService.getCurrentLocation(), boolean.class);
                 logger.info("Lock Requested : " + dataService.getCurrentLocation());
                 if(!response) {
                     logger.trace("First point lock denied with id : " + dataService.getCurrentLocation());
@@ -151,16 +150,20 @@ public class RobotCoreLoop implements Runnable
         }
     }
 
-    public IPathplanning getPathplanning()
+    public IPathplanning getPathplanningService()
     {
-        return this.pathplanning;
+        return this.pathplanningService;
+    }
+
+    public void setPathplanningService(IPathplanning pathplanningService) {
+        this.pathplanningService = pathplanningService;
     }
 
     public void getMap() {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<Map> responseList;
         Map map;
-        while(true) {
+        while(true) { //TODO:: refactor this while(true)-loop (is ugly)
             try {
                 responseList = restTemplate.getForEntity("http://" + serverIP + ":" + serverPort + "/map/", Map.class);
                 map = responseList.getBody();
@@ -174,26 +177,26 @@ public class RobotCoreLoop implements Runnable
                 }
             } catch(HttpMessageNotReadableException e) {
                 logger.error("Can't get map from database, key fails");
-                if(dataService.map != null)
-                    map = dataService.map;
+                if(dataService.getMap() != null)
+                    map = dataService.getMap();
             }
         }
-        dataService.map = map;
+        dataService.setMap(map);
     }
 
     private void setupInterface(){
         switch (pathplanningType.getType()){
             case DIJKSTRA:
-                pathplanning = new PathplanningService();
+                pathplanningService = new PathplanningService();
                 dataService.setPathplanningEnum(PathplanningEnum.DIJKSTRA);
                 break;
             case RANDOM:
-                pathplanning = new RandomPathPlanning(pathController);
+                pathplanningService = new RandomPathPlanning(pathController);
                 dataService.setPathplanningEnum(PathplanningEnum.RANDOM);
                 break;
             default:
                 //Dijkstra
-                pathplanning = new PathplanningService();
+                pathplanningService = new PathplanningService();
                 dataService.setPathplanningEnum(PathplanningEnum.DIJKSTRA);
         }
 

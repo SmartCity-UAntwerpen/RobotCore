@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 /**
  * Created by Arthur on 24/04/2016.
  */
-//Class waarin bijna alles wordt bijgehouden
 @Service
 public class DataService
 {
@@ -37,8 +36,8 @@ public class DataService
     public String trafficLightStatus;
     private volatile Long currentLocation = -1L;
 
-    public Map map = null;
-    public NavigationParser navigationParser = null;
+    private Map map = null;
+    private NavigationParser navigationParser = null;
 
     private String tag = "NO_TAG";
 
@@ -139,28 +138,28 @@ public class DataService
     public void setworkingmodeEnum(WorkingmodeEnum workingmodeEnum) {
         this.workingmodeEnum = workingmodeEnum;
     }
-    public Map getMap(){
+    public synchronized Map getMap(){
         return map;
     }
 
-    public void setMap(Map map){
+    public synchronized void setMap(Map map){
         this.map=map;
     }
 
     public void firstLink(){
         if(map != null) {
-            Long start = getCurrentLocation();
-            Long lid = -1L;
+            Long start = this.getCurrentLocation();
+            Long id;
             for(Node node : map.getNodeList()) {
-                if(node.getNodeId() == start) {
+                if(node.getNodeId().equals(start)) {
                     Link link = node.getNeighbours().get(0);
-                    lid = link.getId();
+                    //lid = link.getId();
                     nextNode = link.getEndPoint().getId();
                     prevNode = link.getStartPoint().getId();
                 }
             }
-            lid=getCurrentLocation();   //BIJGEVOEGD      =====FOUT
-            Terminal.printTerminal("Current Link: " + lid);
+            id=this.getCurrentLocation();   //BIJGEVOEGD      =====FOUT
+            Terminal.printTerminal("Current Link: " + id);
             //RestTemplate rest = new RestTemplate();
             //rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + robotID + "/lid/" + lid, Integer.class);
 
@@ -168,4 +167,12 @@ public class DataService
     }
     public synchronized void setDestination(Long dest){this.destination = dest;}
     public synchronized Long getDestination(){return this.destination;}
+
+    public NavigationParser getNavigationParser() {
+        return navigationParser;
+    }
+
+    public void setNavigationParser(NavigationParser navigationParser) {
+        this.navigationParser = navigationParser;
+    }
 }

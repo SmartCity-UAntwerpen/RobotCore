@@ -25,25 +25,29 @@ public class PathplanningService implements IPathplanning
     public List<Vertex> Calculatepath(Map map, long start, long stop) {
         List<Link> linkEntityList = new ArrayList<>();
         List<Vertex> vertexes = new ArrayList<>();
-        for (Node nj : map.getNodeList()){
-            System.out.print(nj);
-            vertexes.add(new Vertex(nj));
-            for(Link linkEntity : nj.getNeighbours()){
-                linkEntityList.add(linkEntity);
-            }
+        for (Node node : map.getNodeList()){
+            System.out.print(node);
+            vertexes.add(new Vertex(node));
+            linkEntityList.addAll(node.getNeighbours());
         }
 
-        ArrayList<Edge> edges;
-        List<ArrayList<Edge>> edgeslistinlist = new ArrayList<>();
+        ArrayList<Edge> edges = new ArrayList<>();
+        List<ArrayList<Edge>> edgesListInList = new ArrayList<>();
         Link realLink = new Link();
         int i = 0;
-        for (Node nj : map.getNodeList()){
-            edges = new ArrayList<>();
-            for (Link neighbour : nj.getNeighbours()){
-                for (Vertex v : vertexes){
-                    if(v.getId() == neighbour.getEndPoint().getId()){
-                        for(Link linkEntity: linkEntityList){
-                            if(linkEntity.getEndPoint().getId() == v.getId() && linkEntity.getStartPoint().getId() == nj.getPointEntity().getId()){
+        for (Node node : map.getNodeList())
+        {
+            edges.clear();
+            for (Link neighbour : node.getNeighbours())
+            {
+                for (Vertex v : vertexes)
+                {
+                    if(v.getId().equals(neighbour.getEndPoint().getId()))
+                    {
+                        for(Link linkEntity: linkEntityList)
+                        {
+                            if(linkEntity.getEndPoint().getId().equals(v.getId()) && linkEntity.getStartPoint().getId() == node.getPointEntity().getId())
+                            {
                                 realLink = linkEntity;
                             }
                         }
@@ -51,12 +55,12 @@ public class PathplanningService implements IPathplanning
                     }
                 }
             }
-            edgeslistinlist.add(i, (edges));
+            edgesListInList.add(i, (edges));
             i++;
         }
 
         for (int j = 0; j < vertexes.size();j++){
-            vertexes.get(j).setAdjacencies(edgeslistinlist.get(j));
+            vertexes.get(j).setAdjacencies(edgesListInList.get(j));
         }
 
 

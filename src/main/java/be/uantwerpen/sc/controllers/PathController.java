@@ -31,8 +31,7 @@ public class PathController
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<Path> responseList;
         responseList = restTemplate.getForEntity("http://" + serverIP + ":" + serverPort + "/map/"+Integer.toString(start)+"/path/"+Integer.toString(stop), Path.class);
-        Path path = responseList.getBody();
-        return path;
+        return responseList.getBody();
     }
 
     @RequestMapping(value = "random",method = RequestMethod.GET)

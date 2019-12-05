@@ -17,8 +17,8 @@ public class NavigationParser {
 
     @Autowired
     private DataService dataService;
-    public List<Vertex> path;
-    public Queue<DriveDir> commands = new LinkedList<DriveDir>();
+    private List<Vertex> path;
+    private Queue<DriveDir> commands = new LinkedList<DriveDir>();
 
     public NavigationParser(List<Vertex> path, DataService dataservice){
         this.path = path;
@@ -31,9 +31,9 @@ public class NavigationParser {
 
     public void decideOnCrossing(Vertex current, Vertex next) {
         for(Edge edge: current.getAdjacencies()) {
-            if(edge.getLinkEntity().getStartPoint().getId() == current.getId() && edge.getLinkEntity().getEndPoint().getId() == next.getId()) {
-                if(edge.getLinkEntity().getAngle() > -181 && edge.getLinkEntity().getAngle() < 181)
-                    if(edge.getLinkEntity().getAngle() == 0) {
+            if(edge.getLinkEntity().getStartPoint().getId().equals(current.getId()) && edge.getLinkEntity().getEndPoint().getId().equals(next.getId())) {
+                if(edge.getLinkEntity().getAngle() > -181.0 && edge.getLinkEntity().getAngle() < 181.0)
+                    if(edge.getLinkEntity().getAngle() <= 0.0001 && edge.getLinkEntity().getAngle() >= -0.0001) {
                         //if the length of the path is 0 we assume it's a crossroad
                         if(edge.getLinkEntity().getLength() == 0) {
                             commands.add(new DriveDir(DriveDirEnum.FORWARD));
@@ -41,7 +41,7 @@ public class NavigationParser {
                             // execute follow line after each crossroad
                             commands.add(new DriveDir(DriveDirEnum.FOLLOW));
                         }
-                    } else if(Math.abs(edge.getLinkEntity().getAngle()) == 180) {
+                    } else if(Math.abs(edge.getLinkEntity().getAngle()) <= 180.0001 && Math.abs(edge.getLinkEntity().getAngle()) >= 179.9999) {
                         commands.add(new DriveDir(DriveDirEnum.TURN));
                     } else {
                         if(edge.getLinkEntity().getAngle() > 0)
@@ -69,15 +69,15 @@ public class NavigationParser {
                     next = path.get(i+2);
                 else
                     next = driveTo;
-                Long linkId = new Long(-1);
+                Long linkId = (long) -1;
                 for(Edge edge : current.getAdjacencies()) {
-                    if(edge.getLinkEntity().getStartPoint().getId() == current.getId() && edge.getLinkEntity().getEndPoint().getId() == driveTo.getId()) {
+                    if(edge.getLinkEntity().getStartPoint().getId().equals(current.getId()) && edge.getLinkEntity().getEndPoint().getId().equals(driveTo.getId())) {
                         linkId = edge.getLinkEntity().getId();
                         break;
                     }
                 }
                 commands.add(new DriveDir("REQUEST LOCKS "+driveTo.getId() + " " + linkId));
-                switch (dataService.map.getPointById(path.get(i).getId()).getTile().getType().toLowerCase()) {
+                switch (dataService.getMap().getPointById(path.get(i).getId()).getTile().getType().toLowerCase()) {
                     case "crossing":
                             //Check at what angle the crossroad needs to be passed
                            decideOnCrossing(current, driveTo);
@@ -112,7 +112,7 @@ public class NavigationParser {
                 // needed to relock the tile since points on crosspoints reffer to same tile -> same lock
                 commands.add(new DriveDir("RELOCK TILE " + driveTo.getId()));
             }
-            if(dataService.map.getPointById(path.get(path.size()-1).getId()).getTile().getType().toLowerCase().equals("end")) {
+            if(dataService.getMap().getPointById(path.get(path.size()-1).getId()).getTile().getType().toLowerCase().equals("end")) {
                 //last point -> park
                 commands.add(new DriveDir("SPEAKER UNMUTE"));
                 commands.add(new DriveDir("SPEAKER SAY PARKING"));
@@ -128,5 +128,25 @@ public class NavigationParser {
 
         }
         return commands;
+    }
+
+    public DataService getDataService() {
+        return dataService;
+    }
+
+    public void setDataService(DataService dataService) {
+        this.dataService = dataService;
+    }
+
+    public void setPath(List<Vertex> path) {
+        this.path = path;
+    }
+
+    public Queue<DriveDir> getCommands() {
+        return commands;
+    }
+
+    public void setCommands(Queue<DriveDir> commands) {
+        this.commands = commands;
     }
 }

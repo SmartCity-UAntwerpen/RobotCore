@@ -110,6 +110,15 @@ public class QueueConsumer implements Runnable
                                 }
                             }
                             break;
+                        case PARTIALSERVER:
+                            //TODO
+                            break;
+                        case PARTIALSERVERNG:
+                            //TODO
+                            break;
+                        case FULLSERVER:
+                            //TODO
+                            break;
                      default:
                          break;
                     }
