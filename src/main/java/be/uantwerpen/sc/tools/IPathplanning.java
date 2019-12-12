@@ -1,8 +1,8 @@
 package be.uantwerpen.sc.tools;
 
 import be.uantwerpen.rc.models.map.Map;
+import be.uantwerpen.rc.models.map.Point;
 import org.springframework.stereotype.Component;
-import be.uantwerpen.rc.tools.Vertex;
 import java.util.List;
 
 /**
@@ -12,7 +12,7 @@ import java.util.List;
 @Component
 public interface IPathplanning {
 
-    List<Vertex> Calculatepath(Map map, long start, long stop); //implementhed in pathplanning server
+    List<Point> Calculatepath(Map map, long start, long stop); //implementhed in pathplanning server
 
 
 }

@@ -70,7 +70,8 @@ public class RobotCoreLoop implements Runnable
         Terminal.printTerminalInfo("Selected WorkingmodeType: " + workingmodeType.getType().name());
     }
 
-    public void run() {
+    public void run()
+    {
         //getRobotId
         terminalService=new TerminalService(); //terminal service starten. terminal wordt gebruikt om bepaalde dingen te printen en commandos in te geven
         RestTemplate restTemplate = new RestTemplate(); //standaard resttemplate gebruiken
@@ -111,7 +112,7 @@ public class RobotCoreLoop implements Runnable
 
         //Request map at server with rest
         this.getMap();
-        logger.info("Map received " + dataService.getMap().getNodeList());
+        logger.info("Map received " + dataService.getMap().getPointList());
 
         //Set location of bot
         Long locationID = dataService.getMap().getLocationByRFID(dataService.getTag());
@@ -120,7 +121,7 @@ public class RobotCoreLoop implements Runnable
 
 
         //We have the map now, update link
-        if(dataService.getWorkingmodeEnum()==WorkingmodeEnum.INDEPENDENT)
+        if(dataService.getWorkingmodeEnum() == WorkingmodeEnum.INDEPENDENT)
             dataService.firstLink();
         logger.info("link updated");
         logger.info("next: "+dataService.getNextNode());

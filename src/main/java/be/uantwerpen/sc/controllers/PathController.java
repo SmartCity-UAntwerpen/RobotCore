@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+// TODO: this class is used by TerminalServide: this should be deleted or the endpoints should be defined
+
+
 /**
  * Created by Niels on 10/05/2016.
  */
@@ -39,7 +42,6 @@ public class PathController
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<Path> responseList;
         responseList = restTemplate.getForEntity("http://" + serverIP + ":" + serverPort + "/map/random/"+Integer.toString(start), Path.class);
-        Path path = responseList.getBody();
-        return path;
+        return responseList.getBody();
     }
 }

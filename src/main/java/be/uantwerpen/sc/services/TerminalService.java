@@ -1,11 +1,12 @@
 package be.uantwerpen.sc.services;
 
+import be.uantwerpen.rc.models.map.Point;
+import be.uantwerpen.rc.tools.DriveDir;
 import be.uantwerpen.sc.RobotCoreLoop;
 import be.uantwerpen.sc.controllers.DriverCommandSender;
 import be.uantwerpen.sc.controllers.PathController;
 import be.uantwerpen.rc.models.map.Path;
 import be.uantwerpen.sc.tools.*;
-import be.uantwerpen.rc.tools.Vertex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -130,7 +131,7 @@ public class TerminalService
                         terminal.printTerminalInfo("Usage: navigate end");
                     }*/
                 }catch(ArrayIndexOutOfBoundsException e){
-                    terminal.printTerminalInfo("Usage: navigate end");
+                    Terminal.printTerminalInfo("Usage: navigate end");
                 }
                 break;
             case "path":
@@ -139,29 +140,29 @@ public class TerminalService
 
                     String start = command2.split(" ", 2)[0].toLowerCase();
                     String end = command2.split(" ", 2)[1].toLowerCase();
-                    if (start == end) {
-                        terminal.printTerminalInfo("Start cannot equal end.");
-                    } else if (start == "" || end == "") {
-                        terminal.printTerminalInfo("Usage: navigate start end");
+                    if (start.equals(end)) {
+                        Terminal.printTerminalInfo("Start cannot equal end.");
+                    } else if (start.equals("") || end.equals("")) {
+                        Terminal.printTerminalInfo("Usage: navigate start end");
                     } else {
                         try {
                             int startInt = Integer.parseInt(start);
                             int endInt = Integer.parseInt(end);
                             getPath(startInt, endInt);
                         } catch (NumberFormatException e) {
-                            terminal.printTerminalError(e.getMessage());
-                            terminal.printTerminalInfo("Usage: navigate start end");
+                            Terminal.printTerminalError(e.getMessage());
+                            Terminal.printTerminalInfo("Usage: navigate start end");
                         }
                     }
                 }catch(ArrayIndexOutOfBoundsException e){
-                    terminal.printTerminalError("Usage: navigate start end");
+                    Terminal.printTerminalError("Usage: navigate start end");
                 }
                 break;
             case "random":
                 try {
                     getRandomPath();
                 }catch(ArrayIndexOutOfBoundsException e){
-                    terminal.printTerminalError("Usage: navigate start end");
+                    Terminal.printTerminalError("Usage: navigate start end");
                 }
                 break;
             case "sendcommand":
@@ -174,7 +175,7 @@ public class TerminalService
                     //Override
                     //sender.sendCommand(command2);
                 }catch(ArrayIndexOutOfBoundsException e){
-                    terminal.printTerminalInfo("Usage: navigate start end");
+                    Terminal.printTerminalInfo("Usage: navigate start end");
                 }
                 break;
             case "domusic":
@@ -194,7 +195,7 @@ public class TerminalService
                 try {
                     System.out.println(queueService.getContentQueue().toString());
                 }catch(ArrayIndexOutOfBoundsException e){
-                    terminal.printTerminalError("error");
+                    Terminal.printTerminalError("error");
                 }
                 break;
             case "exit":
@@ -205,14 +206,14 @@ public class TerminalService
                 printHelp("");
                 break;
             default:
-                terminal.printTerminalInfo("Command: '" + command + "' is not recognized.");
+                Terminal.printTerminalInfo("Command: '" + command + "' is not recognized.");
                 break;
         }
     }
 
     private void exitSystem()
     {
-        //aan RobotBackend late wete dat bot shutdownt
+        //aan RobotBackend late weten dat bot shutdownt
         RestTemplate resttemplate = new RestTemplate();
         resttemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/delete/"
                 + dataService.getRobotID(), void.class);
@@ -252,21 +253,21 @@ public class TerminalService
             }
         }
         Terminal.printTerminal("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end2);
-        dataService.navigationParser = new NavigationParser(robotCoreLoop.pathplanning.Calculatepath(dataService.map, (int)(long)dataService.getCurrentLocation(), end2), dataService);
+        dataService.setNavigationParser(new NavigationParser(robotCoreLoop.getPathplanningService().Calculatepath(dataService.getMap(), (int)(long)dataService.getCurrentLocation(), end2), dataService));
         //Parse Map
-        dataService.navigationParser.parseMap();
+        dataService.getNavigationParser().parseMap();
         //dataService.navigationParser.parseRandomMap(dataService);
 
         //Setup for driving
-        int start = (int)(long)dataService.navigationParser.path.get(0).getId();
-        int end = (int)(long)dataService.navigationParser.path.get(1).getId();
+        int start = (int)(long)dataService.getNavigationParser().getPath().get(0).getId();
+        int end = (int)(long)dataService.getNavigationParser().getPath().get(1).getId();
         dataService.setNextNode((long)end);
         dataService.setPrevNode((long)start);
         queueService.insertCommand("DRIVE FOLLOWLINE");
         queueService.insertCommand("DRIVE FORWARD 110");
 
         //Process map
-        for (DriveDir command : dataService.navigationParser.commands) {
+        for (DriveDir command : dataService.getNavigationParser().getCommands()) {
             queueService.insertCommand(command.toString());
         }
     }
@@ -281,7 +282,7 @@ public class TerminalService
         if(currentLocation < 0) {
             currentLocation = 4;
         }
-        List<Vertex> path = pathController.getRandomPath(currentLocation).getPath();
+        List<Point> path = pathController.getRandomPath(currentLocation).getPath();
         NavigationParser navigationParser = new NavigationParser(path, dataService);
 
     }

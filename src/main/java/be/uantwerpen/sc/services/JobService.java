@@ -1,6 +1,8 @@
 package be.uantwerpen.sc.services;
 
-import be.uantwerpen.rc.tools.Vertex;
+import be.uantwerpen.rc.models.map.Point;
+import be.uantwerpen.rc.tools.DriveDir;
+import be.uantwerpen.rc.tools.DriveDirEncapsulator;
 import be.uantwerpen.sc.RobotCoreLoop;
 import be.uantwerpen.sc.controllers.DriverCommandSender;
 import be.uantwerpen.rc.models.Job;
@@ -75,25 +77,25 @@ public class JobService
         String tempStr = job.split(":")[2];
         String jobidNumber = tempStr.split("/")[0];
 
-        String tempbotid = job.split("/")[1];
-        String botidNumber = tempbotid.split(":",2)[1];
+        String tempBotId = job.split("/")[1];
+        String botIdNumber = tempBotId.split(":",2)[1];
 
-        String tempidstart = job.split("/")[2];
-        String idstartNumber = tempidstart.split(":")[1];
+        String tempIdStart = job.split("/")[2];
+        String idStartNumber = tempIdStart.split(":")[1];
 
-        String tempidend = job.split("/")[3];
-        String idendNumber = tempidend.split(":")[1];
-        idendNumber = idendNumber.replace("}","");
+        String tempIdEnd = job.split("/")[3];
+        String idEndNumber = tempIdEnd.split(":")[1];
+        idEndNumber = idEndNumber.replace("}","");
 
-        Long jobid = Long.parseLong(jobidNumber);
-        Long botid = Long.parseLong(botidNumber);
-        Long startid = Long.parseLong(idstartNumber);
-        Long endid = Long.parseLong(idendNumber);
+        Long jobId = Long.parseLong(jobidNumber);
+        Long botId = Long.parseLong(botIdNumber);
+        Long startId = Long.parseLong(idStartNumber);
+        Long endId = Long.parseLong(idEndNumber);
 
-        logger.info("Parsed: jobid = " + jobid + " botid = " + botid + " startid = " + startid + " endid = " + endid);
+        logger.info("Parsed: jobid = " + jobId + " botid = " + botId + " startid = " + startId + " endid = " + endId);
 
-        if(!(dataService.getCurrentLocation().equals(endid) && dataService.getCurrentLocation().equals(startid))) {
-            Job parsedJob = new Job(jobid,startid,endid);
+        if(!(dataService.getCurrentLocation().equals(endId) && dataService.getCurrentLocation().equals(startId))) {
+            Job parsedJob = new Job(jobId,startId,endId);
             dataService.setJob(parsedJob);
         } else {
             logger.info("Already on destination");
@@ -146,7 +148,7 @@ public class JobService
         logger.info("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end);
         //first retrieve the most updated version of the map (weights are dynamic)
         getUpdatedMap();
-        List<Vertex> temp = robotCoreLoop.getPathplanningService().Calculatepath(dataService.getMap(), (int)(long)dataService.getCurrentLocation(), end);
+        List<Point> temp = robotCoreLoop.getPathplanningService().Calculatepath(dataService.getMap(), (int)(long)dataService.getCurrentLocation(), end);
         dataService.setNavigationParser(new NavigationParser(temp, dataService));
         //Parse Map
         dataService.getNavigationParser().parseMap();

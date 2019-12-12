@@ -1,11 +1,10 @@
 package be.uantwerpen.sc.services;
 
+import be.uantwerpen.rc.models.map.Point;
 import be.uantwerpen.sc.controllers.DriverCommandSender;
 import be.uantwerpen.rc.models.Job;
 import be.uantwerpen.rc.models.map.Link;
 import be.uantwerpen.rc.models.map.Map;
-import be.uantwerpen.rc.models.map.Node;
-import be.uantwerpen.rc.tools.Edge;
 import be.uantwerpen.sc.tools.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 /**
  * Created by Arthur on 24/04/2016.
+ *
+ * @Author Riad on 12/12/2019
  */
 @Service
 public class DataService
@@ -147,11 +148,11 @@ public class DataService
     }
 
     public void firstLink(){
-        if(map != null) {
+        if(this.map != null) {
             Long start = this.getCurrentLocation();
             Long id;
-            for(Node node : map.getNodeList()) {
-                if(node.getNodeId().equals(start)) {
+            for(Point node : map.getPointList()) {
+                if(node.getId().equals(start)) {
                     Link link = node.getNeighbours().get(0);
                     //lid = link.getId();
                     nextNode = link.getEndPoint().getId();

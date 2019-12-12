@@ -25,12 +25,12 @@ public class DriverStatusEventHandler implements Runnable
     DataService dataService;
 
     @Autowired
-    MqttPublisher locationPublisher;
+    private MqttPublisher locationPublisher;
 
-    Socket socket;
-    DataInputStream dIn;
+    private Socket socket;
+    private DataInputStream dIn;
 
-    Logger logger = LoggerFactory.getLogger(DriverStatusEventHandler.class);
+    private Logger logger = LoggerFactory.getLogger(DriverStatusEventHandler.class);
 
     //@Value("${car.ccore.ip:localhost}")
     @Value("${car.driver.ip:146.175.140.187}")
@@ -109,7 +109,7 @@ public class DriverStatusEventHandler implements Runnable
                         if(!tag.trim().equals("NONE") && !tag.trim().equals("NO_TAG"))
                         {
                             if(dataService.getMap() != null){
-                                dataService.setCurrentLocation(dataService.map.getLocationByRFID(tag));
+                                dataService.setCurrentLocation(dataService.getMap().getLocationByRFID(tag));
                             }
                             dataService.setLocationUpdated(true);
                         }
@@ -139,7 +139,7 @@ public class DriverStatusEventHandler implements Runnable
 
 
     private String readData(){
-        String recvData = "";
+        StringBuilder recvData = new StringBuilder();
         try {
             if(dIn==null){
                 try
@@ -159,11 +159,11 @@ public class DriverStatusEventHandler implements Runnable
 
             char b = (char)dIn.readByte(); //Read first char
             while(b != '\n'){ //Read the other chars and add them to string
-                recvData = recvData + b;
+                recvData.append(b);
                 b = (char)dIn.readByte();
 
             }
-            return recvData;
+            return recvData.toString();
         }catch(Exception e){
             System.err.println("Lost connection to robot");
             try {
@@ -172,6 +172,6 @@ public class DriverStatusEventHandler implements Runnable
                 er.printStackTrace();
             }
         }
-        return recvData;
+        return recvData.toString();
     }
 }

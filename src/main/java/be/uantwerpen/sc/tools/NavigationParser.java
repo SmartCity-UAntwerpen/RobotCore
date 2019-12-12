@@ -1,53 +1,60 @@
 package be.uantwerpen.sc.tools;
 
+import be.uantwerpen.rc.models.map.Link;
+import be.uantwerpen.rc.models.map.Point;
+import be.uantwerpen.rc.tools.DriveDir;
+import be.uantwerpen.rc.tools.DriveDirEnum;
 import be.uantwerpen.sc.services.DataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import be.uantwerpen.rc.tools.Vertex;
-import be.uantwerpen.rc.tools.Edge;
 
 import java.util.*;
+import java.util.List;
 
 /**
  * Created by Arthur on 28/04/2016.
+ *
+ * @Author Riad on 12/12/2019
  */
 public class NavigationParser {
+
     private Logger logger = LoggerFactory.getLogger(NavigationParser.class);
 
     @Autowired
     private DataService dataService;
-    private List<Vertex> path;
+
+    private List<Point> path;
     private Queue<DriveDir> commands = new LinkedList<DriveDir>();
 
-    public NavigationParser(List<Vertex> path, DataService dataservice){
+    public NavigationParser(List<Point> path, DataService dataservice){
         this.path = path;
         this.dataService=dataservice;
     }
 
-    public List<Vertex> getPath(){
+    public List<Point> getPath(){
         return path;
     }
 
-    public void decideOnCrossing(Vertex current, Vertex next) {
-        for(Edge edge: current.getAdjacencies()) {
-            if(edge.getLinkEntity().getStartPoint().getId().equals(current.getId()) && edge.getLinkEntity().getEndPoint().getId().equals(next.getId())) {
-                if(edge.getLinkEntity().getAngle() > -181.0 && edge.getLinkEntity().getAngle() < 181.0)
-                    if(edge.getLinkEntity().getAngle() <= 0.0001 && edge.getLinkEntity().getAngle() >= -0.0001) {
+    public void decideOnCrossing(Point current, Point next) {
+        for(Link link: current.getNeighbours()) {
+            if(link.getStartPoint().getId().equals(current.getId()) && link.getEndPoint().getId().equals(next.getId())) {
+                if(link.getAngle() > -181.0 && link.getAngle() < 181.0)
+                    if(link.getAngle() <= 0.0001 && link.getAngle() >= -0.0001) {
                         //if the length of the path is 0 we assume it's a crossroad
-                        if(edge.getLinkEntity().getLength() == 0) {
+                        if(link.getCost().getLength() == 0) {
                             commands.add(new DriveDir(DriveDirEnum.FORWARD));
                         } else {
                             // execute follow line after each crossroad
                             commands.add(new DriveDir(DriveDirEnum.FOLLOW));
                         }
-                    } else if(Math.abs(edge.getLinkEntity().getAngle()) <= 180.0001 && Math.abs(edge.getLinkEntity().getAngle()) >= 179.9999) {
+                    } else if(Math.abs(link.getAngle()) <= 180.0001 && Math.abs(link.getAngle()) >= 179.9999) {
                         commands.add(new DriveDir(DriveDirEnum.TURN));
                     } else {
-                        if(edge.getLinkEntity().getAngle() > 0)
-                            commands.add(new DriveDir(DriveDirEnum.RIGHT, edge.getLinkEntity().getAngle()));
+                        if(link.getAngle() > 0)
+                            commands.add(new DriveDir(DriveDirEnum.RIGHT, link.getAngle()));
                         else
-                            commands.add(new DriveDir(DriveDirEnum.LEFT, Math.abs(edge.getLinkEntity().getAngle())));
+                            commands.add(new DriveDir(DriveDirEnum.LEFT, Math.abs(link.getAngle())));
                     }
                 break;
             }
@@ -59,9 +66,9 @@ public class NavigationParser {
         if(path.isEmpty()){
             logger.warn("Cannot parse empty path");
         }else {
-            Vertex current;
-            Vertex driveTo;
-            Vertex next;
+            Point current;
+            Point driveTo;
+            Point next;
             for(int i = 0;  i < path.size() - 1; i++) {
                 current = path.get(i);
                 driveTo = path.get(i+1);
@@ -70,9 +77,9 @@ public class NavigationParser {
                 else
                     next = driveTo;
                 Long linkId = (long) -1;
-                for(Edge edge : current.getAdjacencies()) {
-                    if(edge.getLinkEntity().getStartPoint().getId().equals(current.getId()) && edge.getLinkEntity().getEndPoint().getId().equals(driveTo.getId())) {
-                        linkId = edge.getLinkEntity().getId();
+                for(Link link : current.getNeighbours()) {
+                    if(link.getStartPoint().getId().equals(current.getId()) && link.getEndPoint().getId().equals(driveTo.getId())) {
+                        linkId = link.getId();
                         break;
                     }
                 }
@@ -138,7 +145,7 @@ public class NavigationParser {
         this.dataService = dataService;
     }
 
-    public void setPath(List<Vertex> path) {
+    public void setPath(List<Point> path) {
         this.path = path;
     }
 
