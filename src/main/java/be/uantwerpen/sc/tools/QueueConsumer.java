@@ -17,7 +17,7 @@ import org.springframework.web.client.RestTemplate;
 public class QueueConsumer implements Runnable
 {
 
-    @Value("${sc.backend.ip:localhost}") //values won't be loaded beceause QueueConsumer is created with "new" in systemloader
+    @Value("${sc.backend.ip:localhost}") //values won't be loaded because QueueConsumer is created with "new" in systemloader
     private String serverIP;
 
     @Value("#{new Integer(${sc.backend.port}) ?: 1994}")
@@ -41,6 +41,8 @@ public class QueueConsumer implements Runnable
         this.locationPublisher = locationPublisher;
     }
 
+    // TODO: should be split into two implementations: one for the commands to the cloud and one to the driver
+    // The current design is not clean
     @Override
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
@@ -54,61 +56,10 @@ public class QueueConsumer implements Runnable
                             logger.info("Independent case");
                             logger.info("Robot not busy");
                             logger.trace(queueService.getContentQueue().toString());
-                            String s = queueService.getCommand();
-                            logger.info("executing: " + s);
+                            String command = queueService.getCommand();
+                            logger.info("executing: " + command);
+                            this.handleCommands(command);
 
-                            if (s.contains("UPDATE LOCATION")) {
-                                String split[] = s.split(" ");
-                                dataService.setPrevNode(dataService.getCurrentLocation());
-                                dataService.setCurrentLocation(Long.parseLong(split[2]));
-                                dataService.setNextNode(Long.parseLong(split[3]));
-                                float progress = (Float.parseFloat(split[4]));
-                                locationPublisher.publishLocation(new Integer(Math.round(progress)));
-                            } else if(s.equals("SEND LOCATION")) {
-                                sendLocation();
-                            } else if (s.contains("REQUEST LOCKS") || (s.contains("RELOCK TILE")) ) {
-                                String split[] = s.split(" ");
-                                Long driveTo = Long.parseLong(split[2]);
-                                requestPointLock(dataService.getRobotID(), driveTo);
-                                if(!s.contains("RELOCK TILE")) {
-                                    Long linkId = Long.parseLong(split[3]);
-                                    requestLinkLock(dataService.getRobotID(), linkId);
-                                }
-                            } else if(s.contains("RELEASE LOCKS")) {
-                                String split [] = s.split(" ");
-                                Long point = Long.parseLong(split[2]);
-                                Long linkId =  Long.parseLong(split[3]);
-                                boolean success;
-                                try {
-                                    do {
-                                        success = releasePointLock(dataService.getRobotID(), point);
-                                        Thread.sleep(1000);
-                                    } while(success == false);
-                                    do {
-                                        releaseLinkLock(dataService.getRobotID(), linkId);
-                                        Thread.sleep(1000);
-                                    } while(success == false);
-                                }catch(InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            } else if (s.contains("TRAFFICLIGHT DETECTION")) {
-                                String split [] = s.split(" ");
-                                Long point = Long.parseLong(split[2]);
-                                handleTrafficLight(point);
-                            } else if (s.contains("FINISH JOB")) {
-                                //notify backend
-                                sendJobFinish();
-                                //notify other threads that the robot arrived at its location
-                                dataService.setRobotDriving(false);
-                            } else {
-                                //commands that have to be executed on the robot driver
-                                sender.sendCommand(s);
-                                if(!s.contains("SPEAKER")) {
-                                    dataService.setRobotBusy(true);
-                                    while(dataService.getRobotBusy()){ //wait till drive event is finished
-                                    }
-                                }
-                            }
                             break;
                         case PARTIALSERVER:
                             //TODO
@@ -118,11 +69,73 @@ public class QueueConsumer implements Runnable
                             break;
                         case FULLSERVER:
                             //TODO
+                            logger.info("Full Server mode");
+                            logger.info("Robot not busy");
+                            logger.trace(queueService.getContentQueue().toString());
+                            command = queueService.getCommand();
+                            logger.info("executing: " + command);
+                            this.handleCommands(command);
                             break;
                      default:
                          break;
                     }
 
+                }
+            }
+        }
+    }
+
+    private void handleCommands(String command)
+    {
+        if (command.contains("UPDATE LOCATION")) {
+            String split[] = command.split(" ");
+            dataService.setPrevNode(dataService.getCurrentLocation());
+            dataService.setCurrentLocation(Long.parseLong(split[2]));
+            dataService.setNextNode(Long.parseLong(split[3]));
+            float progress = (Float.parseFloat(split[4]));
+            locationPublisher.publishLocation(Math.round(progress));
+        } else if(command.equals("SEND LOCATION")) {
+            sendLocation();
+        } else if (command.contains("REQUEST LOCKS") || (command.contains("RELOCK TILE")) ) {
+            String split[] = command.split(" ");
+            Long driveTo = Long.parseLong(split[2]);
+            requestPointLock(dataService.getRobotID(), driveTo);
+            if(!command.contains("RELOCK TILE")) {
+                Long linkId = Long.parseLong(split[3]);
+                requestLinkLock(dataService.getRobotID(), linkId);
+            }
+        } else if(command.contains("RELEASE LOCKS")) {
+            String split [] = command.split(" ");
+            Long point = Long.parseLong(split[2]);
+            Long linkId =  Long.parseLong(split[3]);
+            boolean success;
+            try {
+                do {
+                    success = releasePointLock(dataService.getRobotID(), point);
+                    Thread.sleep(1000);
+                } while(!success);
+                do {
+                    releaseLinkLock(dataService.getRobotID(), linkId);
+                    Thread.sleep(1000);
+                } while(!success);
+            }catch(InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else if (command.contains("TRAFFICLIGHT DETECTION")) {
+            String split [] = command.split(" ");
+            Long point = Long.parseLong(split[2]);
+            handleTrafficLight(point);
+        } else if (command.contains("FINISH JOB")) {
+            //notify backend
+            sendJobFinish();
+            //notify other threads that the robot arrived at its location
+            dataService.setRobotDriving(false);
+        } else {
+            //commands that have to be executed on the robot driver
+            sender.sendCommand(command);
+            if(!command.contains("SPEAKER")) {
+                dataService.setRobotBusy(true);
+                while(dataService.getRobotBusy()){ //wait till drive event is finished
                 }
             }
         }

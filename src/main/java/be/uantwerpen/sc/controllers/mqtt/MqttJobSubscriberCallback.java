@@ -19,8 +19,8 @@ public class MqttJobSubscriberCallback implements MqttCallback
 {
     private Logger logger = LoggerFactory.getLogger(MqttJobSubscriberCallback.class);
 
-    JobService jobService;
-    MqttJobSubscriber subscriber;
+    private JobService jobService;
+    private MqttJobSubscriber subscriber;
 
     public MqttJobSubscriberCallback(MqttJobSubscriber subscriber, JobService jobService)
     {

@@ -12,7 +12,7 @@ import java.util.List;
 @Component
 public interface IPathplanning {
 
-    List<Point> Calculatepath(Map map, long start, long stop); //implementhed in pathplanning server
+    List<Point> Calculatepath(Map map, long start, long stop); //implemented in pathplanning server
 
 
 }

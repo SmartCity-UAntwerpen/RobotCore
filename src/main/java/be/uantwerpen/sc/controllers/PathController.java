@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-// TODO: this class is used by TerminalServide: this should be deleted or the endpoints should be defined
+// TODO: this class is used by TerminalService: this should be deleted or the endpoints should be defined
 
 
 /**

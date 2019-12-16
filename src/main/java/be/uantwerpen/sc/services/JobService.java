@@ -132,7 +132,6 @@ public class JobService
                         dataService.setDestination(job.getIdEnd());
                         this.startPathPlanning(endInt);
                     }
-
                 } catch (NumberFormatException e) {
                     logger.info(e.getMessage());
                     logger.info("Usage: navigate end");
@@ -140,6 +139,14 @@ public class JobService
                     e.printStackTrace();
                 }
                 break;
+            case FULLSERVER:
+                try{
+                    dataService.setRobotDriving(true);
+                    dataService.setTempJob(false);
+                }catch (NumberFormatException e) {
+                    logger.info(e.getMessage());
+                    logger.info("Usage: navigate end");
+                }
                 //TODO add full server and partial server
         }
     }
@@ -290,6 +297,4 @@ public class JobService
         contentcopy.clear();
         queueService.setContentQueue(content);
     }
-
-
 }
