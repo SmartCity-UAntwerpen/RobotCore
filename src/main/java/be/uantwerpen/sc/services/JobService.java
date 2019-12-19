@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -73,6 +74,9 @@ public class JobService
     public void parseJob(String job) throws ParseException
     {
         logger.info("Parsing job...");
+        System.out.println("Job String: \n " + job);
+
+        // TODO: check if commands are sent along with the job
 
         String tempStr = job.split(":")[2];
         String jobidNumber = tempStr.split("/")[0];
@@ -119,18 +123,18 @@ public class JobService
                         logger.info("start location not current Location. Going to " + job.getIdStart());
                         dataService.setDestination(job.getIdStart());
                         dataService.setTempJob(true);
-                        this.startPathPlanning(startInt);
+                        this.startIndependentPathPlanning(startInt);
                         logger.info("Wait till tempjob is finished");
                         while(!dataService.getCurrentLocation().equals(job.getIdStart())) {
                             Thread.sleep(1000);
                         }
                         dataService.setTempJob(false);
                         dataService.setDestination(job.getIdEnd());
-                        this.startPathPlanning(endInt);
+                        this.startIndependentPathPlanning(endInt);
                     } else {
                         dataService.setTempJob(false);
                         dataService.setDestination(job.getIdEnd());
-                        this.startPathPlanning(endInt);
+                        this.startIndependentPathPlanning(endInt);
                     }
                 } catch (NumberFormatException e) {
                     logger.info(e.getMessage());
@@ -143,15 +147,40 @@ public class JobService
                 try{
                     dataService.setRobotDriving(true);
                     dataService.setTempJob(false);
+                    if(!dataService.getCurrentLocation().equals(job.getIdStart()))
+                    {
+                        logger.info("Start location not equal to current location. Going to " + job.getIdStart());
+                        dataService.setDestination(job.getIdStart());
+                        dataService.setTempJob(true);
+                        this.startFullServerPathPlanning(startInt);
+                        logger.info("Wait till tempjob is finished.");
+                        while(!dataService.getCurrentLocation().equals(job.getIdStart()))
+                        {
+                            Thread.sleep(1000);
+                        }
+                        dataService.setTempJob(false);
+                        dataService.setDestination(job.getIdEnd());
+                        this.startFullServerPathPlanning(endInt);
+                    }
+                    else
+                    {
+                        logger.info("Start location equal to current location. Going to " + job.getIdStart());
+                        dataService.setTempJob(false);
+                        dataService.setDestination(job.getIdEnd());
+                        this.startFullServerPathPlanning(endInt);
+                    }
+
                 }catch (NumberFormatException e) {
                     logger.info(e.getMessage());
                     logger.info("Usage: navigate end");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
                 //TODO add full server and partial server
         }
     }
 
-    private void startPathPlanning(int end){
+    private void startIndependentPathPlanning(int end){
         logger.info("Starting pathplanning from point " + dataService.getCurrentLocation() + " to " + end);
         //first retrieve the most updated version of the map (weights are dynamic)
         getUpdatedMap();
@@ -167,6 +196,16 @@ public class JobService
             queueService.insertCommand(command.toString());
         }
     }
+
+    private void startFullServerPathPlanning(int end)
+    {
+        // TODO: get the commands directly from backend (no calculations or whatever, just commands)
+        // TODO: insert the commands
+        logger.info("Get pathplanning from backend starting from point " + dataService.getCurrentLocation() + " to " + end);
+        Queue<DriveDir> commands;
+
+    }
+
 
     private void getUpdatedMap() {
         logger.info("Receiving updated map...");

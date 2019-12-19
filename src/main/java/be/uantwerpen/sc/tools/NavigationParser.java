@@ -1,6 +1,7 @@
 package be.uantwerpen.sc.tools;
 
 import be.uantwerpen.rc.models.map.Link;
+import be.uantwerpen.rc.models.map.Map;
 import be.uantwerpen.rc.models.map.Point;
 import be.uantwerpen.rc.tools.DriveDir;
 import be.uantwerpen.rc.tools.DriveDirEnum;
