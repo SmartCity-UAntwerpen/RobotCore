@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="RobotCoreDeployer">
+    <output-path>$PROJECT_DIR$/out/artifacts/RobotCoreDeployer</output-path>
+    <root id="archive" name="RobotCoreDeployer.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="library" level="project" name="Maven: be.uantwerpen.rc:RobotCommon:0.0.1-SNAPSHOT" />
+      <element id="module-output" name="RobotCore" />
+    </root>
+  </artifact>
+</component>

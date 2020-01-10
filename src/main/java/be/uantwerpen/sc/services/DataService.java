@@ -155,8 +155,8 @@ public class DataService
                 if(node.getId().equals(start)) {
                     Link link = node.getNeighbours().get(0);
                     //lid = link.getId();
-                    nextNode = link.getEndPoint().getId();
-                    prevNode = link.getStartPoint().getId();
+                    nextNode = link.getEndPoint();
+                    prevNode = link.getStartPoint();
                 }
             }
             id=this.getCurrentLocation();   //BIJGEVOEGD      =====FOUT

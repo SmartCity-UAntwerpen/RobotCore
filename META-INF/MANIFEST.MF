@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Class-Path: C:\Users\riad_\IdeaProjects\SmartCityProject\RobotCore\tar
+ get\classes
+Main-Class: be.uantwerpen.sc.RobotCoreApplication
+

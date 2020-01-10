@@ -39,7 +39,7 @@ public class NavigationParser {
 
     public void decideOnCrossing(Point current, Point next) {
         for(Link link: current.getNeighbours()) {
-            if(link.getStartPoint().getId().equals(current.getId()) && link.getEndPoint().getId().equals(next.getId())) {
+            if(link.getStartPoint().equals(current.getId()) && link.getEndPoint().equals(next.getId())) {
                 if(link.getAngle() > -181.0 && link.getAngle() < 181.0)
                     if(link.getAngle() <= 0.0001 && link.getAngle() >= -0.0001) {
                         //if the length of the path is 0 we assume it's a crossroad
@@ -79,7 +79,7 @@ public class NavigationParser {
                     next = driveTo;
                 Long linkId = (long) -1;
                 for(Link link : current.getNeighbours()) {
-                    if(link.getStartPoint().getId().equals(current.getId()) && link.getEndPoint().getId().equals(driveTo.getId())) {
+                    if(link.getStartPoint().equals(current.getId()) && link.getEndPoint().equals(driveTo.getId())) {
                         linkId = link.getId();
                         break;
                     }

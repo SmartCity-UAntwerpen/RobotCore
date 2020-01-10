@@ -143,6 +143,7 @@ public class RobotCoreLoop implements Runnable
             }
         }
 
+        restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + botId + "/locationUpdate/" +dataService.getCurrentLocation(), boolean.class);
         //TODO:: all the code above this line should only be executed once,
         // while the code below should continuously be running
         //TODO:: this could be moved to separate method/class/thread/...

@@ -7,6 +7,8 @@ import be.uantwerpen.sc.RobotCoreLoop;
 import be.uantwerpen.sc.controllers.DriverCommandSender;
 import be.uantwerpen.rc.models.Job;
 import be.uantwerpen.sc.tools.*;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +19,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -91,6 +93,22 @@ public class JobService
         String idEndNumber = tempIdEnd.split(":")[1];
         idEndNumber = idEndNumber.replace("}","");
 
+        List<DriveDir> driveDirs = new ArrayList<>();
+        if(job.length() >= 60)
+        {
+            String commands = job.split("ions:")[1];
+            commands = commands.substring(0, commands.length()-1);
+            Gson gson = new Gson();
+            logger.info("Extracted Command JSON: " + commands);
+            driveDirs = gson.fromJson(commands, new TypeToken<List<DriveDir>>(){}.getType());
+            /*for (String command : commands)
+            {
+                //String[] commandParam = command.split(" ");
+                driveDirs.add(new DriveDir(command));
+            }*/
+
+        }
+
         Long jobId = Long.parseLong(jobidNumber);
         Long botId = Long.parseLong(botIdNumber);
         Long startId = Long.parseLong(idStartNumber);
@@ -100,6 +118,7 @@ public class JobService
 
         if(!(dataService.getCurrentLocation().equals(endId) && dataService.getCurrentLocation().equals(startId))) {
             Job parsedJob = new Job(jobId,startId,endId);
+            if(!driveDirs.isEmpty()) parsedJob.setDriveDirections(driveDirs);
             dataService.setJob(parsedJob);
         } else {
             logger.info("Already on destination");
@@ -130,7 +149,7 @@ public class JobService
                         }
                         dataService.setTempJob(false);
                         dataService.setDestination(job.getIdEnd());
-                        this.startIndependentPathPlanning(endInt);
+                        //this.startIndependentPathPlanning(endInt);
                     } else {
                         dataService.setTempJob(false);
                         dataService.setDestination(job.getIdEnd());
@@ -152,7 +171,7 @@ public class JobService
                         logger.info("Start location not equal to current location. Going to " + job.getIdStart());
                         dataService.setDestination(job.getIdStart());
                         dataService.setTempJob(true);
-                        this.startFullServerPathPlanning(startInt);
+                        this.startFullServerPathPlanning(startInt, job);
                         logger.info("Wait till tempjob is finished.");
                         while(!dataService.getCurrentLocation().equals(job.getIdStart()))
                         {
@@ -160,14 +179,14 @@ public class JobService
                         }
                         dataService.setTempJob(false);
                         dataService.setDestination(job.getIdEnd());
-                        this.startFullServerPathPlanning(endInt);
+                        //this.startFullServerPathPlanning(endInt, job);
                     }
                     else
                     {
                         logger.info("Start location equal to current location. Going to " + job.getIdStart());
                         dataService.setTempJob(false);
                         dataService.setDestination(job.getIdEnd());
-                        this.startFullServerPathPlanning(endInt);
+                        this.startFullServerPathPlanning(endInt, job);
                     }
 
                 }catch (NumberFormatException e) {
@@ -185,6 +204,7 @@ public class JobService
         //first retrieve the most updated version of the map (weights are dynamic)
         getUpdatedMap();
         List<Point> temp = robotCoreLoop.getPathplanningService().Calculatepath(dataService.getMap(), (int)(long)dataService.getCurrentLocation(), end);
+        for(Point point: temp) logger.info("Point in path to be followed: " + point.getId());
         dataService.setNavigationParser(new NavigationParser(temp, dataService));
         //Parse Map
         dataService.getNavigationParser().parseMap();
@@ -197,12 +217,17 @@ public class JobService
         }
     }
 
-    private void startFullServerPathPlanning(int end)
+    private void startFullServerPathPlanning(int end, Job job)
     {
         // TODO: get the commands directly from backend (no calculations or whatever, just commands)
         // TODO: insert the commands
         logger.info("Get pathplanning from backend starting from point " + dataService.getCurrentLocation() + " to " + end);
-        Queue<DriveDir> commands;
+        for(DriveDir command: job.getDriveDirections())
+        {
+            logger.info("insert job " + command.toString());
+            queueService.insertCommand(command.toString());
+        }
+
 
     }
 

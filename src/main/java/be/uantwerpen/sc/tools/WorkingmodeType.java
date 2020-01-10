@@ -22,7 +22,8 @@ public class WorkingmodeType {
         // if run with "--debug logfile.txt" debug=true, files=["logfile.txt"]
         if(files.isEmpty()){
             //type = WorkingmodeEnum.PARTIALSERVERNG;
-            type = WorkingmodeEnum.INDEPENDENT;
+            type = WorkingmodeEnum.FULLSERVER;
+            //type = WorkingmodeEnum.INDEPENDENT;
 
         }else{
             switch (files.get(0).toLowerCase()){
