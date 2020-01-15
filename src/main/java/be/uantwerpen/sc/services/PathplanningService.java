@@ -28,50 +28,7 @@ public class PathplanningService implements IPathplanning
 
 
         // TODO: should be completely independent of Dijkstra
-        // TODO: transitions from map-classes to pathplanning-classes
-
-
-        /*List<Link> linkEntityList = new ArrayList<>();
-        List<Point> vertexes = new ArrayList<>();
-        for (Point node : map.getPointList()){
-            System.out.print(node);
-            vertexes.add(node);
-            linkEntityList.addAll(node.getNeighbours());
-        }
-
-        ArrayList<Link> edges = new ArrayList<>();
-        List<ArrayList<Link>> edgesListInList = new ArrayList<>();
-        Link realLink = new Link();
-        int i = 0;
-        for (Point node : map.getPointList())
-        {
-            edges.clear();
-            for (Link neighbour : node.getNeighbours())
-            {
-                for (Point v : map.getPointList())
-                {
-                    if(v.getId().equals(neighbour.getEndPoint()))
-                    {
-                        for(Link linkEntity: linkEntityList)
-                        {
-                            if(linkEntity.getEndPoint().equals(v.getId()) && linkEntity.getStartPoint().equals(node.getId()))
-                            {
-                                realLink = linkEntity;
-                            }
-                        }
-                        edges.add(new Link(v.getId(), neighbour.getCost().getWeight()));
-                    }
-                }
-            }
-            edgesListInList.add(i, (edges));
-            i++;
-        }
-
-        for (int j = 0; j < vertexes.size(); j++){
-            vertexes.get(j).setNeighbours(edgesListInList.get(j));
-        }*/
-
-
+        // TODO: transitions from map-classes to pathplanning-classes/
         dijkstra.computePaths(start, map.getPointList()); // run Dijkstra
         List<Point> path = dijkstra.getShortestPathTo(stop,map.getPointList()).getPath();
         System.out.println("Path: " + path);

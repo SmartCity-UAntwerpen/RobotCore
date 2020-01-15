@@ -33,7 +33,7 @@ public class DriverStatusEventHandler implements Runnable
     private Logger logger = LoggerFactory.getLogger(DriverStatusEventHandler.class);
 
     //@Value("${car.ccore.ip:localhost}")
-    @Value("${car.driver.ip:146.175.140.187}")
+    @Value("${car.driver.ip}")
     private String driverIp;
 
     @Value("#{new Integer(${car.driver.eventport}) ?: 1314}")
