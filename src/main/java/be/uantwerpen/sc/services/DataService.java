@@ -159,11 +159,8 @@ public class DataService
                     prevNode = link.getStartPoint();
                 }
             }
-            id=this.getCurrentLocation();   //BIJGEVOEGD      =====FOUT
+            id=this.getCurrentLocation();
             Terminal.printTerminal("Current Link: " + id);
-            //RestTemplate rest = new RestTemplate();
-            //rest.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + robotID + "/lid/" + lid, Integer.class);
-
         }
     }
     public synchronized void setDestination(Long dest){this.destination = dest;}

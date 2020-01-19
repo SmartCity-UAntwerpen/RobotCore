@@ -33,7 +33,7 @@ public class PathController
     public Path getPath(int start, int stop){
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<Path> responseList;
-        responseList = restTemplate.getForEntity("http://" + serverIP + ":" + serverPort + "/map/"+Integer.toString(start)+"/path/"+Integer.toString(stop), Path.class);
+        responseList = restTemplate.getForEntity("http://" + serverIP + ":" + serverPort + "/map/"+"/path/"+Integer.toString(start)+ "/"+Integer.toString(stop), Path.class);
         return responseList.getBody();
     }
 

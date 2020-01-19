@@ -72,10 +72,16 @@ public class RobotCoreLoop implements Runnable
 
     public void run()
     {
-        //getRobotId
-        //terminalService=new TerminalService(); //terminal service starten. terminal wordt gebruikt om bepaalde dingen te printen en commandos in te geven
-        RestTemplate restTemplate = new RestTemplate(); //standaard resttemplate gebruiken
+        this.initialiseBot();
+        while(!Thread.interrupted()){
+            this.pollForJob();
+        }
+    }
 
+    private void initialiseBot()
+    {
+        //terminalService=new TerminalService(); //terminal service starten. terminal wordt gebruikt om bepaalde dingen te printen en commandos in te geven
+        RestTemplate restTemplate = new RestTemplate();
         Long robotID = restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/initiate/" + botId + "/" //aan de server laten weten dat er een nieuwe bot zich aanbiedt
                 +workingmodeType.getType().toString(), Long.class); //Aan de server laten weten in welke mode de bot werkt
 
@@ -92,23 +98,9 @@ public class RobotCoreLoop implements Runnable
         //Setup interface for correct mode of pathplanningService
         this.setupInterface();
         logger.info("Interface is set up");
-        //Wait for tag read
-        //Read tag where bot is located
-        synchronized (this) {
-            while (dataService.getTag().trim().equals("NONE") || dataService.getTag().trim().equals("NO_TAG")) {
-                try {
-                    //Read tag
-                    queueService.insertCommand("TAG READ UID");
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
 
+        this.readTag();
         logger.info("Tag: " + dataService.getTag());
-
-       // updateStartLocation();
 
         //Request map at server with rest
         this.getMap();
@@ -142,15 +134,30 @@ public class RobotCoreLoop implements Runnable
                 logger.error("Can't connect to the database to lock first point, retrying...");
             }
         }
-
         restTemplate.getForObject("http://" + serverIP + ":" + serverPort + "/bot/" + botId + "/locationUpdate/" +dataService.getCurrentLocation(), boolean.class);
-        //TODO:: all the code above this line should only be executed once,
-        // while the code below should continuously be running
-        //TODO:: this could be moved to separate method/class/thread/...
-        while(!Thread.interrupted()){
-            if(dataService.getJob() != null){
-                jobService.performJob(dataService.getJob());
-                dataService.setJob(null);
+    }
+
+    private void pollForJob()
+    {
+        if(dataService.getJob() != null){
+            jobService.performJob(dataService.getJob());
+            dataService.setJob(null);
+        }
+    }
+
+    private void readTag()
+    {
+        //Wait for tag read
+        //Read tag where bot is located
+        synchronized (this) {
+            while (dataService.getTag().trim().equals("NONE") || dataService.getTag().trim().equals("NO_TAG")) {
+                try {
+                    //Read tag
+                    queueService.insertCommand("TAG READ UID");
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

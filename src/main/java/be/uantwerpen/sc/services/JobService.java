@@ -3,12 +3,13 @@ package be.uantwerpen.sc.services;
 import be.uantwerpen.rc.models.map.Point;
 import be.uantwerpen.rc.tools.DriveDir;
 import be.uantwerpen.rc.tools.DriveDirEncapsulator;
+import be.uantwerpen.rc.tools.helpers.JobAdapter;
 import be.uantwerpen.sc.RobotCoreLoop;
 import be.uantwerpen.sc.controllers.DriverCommandSender;
 import be.uantwerpen.rc.models.Job;
 import be.uantwerpen.sc.tools.*;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
@@ -73,53 +73,20 @@ public class JobService
         this.robotCoreLoop = robotCoreLoop;
     }
 
-    public void parseJob(String job) throws ParseException
+    public void parseJob(String jsonJob) throws ParseException
     {
         logger.info("Parsing job...");
-        System.out.println("Job String: \n " + job);
+        System.out.println("Job String: \n " + jsonJob);
 
-        // TODO: check if commands are sent along with the job
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(Job.class, new JobAdapter());
+        Gson gson = gsonBuilder.create();
+        Job job = gson.fromJson(jsonJob, Job.class);
 
-        String tempStr = job.split(":")[2];
-        String jobidNumber = tempStr.split("/")[0];
+        logger.info("Parsed: jobid = " + job.getJobId() + " startid = " + job.getIdStart() + " endid = " + job.getIdEnd());
 
-        String tempBotId = job.split("/")[1];
-        String botIdNumber = tempBotId.split(":",2)[1];
-
-        String tempIdStart = job.split("/")[2];
-        String idStartNumber = tempIdStart.split(":")[1];
-
-        String tempIdEnd = job.split("/")[3];
-        String idEndNumber = tempIdEnd.split(":")[1];
-        idEndNumber = idEndNumber.replace("}","");
-
-        List<DriveDir> driveDirs = new ArrayList<>();
-        if(job.length() >= 60)
-        {
-            String commands = job.split("ions:")[1];
-            commands = commands.substring(0, commands.length()-1);
-            Gson gson = new Gson();
-            logger.info("Extracted Command JSON: " + commands);
-            driveDirs = gson.fromJson(commands, new TypeToken<List<DriveDir>>(){}.getType());
-            /*for (String command : commands)
-            {
-                //String[] commandParam = command.split(" ");
-                driveDirs.add(new DriveDir(command));
-            }*/
-
-        }
-
-        Long jobId = Long.parseLong(jobidNumber);
-        Long botId = Long.parseLong(botIdNumber);
-        Long startId = Long.parseLong(idStartNumber);
-        Long endId = Long.parseLong(idEndNumber);
-
-        logger.info("Parsed: jobid = " + jobId + " botid = " + botId + " startid = " + startId + " endid = " + endId);
-
-        if(!(dataService.getCurrentLocation().equals(endId) && dataService.getCurrentLocation().equals(startId))) {
-            Job parsedJob = new Job(jobId,startId,endId);
-            if(!driveDirs.isEmpty()) parsedJob.setDriveDirections(driveDirs);
-            dataService.setJob(parsedJob);
+        if(!(dataService.getCurrentLocation().equals(job.getIdEnd()) && dataService.getCurrentLocation().equals(job.getIdStart()))) {
+            dataService.setJob(job);
         } else {
             logger.info("Already on destination");
             //let the backend know that the job is finished
@@ -219,8 +186,6 @@ public class JobService
 
     private void startFullServerPathPlanning(int end, Job job)
     {
-        // TODO: get the commands directly from backend (no calculations or whatever, just commands)
-        // TODO: insert the commands
         logger.info("Get pathplanning from backend starting from point " + dataService.getCurrentLocation() + " to " + end);
         for(DriveDir command: job.getDriveDirections())
         {

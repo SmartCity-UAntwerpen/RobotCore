@@ -68,7 +68,6 @@ public class QueueConsumer implements Runnable
                             //TODO
                             break;
                         case FULLSERVER:
-                            //TODO
                             logger.info("Full Server mode");
                             logger.info("Robot not busy");
                             logger.trace(queueService.getContentQueue().toString());
