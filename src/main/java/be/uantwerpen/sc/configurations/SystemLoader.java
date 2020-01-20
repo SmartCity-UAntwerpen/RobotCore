@@ -32,13 +32,6 @@ public class SystemLoader implements ApplicationRunner
     @Autowired
     private DriverCommandSender cCommandSender;
 
-    @Autowired
-    private PathController pathController;
-
-
-    @Autowired
-    private PathplanningType pathplanningType;
-
 
     @Autowired
     private DriverStatusEventHandler driverStatusEventHandler;
@@ -50,9 +43,6 @@ public class SystemLoader implements ApplicationRunner
 
     @Autowired
     private MqttPublisher locationPublisher;
-
-    //@Autowired
-    //private DriverLocationPoller driverLocationPoller;
 
     @Autowired KeepAliveController keepAlivePoller;
 
@@ -92,7 +82,6 @@ public class SystemLoader implements ApplicationRunner
             new Thread(driverStatusEventHandler).start();
             new Thread(queueConsumer).start();
             new Thread(keepAlivePoller).start();
-            //new Thread(driverLocationPoller).start();
 
             terminalService.systemReady();
         }
